@@ -1,0 +1,6 @@
+{
+  "grpcMessageClientAddress": "msg-service:7000",
+  "grpcChatClientAddress": "user-chat-service:7000",
+  "httpPort": ":8080",
+  "secretKey": "a-string-secret-at-least-256-bits-long"
+}
