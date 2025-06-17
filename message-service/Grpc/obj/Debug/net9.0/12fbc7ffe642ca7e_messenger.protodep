@@ -1,0 +1,3 @@
+obj\Debug\net9.0\Protos/Messenger.cs \
+obj\Debug\net9.0\Protos/MessengerGrpc.cs: C:/Users/User/.nuget/packages/grpc.tools/2.71.0/build/native/include/google/protobuf/timestamp.proto\
+ Protos/messenger.proto

@@ -1,0 +1,166 @@
+2025-05-22 19:05:42.900 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:05:42.994 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:05:42.995 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:05:43.030 +00:00 [DBG] Hosting starting
+2025-05-22 19:05:43.042 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:05:43.044 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:05:43.063 +00:00 [DBG] Repository contains no viable default key. Caller should generate a key with immediate activation.
+2025-05-22 19:05:43.064 +00:00 [DBG] Policy resolution states that a new key should be added to the key ring.
+2025-05-22 19:05:43.069 +00:00 [INF] Creating key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} with creation date 2025-05-22 19:05:43Z, activation date 2025-05-22 19:05:43Z, and expiration date 2025-08-20 19:05:43Z.
+2025-05-22 19:05:43.083 +00:00 [DBG] Descriptor deserializer type for key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} is 'Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'.
+2025-05-22 19:05:43.087 +00:00 [DBG] No key escrow sink found. Not writing key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} to escrow.
+2025-05-22 19:05:43.088 +00:00 [WRN] No XML encryptor configured. Key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} may be persisted to storage in unencrypted form.
+2025-05-22 19:05:43.095 +00:00 [INF] Writing data to file '/home/app/.aspnet/DataProtection-Keys/key-f8362cc9-af2c-44f8-bc99-a6e6e7b92687.xml'.
+2025-05-22 19:05:43.096 +00:00 [DBG] Key cache expiration token triggered by 'CreateNewKey' operation.
+2025-05-22 19:05:43.097 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-f8362cc9-af2c-44f8-bc99-a6e6e7b92687.xml'.
+2025-05-22 19:05:43.101 +00:00 [DBG] Found key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687}.
+2025-05-22 19:05:43.106 +00:00 [DBG] Considering key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} with expiration date 2025-08-20 19:05:43Z as default key.
+2025-05-22 19:05:43.108 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:05:43.112 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:05:43.113 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:05:43.116 +00:00 [DBG] Using key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} as the default key.
+2025-05-22 19:05:43.117 +00:00 [DBG] Key ring with default key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} was loaded during application startup.
+2025-05-22 19:05:43.270 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:05:43.282 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:05:43.283 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:05:43.284 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:05:43.285 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:05:43.286 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:05:43.286 +00:00 [INF] Content root path: /app
+2025-05-22 19:05:43.287 +00:00 [DBG] Hosting started
+2025-05-22 19:05:59.946 +00:00 [INF] Application is shutting down...
+2025-05-22 19:05:59.947 +00:00 [DBG] Hosting stopping
+2025-05-22 19:05:59.965 +00:00 [DBG] Hosting stopped
+2025-05-22 19:06:15.198 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:06:15.314 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:06:15.315 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:06:15.343 +00:00 [DBG] Hosting starting
+2025-05-22 19:06:15.355 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:06:15.356 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:06:15.367 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-f8362cc9-af2c-44f8-bc99-a6e6e7b92687.xml'.
+2025-05-22 19:06:15.376 +00:00 [DBG] Found key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687}.
+2025-05-22 19:06:15.384 +00:00 [DBG] Considering key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} with expiration date 2025-08-20 19:05:43Z as default key.
+2025-05-22 19:06:15.386 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:06:15.390 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:06:15.390 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:06:15.397 +00:00 [DBG] Using key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} as the default key.
+2025-05-22 19:06:15.398 +00:00 [DBG] Key ring with default key {f8362cc9-af2c-44f8-bc99-a6e6e7b92687} was loaded during application startup.
+2025-05-22 19:06:15.564 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:06:15.575 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:06:15.576 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:06:15.579 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:06:15.581 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:06:15.583 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:06:15.584 +00:00 [INF] Content root path: /app
+2025-05-22 19:06:15.585 +00:00 [DBG] Hosting started
+2025-05-22 19:09:05.208 +00:00 [INF] Application is shutting down...
+2025-05-22 19:09:05.211 +00:00 [DBG] Hosting stopping
+2025-05-22 19:09:05.225 +00:00 [DBG] Hosting stopped
+2025-05-22 19:09:47.009 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:09:47.125 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:09:47.126 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:09:47.157 +00:00 [DBG] Hosting starting
+2025-05-22 19:09:47.174 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:09:47.175 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:09:47.196 +00:00 [DBG] Repository contains no viable default key. Caller should generate a key with immediate activation.
+2025-05-22 19:09:47.197 +00:00 [DBG] Policy resolution states that a new key should be added to the key ring.
+2025-05-22 19:09:47.202 +00:00 [INF] Creating key {63c2ec42-d30a-4ef7-9204-40491b001ae5} with creation date 2025-05-22 19:09:47Z, activation date 2025-05-22 19:09:47Z, and expiration date 2025-08-20 19:09:47Z.
+2025-05-22 19:09:47.215 +00:00 [DBG] Descriptor deserializer type for key {63c2ec42-d30a-4ef7-9204-40491b001ae5} is 'Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'.
+2025-05-22 19:09:47.221 +00:00 [DBG] No key escrow sink found. Not writing key {63c2ec42-d30a-4ef7-9204-40491b001ae5} to escrow.
+2025-05-22 19:09:47.223 +00:00 [WRN] No XML encryptor configured. Key {63c2ec42-d30a-4ef7-9204-40491b001ae5} may be persisted to storage in unencrypted form.
+2025-05-22 19:09:47.240 +00:00 [INF] Writing data to file '/home/app/.aspnet/DataProtection-Keys/key-63c2ec42-d30a-4ef7-9204-40491b001ae5.xml'.
+2025-05-22 19:09:47.241 +00:00 [DBG] Key cache expiration token triggered by 'CreateNewKey' operation.
+2025-05-22 19:09:47.244 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-63c2ec42-d30a-4ef7-9204-40491b001ae5.xml'.
+2025-05-22 19:09:47.253 +00:00 [DBG] Found key {63c2ec42-d30a-4ef7-9204-40491b001ae5}.
+2025-05-22 19:09:47.269 +00:00 [DBG] Considering key {63c2ec42-d30a-4ef7-9204-40491b001ae5} with expiration date 2025-08-20 19:09:47Z as default key.
+2025-05-22 19:09:47.280 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:09:47.293 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:09:47.295 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:09:47.300 +00:00 [DBG] Using key {63c2ec42-d30a-4ef7-9204-40491b001ae5} as the default key.
+2025-05-22 19:09:47.302 +00:00 [DBG] Key ring with default key {63c2ec42-d30a-4ef7-9204-40491b001ae5} was loaded during application startup.
+2025-05-22 19:09:47.678 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:09:47.698 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:09:47.701 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:09:47.703 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:09:47.704 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:09:47.705 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:09:47.706 +00:00 [INF] Content root path: /app
+2025-05-22 19:09:47.707 +00:00 [DBG] Hosting started
+2025-05-22 19:12:17.159 +00:00 [INF] Application is shutting down...
+2025-05-22 19:12:17.161 +00:00 [DBG] Hosting stopping
+2025-05-22 19:12:17.176 +00:00 [DBG] Hosting stopped
+2025-05-22 19:12:28.327 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:12:28.456 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:12:28.456 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:12:28.481 +00:00 [DBG] Hosting starting
+2025-05-22 19:12:28.491 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:12:28.492 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:12:28.502 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-63c2ec42-d30a-4ef7-9204-40491b001ae5.xml'.
+2025-05-22 19:12:28.510 +00:00 [DBG] Found key {63c2ec42-d30a-4ef7-9204-40491b001ae5}.
+2025-05-22 19:12:28.519 +00:00 [DBG] Considering key {63c2ec42-d30a-4ef7-9204-40491b001ae5} with expiration date 2025-08-20 19:09:47Z as default key.
+2025-05-22 19:12:28.521 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:12:28.525 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:12:28.526 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:12:28.532 +00:00 [DBG] Using key {63c2ec42-d30a-4ef7-9204-40491b001ae5} as the default key.
+2025-05-22 19:12:28.533 +00:00 [DBG] Key ring with default key {63c2ec42-d30a-4ef7-9204-40491b001ae5} was loaded during application startup.
+2025-05-22 19:12:28.653 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:12:28.661 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:12:28.662 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:12:28.663 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:12:28.664 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:12:28.664 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:12:28.665 +00:00 [INF] Content root path: /app
+2025-05-22 19:12:28.666 +00:00 [DBG] Hosting started
+2025-05-22 19:13:20.820 +00:00 [INF] Application is shutting down...
+2025-05-22 19:13:20.821 +00:00 [DBG] Hosting stopping
+2025-05-22 19:13:20.834 +00:00 [DBG] Hosting stopped
+2025-05-22 19:13:22.323 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:13:22.430 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:13:22.430 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:13:22.479 +00:00 [DBG] Hosting starting
+2025-05-22 19:13:22.491 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:13:22.492 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:13:22.506 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-63c2ec42-d30a-4ef7-9204-40491b001ae5.xml'.
+2025-05-22 19:13:22.517 +00:00 [DBG] Found key {63c2ec42-d30a-4ef7-9204-40491b001ae5}.
+2025-05-22 19:13:22.529 +00:00 [DBG] Considering key {63c2ec42-d30a-4ef7-9204-40491b001ae5} with expiration date 2025-08-20 19:09:47Z as default key.
+2025-05-22 19:13:22.532 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:13:22.537 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:13:22.538 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:13:22.545 +00:00 [DBG] Using key {63c2ec42-d30a-4ef7-9204-40491b001ae5} as the default key.
+2025-05-22 19:13:22.547 +00:00 [DBG] Key ring with default key {63c2ec42-d30a-4ef7-9204-40491b001ae5} was loaded during application startup.
+2025-05-22 19:13:22.681 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:13:22.689 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:13:22.691 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:13:22.692 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:13:22.695 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:13:22.695 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:13:22.696 +00:00 [INF] Content root path: /app
+2025-05-22 19:13:22.697 +00:00 [DBG] Hosting started
+2025-05-22 19:13:43.244 +00:00 [INF] Application is shutting down...
+2025-05-22 19:13:43.246 +00:00 [DBG] Hosting stopping
+2025-05-22 19:13:43.259 +00:00 [DBG] Hosting stopped
+2025-05-22 19:20:23.326 +00:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-22 19:20:23.428 +00:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-22 19:20:23.429 +00:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-22 19:20:23.470 +00:00 [DBG] Hosting starting
+2025-05-22 19:20:23.487 +00:00 [WRN] Storing keys in a directory '/home/app/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+2025-05-22 19:20:23.488 +00:00 [INF] User profile is available. Using '/home/app/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-05-22 19:20:23.507 +00:00 [DBG] Reading data from file '/home/app/.aspnet/DataProtection-Keys/key-63c2ec42-d30a-4ef7-9204-40491b001ae5.xml'.
+2025-05-22 19:20:23.516 +00:00 [DBG] Found key {63c2ec42-d30a-4ef7-9204-40491b001ae5}.
+2025-05-22 19:20:23.525 +00:00 [DBG] Considering key {63c2ec42-d30a-4ef7-9204-40491b001ae5} with expiration date 2025-08-20 19:09:47Z as default key.
+2025-05-22 19:20:23.527 +00:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-22 19:20:23.532 +00:00 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-05-22 19:20:23.532 +00:00 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-05-22 19:20:23.539 +00:00 [DBG] Using key {63c2ec42-d30a-4ef7-9204-40491b001ae5} as the default key.
+2025-05-22 19:20:23.540 +00:00 [DBG] Key ring with default key {63c2ec42-d30a-4ef7-9204-40491b001ae5} was loaded during application startup.
+2025-05-22 19:20:23.665 +00:00 [WRN] Overriding address(es) 'http://*:8080'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+2025-05-22 19:20:23.672 +00:00 [INF] Now listening on: http://localhost:5000
+2025-05-22 19:20:23.674 +00:00 [INF] Now listening on: http://localhost:5001
+2025-05-22 19:20:23.674 +00:00 [DBG] Loaded hosting startup assembly UI
+2025-05-22 19:20:23.675 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-22 19:20:23.675 +00:00 [INF] Hosting environment: Development
+2025-05-22 19:20:23.676 +00:00 [INF] Content root path: /app
+2025-05-22 19:20:23.677 +00:00 [DBG] Hosting started
+2025-05-22 19:27:31.362 +00:00 [INF] Application is shutting down...
+2025-05-22 19:27:31.364 +00:00 [DBG] Hosting stopping
+2025-05-22 19:27:31.378 +00:00 [DBG] Hosting stopped

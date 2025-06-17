@@ -1,0 +1,151 @@
+2025-05-16 22:31:08.933 +03:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-16 22:31:08.988 +03:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-16 22:31:08.989 +03:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-16 22:31:09.025 +03:00 [DBG] Hosting starting
+2025-05-16 22:31:09.046 +03:00 [INF] User profile is available. Using 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-05-16 22:31:09.064 +03:00 [DBG] Reading data from file 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys\key-481ef570-6c2e-4a6e-9762-cce7f7c8e8f9.xml'.
+2025-05-16 22:31:09.074 +03:00 [DBG] Found key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9}.
+2025-05-16 22:31:09.087 +03:00 [DBG] Considering key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} with expiration date 2025-06-12 18:14:50Z as default key.
+2025-05-16 22:31:09.090 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-16 22:31:09.095 +03:00 [DBG] Decrypting secret element using Windows DPAPI.
+2025-05-16 22:31:09.097 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-16 22:31:09.103 +03:00 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2025-05-16 22:31:09.107 +03:00 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2025-05-16 22:31:09.109 +03:00 [DBG] Using key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} as the default key.
+2025-05-16 22:31:09.111 +03:00 [DBG] Key ring with default key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} was loaded during application startup.
+2025-05-16 22:31:09.309 +03:00 [INF] Now listening on: http://localhost:5000
+2025-05-16 22:31:09.311 +03:00 [INF] Now listening on: http://localhost:5001
+2025-05-16 22:31:09.312 +03:00 [DBG] Loaded hosting startup assembly UI
+2025-05-16 22:31:09.313 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-16 22:31:09.314 +03:00 [INF] Hosting environment: Development
+2025-05-16 22:31:09.315 +03:00 [INF] Content root path: C:\Users\User\RiderProjects\MessageService\UI
+2025-05-16 22:31:09.316 +03:00 [DBG] Hosting started
+2025-05-16 22:31:15.755 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" accepted.
+2025-05-16 22:31:15.756 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" started.
+2025-05-16 22:31:28.519 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" reset.
+2025-05-16 22:31:28.530 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" is closed. The last processed stream ID was 0.
+2025-05-16 22:31:28.529 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4N completed.
+2025-05-16 22:31:28.533 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:31:28.553 +03:00 [DBG] Connection id "0HNCKM0SP5B4N" stopped.
+2025-05-16 22:38:38.655 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" accepted.
+2025-05-16 22:38:38.656 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" started.
+2025-05-16 22:40:10.709 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" reset.
+2025-05-16 22:40:10.711 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" is closed. The last processed stream ID was 0.
+2025-05-16 22:40:10.711 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4O completed.
+2025-05-16 22:40:10.713 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:40:10.722 +03:00 [DBG] Connection id "0HNCKM0SP5B4O" stopped.
+2025-05-16 22:41:51.717 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" accepted.
+2025-05-16 22:41:51.718 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" started.
+2025-05-16 22:41:55.459 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" reset.
+2025-05-16 22:41:55.461 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" is closed. The last processed stream ID was 0.
+2025-05-16 22:41:55.463 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4P completed.
+2025-05-16 22:41:55.466 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:41:55.478 +03:00 [DBG] Connection id "0HNCKM0SP5B4P" stopped.
+2025-05-16 22:42:19.259 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" accepted.
+2025-05-16 22:42:19.260 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" started.
+2025-05-16 22:42:27.239 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" reset.
+2025-05-16 22:42:27.241 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" is closed. The last processed stream ID was 0.
+2025-05-16 22:42:27.241 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4Q completed.
+2025-05-16 22:42:27.243 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:42:27.247 +03:00 [DBG] Connection id "0HNCKM0SP5B4Q" stopped.
+2025-05-16 22:43:20.591 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" accepted.
+2025-05-16 22:43:20.592 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" started.
+2025-05-16 22:43:29.237 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" reset.
+2025-05-16 22:43:29.240 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" is closed. The last processed stream ID was 0.
+2025-05-16 22:43:29.240 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:43:29.242 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4R completed.
+2025-05-16 22:43:29.243 +03:00 [DBG] Connection id "0HNCKM0SP5B4R" stopped.
+2025-05-16 22:46:12.436 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" accepted.
+2025-05-16 22:46:12.437 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" started.
+2025-05-16 22:46:29.083 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" reset.
+2025-05-16 22:46:29.084 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" is closed. The last processed stream ID was 0.
+2025-05-16 22:46:29.085 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4S completed.
+2025-05-16 22:46:29.086 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:46:29.104 +03:00 [DBG] Connection id "0HNCKM0SP5B4S" stopped.
+2025-05-16 22:51:21.248 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" accepted.
+2025-05-16 22:51:21.249 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" started.
+2025-05-16 22:51:22.399 +03:00 [DBG] Connection id "0HNCKM0SP5B4T": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-16 22:51:22.401 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" is closed. The last processed stream ID was 0.
+2025-05-16 22:51:22.402 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" received FIN.
+2025-05-16 22:51:22.403 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4T completed.
+2025-05-16 22:51:22.403 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:51:22.412 +03:00 [DBG] Connection id "0HNCKM0SP5B4T" stopped.
+2025-05-16 22:51:22.678 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" accepted.
+2025-05-16 22:51:22.680 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" started.
+2025-05-16 22:51:22.682 +03:00 [DBG] Connection id "0HNCKM0SP5B4U": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-16 22:51:22.683 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" is closed. The last processed stream ID was 0.
+2025-05-16 22:51:22.684 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" received FIN.
+2025-05-16 22:51:22.685 +03:00 [DBG] The connection queue processing loop for 0HNCKM0SP5B4U completed.
+2025-05-16 22:51:22.686 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:51:22.692 +03:00 [DBG] Connection id "0HNCKM0SP5B4U" stopped.
+2025-05-16 22:53:26.879 +03:00 [INF] Application is shutting down...
+2025-05-16 22:53:26.881 +03:00 [DBG] Hosting stopping
+2025-05-16 22:53:26.891 +03:00 [DBG] Hosting stopped
+2025-05-16 22:53:35.694 +03:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-16 22:53:35.759 +03:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-16 22:53:35.760 +03:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-16 22:53:35.803 +03:00 [DBG] Hosting starting
+2025-05-16 22:53:35.830 +03:00 [INF] User profile is available. Using 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-05-16 22:53:35.856 +03:00 [DBG] Reading data from file 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys\key-481ef570-6c2e-4a6e-9762-cce7f7c8e8f9.xml'.
+2025-05-16 22:53:35.869 +03:00 [DBG] Found key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9}.
+2025-05-16 22:53:35.883 +03:00 [DBG] Considering key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} with expiration date 2025-06-12 18:14:50Z as default key.
+2025-05-16 22:53:35.888 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-16 22:53:35.894 +03:00 [DBG] Decrypting secret element using Windows DPAPI.
+2025-05-16 22:53:35.898 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-16 22:53:35.912 +03:00 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2025-05-16 22:53:35.917 +03:00 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2025-05-16 22:53:35.919 +03:00 [DBG] Using key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} as the default key.
+2025-05-16 22:53:35.921 +03:00 [DBG] Key ring with default key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} was loaded during application startup.
+2025-05-16 22:53:36.220 +03:00 [INF] Now listening on: http://localhost:5000
+2025-05-16 22:53:36.223 +03:00 [INF] Now listening on: http://localhost:5001
+2025-05-16 22:53:36.224 +03:00 [DBG] Loaded hosting startup assembly UI
+2025-05-16 22:53:36.226 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-16 22:53:36.227 +03:00 [INF] Hosting environment: Development
+2025-05-16 22:53:36.228 +03:00 [INF] Content root path: C:\Users\User\RiderProjects\MessageService\UI
+2025-05-16 22:53:36.229 +03:00 [DBG] Hosting started
+2025-05-16 22:55:29.497 +03:00 [DBG] Connection id "0HNCKMEE14BL6" accepted.
+2025-05-16 22:55:29.499 +03:00 [DBG] Connection id "0HNCKMEE14BL6" started.
+2025-05-16 22:57:41.459 +03:00 [DBG] Connection id "0HNCKMEE14BL6" is closing.
+2025-05-16 22:57:41.465 +03:00 [DBG] Connection id "0HNCKMEE14BL6" is closed. The last processed stream ID was 0.
+2025-05-16 22:57:41.467 +03:00 [DBG] Connection id "0HNCKMEE14BL6" received FIN.
+2025-05-16 22:57:41.469 +03:00 [DBG] Connection id "0HNCKMEE14BL6" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 22:57:41.470 +03:00 [DBG] The connection queue processing loop for 0HNCKMEE14BL6 completed.
+2025-05-16 22:57:41.473 +03:00 [DBG] Connection id "0HNCKMEE14BL6" stopped.
+2025-05-16 22:57:47.264 +03:00 [DBG] Connection id "0HNCKMEE14BL7" accepted.
+2025-05-16 22:57:47.266 +03:00 [DBG] Connection id "0HNCKMEE14BL7" started.
+2025-05-16 22:59:58.791 +03:00 [DBG] Connection id "0HNCKMEE14BL7" is closing.
+2025-05-16 22:59:58.793 +03:00 [DBG] Connection id "0HNCKMEE14BL7" is closed. The last processed stream ID was 0.
+2025-05-16 22:59:58.794 +03:00 [DBG] The connection queue processing loop for 0HNCKMEE14BL7 completed.
+2025-05-16 22:59:58.795 +03:00 [DBG] Connection id "0HNCKMEE14BL7" received FIN.
+2025-05-16 22:59:58.795 +03:00 [DBG] Connection id "0HNCKMEE14BL7" stopped.
+2025-05-16 22:59:58.797 +03:00 [DBG] Connection id "0HNCKMEE14BL7" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 23:00:39.032 +03:00 [DBG] Connection id "0HNCKMEE14BL8" accepted.
+2025-05-16 23:00:39.033 +03:00 [DBG] Connection id "0HNCKMEE14BL8" started.
+2025-05-16 23:01:15.456 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-16 23:01:15.460 +03:00 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-05-16 23:01:15.491 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.497 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.499 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.500 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.502 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.525 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-16 23:01:15.646 +03:00 [DBG] Successfully validated the token.
+2025-05-16 23:01:15.649 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-16 23:01:15.655 +03:00 [DBG] Authorization was successful.
+2025-05-16 23:01:15.659 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-16 23:01:15.670 +03:00 [DBG] Reading message.
+2025-05-16 23:01:15.673 +03:00 [DBG] Connection id "0HNCKMEE14BL8", Request id "0HNCKMEE14BL8:00000001": started reading request body.
+2025-05-16 23:01:15.675 +03:00 [DBG] Connection id "0HNCKMEE14BL8", Request id "0HNCKMEE14BL8:00000001": done reading request body.
+2025-05-16 23:01:15.856 +03:00 [INF] (gRPC) Starting to create message by user e9bbd91a-052c-45bf-be52-0c9fe45da4bb.
+2025-05-16 23:01:18.180 +03:00 [INF] (gRPC) Message "34492fa0-a9e0-45c2-984c-f786a684bda5" created by e9bbd91a-052c-45bf-be52-0c9fe45da4bb.
+2025-05-16 23:01:18.188 +03:00 [DBG] Sending message.
+2025-05-16 23:01:18.205 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-16 23:01:18.213 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 2758.7064ms
+2025-05-16 23:01:36.132 +03:00 [DBG] Connection id "0HNCKMEE14BL8" reset.
+2025-05-16 23:01:36.134 +03:00 [DBG] Connection id "0HNCKMEE14BL8" is closed. The last processed stream ID was 1.
+2025-05-16 23:01:36.134 +03:00 [DBG] The connection queue processing loop for 0HNCKMEE14BL8 completed.
+2025-05-16 23:01:36.135 +03:00 [DBG] Connection id "0HNCKMEE14BL8" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-16 23:01:36.139 +03:00 [DBG] Connection id "0HNCKMEE14BL8" stopped.
+2025-05-16 23:08:21.447 +03:00 [INF] Application is shutting down...
+2025-05-16 23:08:21.449 +03:00 [DBG] Hosting stopping
+2025-05-16 23:08:21.462 +03:00 [DBG] Hosting stopped

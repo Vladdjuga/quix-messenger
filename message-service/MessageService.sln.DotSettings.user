@@ -1,0 +1,10 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AFilterDefinition_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FAppData_003FRoaming_003FJetBrains_003FRider2024_002E3_003Fresharper_002Dhost_003FSourcesCache_003F5e9393c0aa978056f5dcf0dcf3a22cc1562ee9fad0602f1e34d22771e878668d_003FFilterDefinition_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=bace2ba3_002D05db_002D458b_002D826a_002Dfdd6c27e9a73/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Handle_CreateMessage_WhenDataIsValid" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;xUnit::87E6979C-2E45-4FC3-8BF3-3D32DF7489DA::net8.0::Tests.UseCases.CreateMessageHandlerTests&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::87E6979C-2E45-4FC3-8BF3-3D32DF7489DA::net8.0::Tests.UseCases.GetMessagesHandlerTests.Handle_GetMessages_WhenCountIsZero_ThrowsException&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::87E6979C-2E45-4FC3-8BF3-3D32DF7489DA::net8.0::Tests.UseCases.GetMessagesHandlerTests.Handle_GetMessages_WhenCountIsZeroOrNegative_ThrowsException&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;xUnit::87E6979C-2E45-4FC3-8BF3-3D32DF7489DA::net8.0::Tests.UseCases.GetMessagesHandlerTests.Handle_GetMessages_WhenDataIsValid&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

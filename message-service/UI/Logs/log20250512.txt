@@ -1,0 +1,328 @@
+2025-05-12 22:04:51.046 +03:00 [DBG] Found validator GetMessagesQueryValidator
+2025-05-12 22:04:51.108 +03:00 [DBG] Found validator CreateMessageCommandValidator
+2025-05-12 22:04:51.109 +03:00 [DBG] Found module UI.Endpoints.MessageEndpoints
+2025-05-12 22:04:51.162 +03:00 [DBG] Hosting starting
+2025-05-12 22:04:51.185 +03:00 [INF] User profile is available. Using 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-05-12 22:04:51.210 +03:00 [DBG] Reading data from file 'C:\Users\User\AppData\Local\ASP.NET\DataProtection-Keys\key-481ef570-6c2e-4a6e-9762-cce7f7c8e8f9.xml'.
+2025-05-12 22:04:51.253 +03:00 [DBG] Found key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9}.
+2025-05-12 22:04:51.269 +03:00 [DBG] Considering key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} with expiration date 2025-06-12 18:14:50Z as default key.
+2025-05-12 22:04:51.273 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-12 22:04:51.277 +03:00 [DBG] Decrypting secret element using Windows DPAPI.
+2025-05-12 22:04:51.280 +03:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-05-12 22:04:51.292 +03:00 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2025-05-12 22:04:51.296 +03:00 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2025-05-12 22:04:51.299 +03:00 [DBG] Using key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} as the default key.
+2025-05-12 22:04:51.302 +03:00 [DBG] Key ring with default key {481ef570-6c2e-4a6e-9762-cce7f7c8e8f9} was loaded during application startup.
+2025-05-12 22:04:51.608 +03:00 [INF] Now listening on: http://localhost:5000
+2025-05-12 22:04:51.611 +03:00 [INF] Now listening on: http://localhost:5001
+2025-05-12 22:04:51.612 +03:00 [DBG] Loaded hosting startup assembly UI
+2025-05-12 22:04:51.614 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-05-12 22:04:51.615 +03:00 [INF] Hosting environment: Development
+2025-05-12 22:04:51.616 +03:00 [INF] Content root path: C:\Users\User\RiderProjects\MessageService\UI
+2025-05-12 22:04:51.618 +03:00 [DBG] Hosting started
+2025-05-12 22:05:00.136 +03:00 [DBG] Connection id "0HNCHGVICENO8" accepted.
+2025-05-12 22:05:00.140 +03:00 [DBG] Connection id "0HNCHGVICENO8" started.
+2025-05-12 22:05:00.265 +03:00 [DBG] Connection id "0HNCHGVICENO8": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-12 22:05:00.272 +03:00 [DBG] Connection id "0HNCHGVICENO8" received FIN.
+2025-05-12 22:05:00.276 +03:00 [DBG] Connection id "0HNCHGVICENO8" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:05:00.277 +03:00 [DBG] Connection id "0HNCHGVICENO8" is closed. The last processed stream ID was 0.
+2025-05-12 22:05:00.287 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENO8 completed.
+2025-05-12 22:05:00.292 +03:00 [DBG] Connection id "0HNCHGVICENO8" stopped.
+2025-05-12 22:05:00.532 +03:00 [DBG] Connection id "0HNCHGVICENO9" accepted.
+2025-05-12 22:05:00.536 +03:00 [DBG] Connection id "0HNCHGVICENO9" started.
+2025-05-12 22:05:00.540 +03:00 [DBG] Connection id "0HNCHGVICENO9" received FIN.
+2025-05-12 22:05:00.546 +03:00 [DBG] Connection id "0HNCHGVICENO9": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-12 22:05:00.554 +03:00 [DBG] Connection id "0HNCHGVICENO9" is closed. The last processed stream ID was 0.
+2025-05-12 22:05:00.566 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENO9 completed.
+2025-05-12 22:05:00.570 +03:00 [DBG] Connection id "0HNCHGVICENO9" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:05:00.591 +03:00 [DBG] Connection id "0HNCHGVICENO9" stopped.
+2025-05-12 22:05:04.387 +03:00 [DBG] Connection id "0HNCHGVICENOA" accepted.
+2025-05-12 22:05:04.389 +03:00 [DBG] Connection id "0HNCHGVICENOA" started.
+2025-05-12 22:05:04.600 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/ - null null
+2025-05-12 22:05:04.605 +03:00 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-05-12 22:05:04.655 +03:00 [DBG] No candidates found for the request path '/'
+2025-05-12 22:05:04.658 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:04.699 +03:00 [DBG] The request path  does not match the path filter
+2025-05-12 22:05:04.746 +03:00 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-05-12 22:05:04.758 +03:00 [DBG] Connection id "0HNCHGVICENOA" completed keep alive response.
+2025-05-12 22:05:04.762 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/ - 404 0 null 164.6661ms
+2025-05-12 22:05:04.773 +03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5001/, Response status code: 404
+2025-05-12 22:05:08.751 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger - null null
+2025-05-12 22:05:08.755 +03:00 [DBG] No candidates found for the request path '/swagger'
+2025-05-12 22:05:08.757 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:08.760 +03:00 [DBG] Connection id "0HNCHGVICENOA" completed keep alive response.
+2025-05-12 22:05:08.762 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger - 301 0 null 10.3588ms
+2025-05-12 22:05:08.766 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/index.html - null null
+2025-05-12 22:05:08.773 +03:00 [DBG] 1 candidate(s) found for the request path '/swagger/index.html'
+2025-05-12 22:05:08.780 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' was rejected by constraint 'unimplementedMethod':'Grpc.AspNetCore.Server.Model.Internal.GrpcUnimplementedConstraint' with value 'index.html' for the request path '/swagger/index.html'
+2025-05-12 22:05:08.783 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is not valid for the request path '/swagger/index.html'
+2025-05-12 22:05:08.785 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:08.884 +03:00 [DBG] Connection id "0HNCHGVICENOA" completed keep alive response.
+2025-05-12 22:05:08.885 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/index.html - 200 null text/html;charset=utf-8 119.4208ms
+2025-05-12 22:05:08.929 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui.css - null null
+2025-05-12 22:05:08.929 +03:00 [DBG] Connection id "0HNCHGVICENOB" accepted.
+2025-05-12 22:05:08.932 +03:00 [DBG] 1 candidate(s) found for the request path '/swagger/swagger-ui.css'
+2025-05-12 22:05:08.934 +03:00 [DBG] Connection id "0HNCHGVICENOB" started.
+2025-05-12 22:05:08.934 +03:00 [DBG] Connection id "0HNCHGVICENOC" accepted.
+2025-05-12 22:05:08.935 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' was rejected by constraint 'unimplementedMethod':'Grpc.AspNetCore.Server.Model.Internal.GrpcUnimplementedConstraint' with value 'swagger-ui.css' for the request path '/swagger/swagger-ui.css'
+2025-05-12 22:05:08.937 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui-bundle.js - null null
+2025-05-12 22:05:08.938 +03:00 [DBG] Connection id "0HNCHGVICENOC" started.
+2025-05-12 22:05:08.941 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is not valid for the request path '/swagger/swagger-ui.css'
+2025-05-12 22:05:08.944 +03:00 [DBG] 1 candidate(s) found for the request path '/swagger/swagger-ui-bundle.js'
+2025-05-12 22:05:08.945 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui-standalone-preset.js - null null
+2025-05-12 22:05:08.946 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:08.948 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' was rejected by constraint 'unimplementedMethod':'Grpc.AspNetCore.Server.Model.Internal.GrpcUnimplementedConstraint' with value 'swagger-ui-bundle.js' for the request path '/swagger/swagger-ui-bundle.js'
+2025-05-12 22:05:08.951 +03:00 [DBG] 1 candidate(s) found for the request path '/swagger/swagger-ui-standalone-preset.js'
+2025-05-12 22:05:08.954 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is not valid for the request path '/swagger/swagger-ui-bundle.js'
+2025-05-12 22:05:08.956 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' was rejected by constraint 'unimplementedMethod':'Grpc.AspNetCore.Server.Model.Internal.GrpcUnimplementedConstraint' with value 'swagger-ui-standalone-preset.js' for the request path '/swagger/swagger-ui-standalone-preset.js'
+2025-05-12 22:05:08.958 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:08.960 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is not valid for the request path '/swagger/swagger-ui-standalone-preset.js'
+2025-05-12 22:05:08.962 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:08.975 +03:00 [INF] Sending file. Request path: '/swagger-ui.css'. Physical path: 'N/A'
+2025-05-12 22:05:08.979 +03:00 [INF] Sending file. Request path: '/swagger-ui-standalone-preset.js'. Physical path: 'N/A'
+2025-05-12 22:05:08.981 +03:00 [DBG] Connection id "0HNCHGVICENOA" completed keep alive response.
+2025-05-12 22:05:08.984 +03:00 [DBG] Connection id "0HNCHGVICENOC" completed keep alive response.
+2025-05-12 22:05:08.985 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui.css - 200 143943 text/css 56.2983ms
+2025-05-12 22:05:08.986 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui-standalone-preset.js - 200 339486 text/javascript 41.043ms
+2025-05-12 22:05:08.998 +03:00 [INF] Sending file. Request path: '/swagger-ui-bundle.js'. Physical path: 'N/A'
+2025-05-12 22:05:09.000 +03:00 [DBG] Connection id "0HNCHGVICENOB" completed keep alive response.
+2025-05-12 22:05:09.001 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/swagger-ui-bundle.js - 200 1096145 text/javascript 63.7ms
+2025-05-12 22:05:09.165 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/favicon-32x32.png - null null
+2025-05-12 22:05:09.168 +03:00 [DBG] 1 candidate(s) found for the request path '/swagger/favicon-32x32.png'
+2025-05-12 22:05:09.170 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' was rejected by constraint 'unimplementedMethod':'Grpc.AspNetCore.Server.Model.Internal.GrpcUnimplementedConstraint' with value 'favicon-32x32.png' for the request path '/swagger/favicon-32x32.png'
+2025-05-12 22:05:09.172 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is not valid for the request path '/swagger/favicon-32x32.png'
+2025-05-12 22:05:09.174 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:09.175 +03:00 [INF] Sending file. Request path: '/favicon-32x32.png'. Physical path: 'N/A'
+2025-05-12 22:05:09.176 +03:00 [DBG] Connection id "0HNCHGVICENOB" completed keep alive response.
+2025-05-12 22:05:09.177 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/favicon-32x32.png - 200 628 image/png 11.9453ms
+2025-05-12 22:05:09.255 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5001/swagger/v1/swagger.json - null null
+2025-05-12 22:05:09.258 +03:00 [DBG] No candidates found for the request path '/swagger/v1/swagger.json'
+2025-05-12 22:05:09.260 +03:00 [DBG] Request did not match any endpoints
+2025-05-12 22:05:09.267 +03:00 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-05-12 22:05:09.462 +03:00 [DBG] Connection id "0HNCHGVICENOB" completed keep alive response.
+2025-05-12 22:05:09.463 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 207.8937ms
+2025-05-12 22:05:20.196 +03:00 [DBG] Connection id "0HNCHGVICENOD" accepted.
+2025-05-12 22:05:20.198 +03:00 [DBG] Connection id "0HNCHGVICENOD" started.
+2025-05-12 22:05:20.438 +03:00 [DBG] Connection id "0HNCHGVICENOD": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-12 22:05:20.439 +03:00 [DBG] Connection id "0HNCHGVICENOD" is closed. The last processed stream ID was 0.
+2025-05-12 22:05:20.440 +03:00 [DBG] Connection id "0HNCHGVICENOD" received FIN.
+2025-05-12 22:05:20.441 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENOD completed.
+2025-05-12 22:05:20.442 +03:00 [DBG] Connection id "0HNCHGVICENOD" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:05:20.447 +03:00 [DBG] Connection id "0HNCHGVICENOD" stopped.
+2025-05-12 22:05:23.859 +03:00 [DBG] Connection id "0HNCHGVICENOE" accepted.
+2025-05-12 22:05:23.860 +03:00 [DBG] Connection id "0HNCHGVICENOE" started.
+2025-05-12 22:05:23.868 +03:00 [DBG] Connection id "0HNCHGVICENOE": Invalid content received on connection. Possible incorrect HTTP version detected. Expected HTTP/2 but received HTTP/1.1.
+2025-05-12 22:05:23.870 +03:00 [DBG] Connection id "0HNCHGVICENOE" is closed. The last processed stream ID was 0.
+2025-05-12 22:05:23.870 +03:00 [DBG] Connection id "0HNCHGVICENOE" received FIN.
+2025-05-12 22:05:23.872 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENOE completed.
+2025-05-12 22:05:23.873 +03:00 [DBG] Connection id "0HNCHGVICENOE" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:05:23.883 +03:00 [DBG] Connection id "0HNCHGVICENOE" stopped.
+2025-05-12 22:05:24.580 +03:00 [DBG] Connection id "0HNCHGVICENOF" accepted.
+2025-05-12 22:05:24.582 +03:00 [DBG] Connection id "0HNCHGVICENOF" started.
+2025-05-12 22:05:30.383 +03:00 [DBG] Connection id "0HNCHGVICENOF" received FIN.
+2025-05-12 22:05:30.384 +03:00 [DBG] Connection id "0HNCHGVICENOF" is closed. The last processed stream ID was 0.
+2025-05-12 22:05:30.384 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENOF completed.
+2025-05-12 22:05:30.385 +03:00 [DBG] Connection id "0HNCHGVICENOF" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:05:30.396 +03:00 [DBG] Connection id "0HNCHGVICENOF" stopped.
+2025-05-12 22:07:04.771 +03:00 [DBG] Connection id "0HNCHGVICENOA" received FIN.
+2025-05-12 22:07:04.771 +03:00 [DBG] Connection id "0HNCHGVICENOB" received FIN.
+2025-05-12 22:07:04.771 +03:00 [DBG] Connection id "0HNCHGVICENOC" received FIN.
+2025-05-12 22:07:04.773 +03:00 [DBG] Connection id "0HNCHGVICENOA" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:07:04.774 +03:00 [DBG] Connection id "0HNCHGVICENOB" disconnecting.
+2025-05-12 22:07:04.776 +03:00 [DBG] Connection id "0HNCHGVICENOC" disconnecting.
+2025-05-12 22:07:04.777 +03:00 [DBG] Connection id "0HNCHGVICENOA" disconnecting.
+2025-05-12 22:07:04.778 +03:00 [DBG] Connection id "0HNCHGVICENOB" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:07:04.779 +03:00 [DBG] Connection id "0HNCHGVICENOC" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:07:04.785 +03:00 [DBG] Connection id "0HNCHGVICENOA" stopped.
+2025-05-12 22:07:04.785 +03:00 [DBG] Connection id "0HNCHGVICENOC" stopped.
+2025-05-12 22:07:04.785 +03:00 [DBG] Connection id "0HNCHGVICENOB" stopped.
+2025-05-12 22:44:32.894 +03:00 [DBG] Connection id "0HNCHGVICENOG" accepted.
+2025-05-12 22:44:32.895 +03:00 [DBG] Connection id "0HNCHGVICENOG" started.
+2025-05-12 22:46:44.000 +03:00 [DBG] Connection id "0HNCHGVICENOG" is closing.
+2025-05-12 22:46:44.001 +03:00 [DBG] Connection id "0HNCHGVICENOG" is closed. The last processed stream ID was 0.
+2025-05-12 22:46:44.003 +03:00 [DBG] Connection id "0HNCHGVICENOG" received FIN.
+2025-05-12 22:46:44.003 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENOG completed.
+2025-05-12 22:46:44.004 +03:00 [DBG] Connection id "0HNCHGVICENOG" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:46:44.014 +03:00 [DBG] Connection id "0HNCHGVICENOG" stopped.
+2025-05-12 22:49:35.757 +03:00 [DBG] Connection id "0HNCHGVICENOH" accepted.
+2025-05-12 22:49:35.758 +03:00 [DBG] Connection id "0HNCHGVICENOH" started.
+2025-05-12 22:49:43.660 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:43.663 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.664 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.667 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.668 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.672 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.675 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:43.757 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:43.760 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:43.769 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:43.771 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:43.784 +03:00 [DBG] Reading message.
+2025-05-12 22:49:43.787 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000001": started reading request body.
+2025-05-12 22:49:43.789 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000001": done reading request body.
+2025-05-12 22:49:44.014 +03:00 [INF] (gRPC) Starting to create message by user e9bbd91a-052c-45bf-be52-0c9fe45da4bb.
+2025-05-12 22:49:45.903 +03:00 [INF] (gRPC) Message "6f07a03a-59a6-4631-8577-c462303ecb02" created by e9bbd91a-052c-45bf-be52-0c9fe45da4bb.
+2025-05-12 22:49:45.911 +03:00 [DBG] Sending message.
+2025-05-12 22:49:45.929 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:45.933 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 2272.7382ms
+2025-05-12 22:49:50.275 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:50.279 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.280 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.282 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.283 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.285 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.286 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:50.291 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:50.292 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:50.295 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:50.296 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.297 +03:00 [DBG] Reading message.
+2025-05-12 22:49:50.298 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000003": started reading request body.
+2025-05-12 22:49:50.299 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000003": done reading request body.
+2025-05-12 22:49:50.301 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:50.333 +03:00 [INF] (gRPC) Message "2d75f32d-b250-474a-b30e-7bcd3316a247" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:50.334 +03:00 [DBG] Sending message.
+2025-05-12 22:49:50.335 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:50.337 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 61.6468ms
+2025-05-12 22:49:57.574 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:57.577 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.578 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.579 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.581 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.583 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.584 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:57.585 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:57.586 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:57.588 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:57.589 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.591 +03:00 [DBG] Reading message.
+2025-05-12 22:49:57.591 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000005": started reading request body.
+2025-05-12 22:49:57.593 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000005": done reading request body.
+2025-05-12 22:49:57.596 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.627 +03:00 [INF] (gRPC) Message "2eed9d16-cae8-43ea-b3ee-80afbad7f8c1" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.628 +03:00 [DBG] Sending message.
+2025-05-12 22:49:57.629 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.630 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 55.7047ms
+2025-05-12 22:49:57.709 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:57.711 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.712 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.713 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.715 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.717 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.718 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:57.719 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:57.721 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:57.722 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:57.723 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.724 +03:00 [DBG] Reading message.
+2025-05-12 22:49:57.725 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000007": started reading request body.
+2025-05-12 22:49:57.726 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000007": done reading request body.
+2025-05-12 22:49:57.728 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.754 +03:00 [INF] (gRPC) Message "908488b6-d688-4a85-a848-a1fb8be58260" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.756 +03:00 [DBG] Sending message.
+2025-05-12 22:49:57.756 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.758 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 48.9432ms
+2025-05-12 22:49:57.837 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:57.839 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.841 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.842 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.845 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.846 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.848 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:57.849 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:57.850 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:57.851 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:57.851 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.852 +03:00 [DBG] Reading message.
+2025-05-12 22:49:57.853 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000009": started reading request body.
+2025-05-12 22:49:57.854 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000009": done reading request body.
+2025-05-12 22:49:57.855 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.883 +03:00 [INF] (gRPC) Message "b3421128-17ff-4c92-a050-6485512f2bc7" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:57.885 +03:00 [DBG] Sending message.
+2025-05-12 22:49:57.886 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.887 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 50.195ms
+2025-05-12 22:49:57.975 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:57.978 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.979 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.980 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.982 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.984 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.986 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:57.987 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:57.989 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:57.990 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:57.991 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:57.992 +03:00 [DBG] Reading message.
+2025-05-12 22:49:57.993 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000B": started reading request body.
+2025-05-12 22:49:57.994 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000B": done reading request body.
+2025-05-12 22:49:57.995 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.022 +03:00 [INF] (gRPC) Message "df4da420-2e5a-466b-b901-9e784973a152" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.023 +03:00 [DBG] Sending message.
+2025-05-12 22:49:58.024 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.025 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 49.8431ms
+2025-05-12 22:49:58.113 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:58.117 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.118 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.120 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.122 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.123 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.124 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:58.126 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:58.127 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:58.128 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:58.129 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.130 +03:00 [DBG] Reading message.
+2025-05-12 22:49:58.131 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000D": started reading request body.
+2025-05-12 22:49:58.132 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000D": done reading request body.
+2025-05-12 22:49:58.134 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.161 +03:00 [INF] (gRPC) Message "5a5ca1b5-fcce-4d8b-9030-c9a3ad3c850b" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.162 +03:00 [DBG] Sending message.
+2025-05-12 22:49:58.163 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.164 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 50.6923ms
+2025-05-12 22:49:58.247 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:58.252 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.253 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.255 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.257 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.258 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.259 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:58.260 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:58.261 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:58.262 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:58.263 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.264 +03:00 [DBG] Reading message.
+2025-05-12 22:49:58.265 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000F": started reading request body.
+2025-05-12 22:49:58.267 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:0000000F": done reading request body.
+2025-05-12 22:49:58.268 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.294 +03:00 [INF] (gRPC) Message "88141ae7-08ec-452e-a4cc-fd26a1a3cc47" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.296 +03:00 [DBG] Sending message.
+2025-05-12 22:49:58.297 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.298 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 50.1818ms
+2025-05-12 22:49:58.381 +03:00 [INF] Request starting HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - application/grpc null
+2025-05-12 22:49:58.383 +03:00 [DBG] 3 candidate(s) found for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.384 +03:00 [DBG] Endpoint 'gRPC - /messenger.Messenger/SendMessage' with route pattern '/messenger.Messenger/SendMessage' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.386 +03:00 [DBG] Endpoint 'gRPC - Unimplemented method for messenger.Messenger' with route pattern 'messenger.Messenger/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.387 +03:00 [DBG] Endpoint 'gRPC - Unimplemented service' with route pattern '{unimplementedService}/{unimplementedMethod:grpcunimplemented}' is valid for the request path '/messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.389 +03:00 [DBG] Request matched endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.391 +03:00 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-05-12 22:49:58.392 +03:00 [DBG] Successfully validated the token.
+2025-05-12 22:49:58.393 +03:00 [DBG] AuthenticationScheme: Bearer was successfully authenticated.
+2025-05-12 22:49:58.395 +03:00 [DBG] Authorization was successful.
+2025-05-12 22:49:58.396 +03:00 [INF] Executing endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.397 +03:00 [DBG] Reading message.
+2025-05-12 22:49:58.398 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000011": started reading request body.
+2025-05-12 22:49:58.399 +03:00 [DBG] Connection id "0HNCHGVICENOH", Request id "0HNCHGVICENOH:00000011": done reading request body.
+2025-05-12 22:49:58.401 +03:00 [INF] (gRPC) Starting to create message by user 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.427 +03:00 [INF] (gRPC) Message "697440e9-ee59-48bb-a78b-4291ae837b84" created by 3412b4b2-9a15-482f-8271-a9cc6852e3fa.
+2025-05-12 22:49:58.429 +03:00 [DBG] Sending message.
+2025-05-12 22:49:58.430 +03:00 [INF] Executed endpoint 'gRPC - /messenger.Messenger/SendMessage'
+2025-05-12 22:49:58.432 +03:00 [INF] Request finished HTTP/2 POST http://localhost:5000/messenger.Messenger/SendMessage - 200 null application/grpc 50.8617ms
+2025-05-12 22:52:09.292 +03:00 [DBG] Connection id "0HNCHGVICENOH" is closing.
+2025-05-12 22:52:09.293 +03:00 [DBG] Connection id "0HNCHGVICENOH" is closed. The last processed stream ID was 17.
+2025-05-12 22:52:09.295 +03:00 [DBG] Connection id "0HNCHGVICENOH" received FIN.
+2025-05-12 22:52:09.295 +03:00 [DBG] The connection queue processing loop for 0HNCHGVICENOH completed.
+2025-05-12 22:52:09.296 +03:00 [DBG] Connection id "0HNCHGVICENOH" sending FIN because: "The Socket transport's send loop completed gracefully."
+2025-05-12 22:52:09.308 +03:00 [DBG] Connection id "0HNCHGVICENOH" stopped.
+2025-05-12 22:52:34.727 +03:00 [INF] Application is shutting down...
+2025-05-12 22:52:34.728 +03:00 [DBG] Hosting stopping
+2025-05-12 22:52:34.741 +03:00 [DBG] Hosting stopped
