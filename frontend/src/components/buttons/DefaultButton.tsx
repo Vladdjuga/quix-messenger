@@ -4,6 +4,7 @@ type ButtonProps = {
     color?: "blue" | "red" | "green" | "yellow";
     children: React.ReactNode;
     onClick?: () => void;
+    type?: "button" | "submit" | "reset";
 };
 
 const colorClasses = {
@@ -13,13 +14,14 @@ const colorClasses = {
     yellow: "bg-yellow-700 hover:bg-yellow-500 text-black",
 };
 
-export default function DefaultButton({ color = "blue", children, onClick }: ButtonProps) {
+export default function DefaultButton({ color = "blue", children, onClick,type }: ButtonProps) {
     return (
         <button
             onClick={onClick}
             className={`px-5 py-2 rounded-md font-semibold transition-colors
             cursor-pointer
              duration-300 shadow-md ${colorClasses[color]}`}
+            type={type}
         >
             {children}
         </button>

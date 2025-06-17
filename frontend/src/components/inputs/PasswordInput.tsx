@@ -1,7 +1,15 @@
 import React from "react";
 
+type PasswordProps = {
+    placeholder?: string;
+    className?: string;
+    value?: string;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    required?: boolean;
+};
+
 export default function PasswordInput({ placeholder = "Password...",
-                                          className = "" }) {
+                                          className = "" ,value,onChange,required}:PasswordProps) {
     const [showPassword, setShowPassword] = React.useState(false);
     return (
         <div className={`relative w-full`}>
@@ -9,6 +17,9 @@ export default function PasswordInput({ placeholder = "Password...",
                 type={showPassword ? "text" : "password"}
                 placeholder={placeholder}
                 className={`${className}`}
+                value={value}
+                onChange={onChange}
+                required={required}
             />
             <button
                 type="button"

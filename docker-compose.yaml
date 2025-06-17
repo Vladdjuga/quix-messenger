@@ -15,7 +15,6 @@ services:
       - app-network
   mongodb:
     image: mongo:7.0
-    container_name: mongodb
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -64,8 +63,18 @@ services:
     networks:
       - app-network
     depends_on:
-      - user-chat-service
+      - user-service
       - msg-service
+  frontend:
+    image: frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    depends_on:
+      - user-service
+      - msg-service
+      - ws-service
 volumes:
   pgdata:
     driver: local
