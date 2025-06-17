@@ -1,0 +1,76 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - app-network
+  user-service:
+    image: userchatservice
+    environment:
+      - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
+    ports:
+      - "5001:7000"
+      - "6001:7001"
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+  msg-service:
+    image: messageservice
+    ports:
+      - "5000:7000"
+      - "6000:7001"
+    networks:
+      - app-network
+    environment:
+      - ConnectionStrings__MongoDb=mongodb://root:secret@mongodb:27017
+      - ConnectionStrings__MongoDbName=MessageMongoDb
+    depends_on:
+      - mongodb
+  #load-service:
+  #  command: sh -c "sleep 4000 && docker run -it --rm --network app-network loadtester"
+  #  depends_on:
+  #    - user-chat-service
+  #    - msg-service
+  #  image: loadtester
+  #  networks:
+  #    - app-network
+  ws-service:
+    image: realtimeservice
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    depends_on:
+      - user-chat-service
+      - msg-service
+volumes:
+  pgdata:
+    driver: local
+  mongodata:
+    driver: local
+networks:
+  app-network:
+    driver: bridge
