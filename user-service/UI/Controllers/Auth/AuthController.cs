@@ -27,7 +27,7 @@ public class AuthController : Controller
     /// <summary>
     /// This method will authorize the user to the application.
     /// </summary>
-    /// <param name="loginDto">This is a login information.</param>
+    /// <param name="loginDto">This is login information.</param>
     /// <returns>Will return a generated JWT token or bad request if the exception was thrown.</returns>
     [HttpPost("login")]
     public async Task<Results<Ok<string>, BadRequest<string>>> Login([FromBody] LoginUserDto loginDto)

@@ -3,6 +3,8 @@ using System.Security.Claims;
 using Application.DTOs.User;
 using Application.Interfaces.DTOs;
 using Application.UseCases.Users.Data;
+using Application.UseCases.Users.Data.GetUser;
+using Application.UseCases.Users.Data.UpdateUser;
 using AutoMapper;
 using Domain.Repositories;
 using MediatR;
@@ -103,4 +105,34 @@ public class UserController : Controller
         _logger.LogInformation("User {Username} updated", userDto.Username);
         return TypedResults.Ok(result.Value);
     }
+    
+    [Authorize]
+    [HttpGet("getMeInfo")]
+    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<string>>> GetMeInfo()
+    {
+        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        if (!Guid.TryParse(userId, out Guid userGuid))
+        {
+            _logger.LogError("Couldn\'t parse from {UserIdString} to {UserIdGuid}"
+                , userId, userGuid);
+            return TypedResults.BadRequest("User not found");
+        }
+
+        var query = new GetUserQuery(
+            Username: null,
+            UserGuid: userGuid
+        );
+        _logger.LogInformation("Starting to get user info for {Guid}", userGuid);
+        var result = await _mediator.Send(query);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to get user info for {Guid}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
+
+        _logger.LogInformation("User {Guid} found", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
+
 }

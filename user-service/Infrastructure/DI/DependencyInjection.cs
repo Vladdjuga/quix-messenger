@@ -9,6 +9,7 @@ using Application.Services;
 using Application.Services.Security;
 using Application.UseCases.Chats.CreateChat;
 using Application.UseCases.Users.Data;
+using Application.UseCases.Users.Data.GetUser;
 using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;

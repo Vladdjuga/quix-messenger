@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.UseCases.Users.Data;
+namespace Application.UseCases.Users.Data.UpdateUser;
 
 public class UpdateUserCommandValidator:AbstractValidator<UpdateUserCommand>
 {

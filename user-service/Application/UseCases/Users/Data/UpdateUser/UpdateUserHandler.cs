@@ -5,7 +5,7 @@ using AutoMapper;
 using Domain.Repositories;
 using MediatR;
 
-namespace Application.UseCases.Users.Data;
+namespace Application.UseCases.Users.Data.UpdateUser;
 
 public class UpdateUserHandler:IRequestHandler<UpdateUserCommand,Result<ReadUserDto>>
 {
