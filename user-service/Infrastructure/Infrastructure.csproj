@@ -6,9 +6,7 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Encryption\" />
         <Folder Include="DI\" />
-        <Folder Include="Notifications\" />
     </ItemGroup>
 
     <ItemGroup>

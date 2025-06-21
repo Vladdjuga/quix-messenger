@@ -10,7 +10,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Копируем решение и проекты (на уровень выше)
-COPY MessageService.sln ./
+COPY message-service.sln ./
 COPY UI/UI.csproj ./UI/
 COPY Infrastructure/Infrastructure.csproj ./Infrastructure/
 COPY Grpc/Grpc.csproj ./Grpc/
