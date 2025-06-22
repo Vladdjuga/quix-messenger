@@ -14,9 +14,9 @@ export default function About() {
                         About Toku
                     </h1>
                     <p>
-                        Toku is a messaging app that allows users to communicate with each other in real-time.
+                        Quix is a messaging app that allows users to communicate with each other in real-time.
                         It offers features such as text messaging, voice and video calls, and file sharing.
-                        Toku is designed to be user-friendly and secure, making it a great choice for both personal
+                        Quix is designed to be user-friendly and secure, making it a great choice for both personal
                         and professional communication.
                     </p>
                 </div>

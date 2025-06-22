@@ -1,10 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import LoginForm from "./LoginForm";
-import {loginUser} from "@/lib/usecases/auth/loginUser";
 
-export default function Login() {
+import RegisterForm from "./RegisterForm";
+export default function Register() {
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -12,7 +11,7 @@ export default function Login() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
         >
-            <LoginForm />
+            <RegisterForm />
         </motion.div>
     )
 }

@@ -38,6 +38,11 @@ export default function Header() {
                             hover:text-black duration-300
                             ">Login</Link>
                         </li>
+                        <li>
+                            <Link href="/register" className="transition-colors
+                            hover:text-black duration-300
+                            ">Register</Link>
+                        </li>
                         {user && (
                             <li className="ml-4 font-semibold text-black">
                                 Hello, {user?.username}!

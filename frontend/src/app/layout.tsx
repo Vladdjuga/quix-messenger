@@ -3,8 +3,8 @@ import React from "react";
 import Header from "@/components/headers/Header";
 
 export const metadata = {
-    title: "Toku - messaging app",
-    description: "Made with love by Toku",
+    title: "Quix - messaging app",
+    description: "Made with love by Quix",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

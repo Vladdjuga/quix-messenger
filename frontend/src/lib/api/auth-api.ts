@@ -1,7 +1,8 @@
+"use server";
 import {RegisterUserDto} from "@/lib/dto/RegisterUserDto";
 
 const BASE_URL = 'http://user-service:7001/api/Auth';
-export async function loginRequest(identity: string, password: string) {
+export async function loginRequest(identity: string, password: string): Promise<{ token: string }> {
     const res = await fetch(`${BASE_URL}/login`, {
         method: 'POST',
         body: JSON.stringify({ identity, password }),
