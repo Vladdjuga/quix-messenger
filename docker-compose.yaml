@@ -28,6 +28,7 @@ services:
   user-service:
     image: userchatservice
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
     ports:
       - "5001:7000"
@@ -44,6 +45,7 @@ services:
     networks:
       - app-network
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__MongoDb=mongodb://root:secret@mongodb:27017
       - ConnectionStrings__MongoDbName=MessageMongoDb
     depends_on:
