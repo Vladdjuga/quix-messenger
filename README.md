@@ -22,11 +22,11 @@
   ```bash
   make build # this command will build the app by simply building all docker containers
   ```
-- ### Turn up the application
+- ### Turn on the application
   ```bash
   make up # this command will run docker compose file
   ```
-- ### Turn down the application
+- ### Turn off the application
   ```bash
   make down # this command will stop all services
   ```
