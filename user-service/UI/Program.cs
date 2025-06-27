@@ -80,14 +80,14 @@ using (var scope = app.Services.CreateScope())
 }
 //app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.MapGet("/health", () => Results.Ok("OK"))
     .WithName("HealthCheck")
     .WithTags("HealthCheck");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapGrpcService<UI.gRPCClients.ChatService>();

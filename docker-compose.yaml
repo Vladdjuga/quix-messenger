@@ -26,8 +26,9 @@ services:
     networks:
       - app-network
   user-service:
-    image: userchatservice
+    image: user-service
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
     ports:
       - "5001:7000"
@@ -36,14 +37,15 @@ services:
       - app-network
     depends_on:
       - postgres
-  msg-service:
-    image: messageservice
+  message-service:
+    image: message-service
     ports:
       - "5000:7000"
       - "6000:7001"
     networks:
       - app-network
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__MongoDb=mongodb://root:secret@mongodb:27017
       - ConnectionStrings__MongoDbName=MessageMongoDb
     depends_on:
@@ -56,8 +58,8 @@ services:
   #  image: loadtester
   #  networks:
   #    - app-network
-  ws-service:
-    image: realtimeservice
+  real-time-service:
+    image: real-time-service
     ports:
       - "8080:8080"
     networks:
