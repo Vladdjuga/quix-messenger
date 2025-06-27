@@ -1,24 +1,29 @@
 package providers
 
 import (
-	"context"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"realTimeService/clients"
 	"realTimeService/configuration"
+	"realTimeService/handlers/wsrouter"
 	"realTimeService/hubs"
-	"time"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // DependencyInjectionContainer DI Container
 type DependencyInjectionContainer struct {
 	Hub                *hubs.MainHub
+	// GrpcClients
 	GrpcMessagesClient *clients.MessageServiceClient
 	GrpcChatClient     *clients.ChatServiceClient
 
+	// gRPC connections
+	// These are used to close the connections when the service stops
 	msgConn  *grpc.ClientConn
 	chatConn *grpc.ClientConn
+
+	// Router for WebSocket handling
+	Router *wsrouter.Router
 }
 
 // NewDependencyInjectionContainer Create a new DI container
@@ -41,6 +46,10 @@ func (d *DependencyInjectionContainer) InitializeProviders(cfg *configuration.Co
 		return
 	}
 	d.GrpcChatClient = clients.NewChatServiceClient(chatConn)
+	d.msgConn = msgConn
+	d.chatConn = chatConn
+	d.Router = wsrouter.NewRouter()
+	log.Println("DependencyInjectionContainer initialized with gRPC clients and main hub")
 }
 func (d *DependencyInjectionContainer) GetHub() *hubs.MainHub {
 	return d.Hub
@@ -52,6 +61,9 @@ func (d *DependencyInjectionContainer) GetMessageClient() *clients.MessageServic
 
 func (d *DependencyInjectionContainer) GetChatClient() *clients.ChatServiceClient {
 	return d.GrpcChatClient
+}
+func (d *DependencyInjectionContainer) GetRouter() *wsrouter.Router {
+	return d.Router
 }
 func (d *DependencyInjectionContainer) Close() error {
 	var err1, err2 error
@@ -69,14 +81,9 @@ func (d *DependencyInjectionContainer) Close() error {
 	return err2
 }
 func connectToGRPC(addr string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	log.Println("Connecting to gRPC server", addr)
-	conn, err := grpc.DialContext(
-		ctx,
-		addr,
+	conn, err := grpc.NewClient(addr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(), // Block until the connection is established
 	)
 	if err != nil {
 		log.Fatalf("gRPC connection failed: %v", err)

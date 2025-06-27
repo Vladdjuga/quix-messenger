@@ -2,16 +2,16 @@ package models
 
 import "github.com/google/uuid"
 
-type Type string
+type MessageType string
 
 const (
-	SendMessage            Type = "sendMessage"
-	ConnectUserToChat           = Type("connectUserToChat")
-	DisconnectUserFromChat      = Type("disconnectUserFromChat")
+	SendMessage            MessageType = "sendMessage"
+	ConnectUserToChat                  = MessageType("connectUserToChat")
+	DisconnectUserFromChat             = MessageType("disconnectUserFromChat")
 )
 
 type IncomingMessage struct {
-	Type   Type      `json:"type"`
-	ChatId uuid.UUID `json:"chatId"`
-	Text   string    `json:"text"`
+	Type   MessageType `json:"type"`
+	ChatId uuid.UUID   `json:"chatId"`
+	Text   string      `json:"text"`
 }
