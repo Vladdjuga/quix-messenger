@@ -1,4 +1,4 @@
-package wsrouter
+package handlers
 
 import (
 	"realTimeService/interfaces"

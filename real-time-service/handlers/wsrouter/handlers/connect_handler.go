@@ -1,9 +1,8 @@
-package wsrouter
+package handlers
 
 import (
 	"realTimeService/interfaces"
 	"realTimeService/models"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
