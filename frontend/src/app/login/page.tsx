@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import LoginForm from "./LoginForm";
-import {loginUser} from "@/lib/usecases/auth/loginUser";
 
 export default function Login() {
     return (
