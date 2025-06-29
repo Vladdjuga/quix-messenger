@@ -10,11 +10,11 @@ namespace Application.UseCases.Users.Auth;
 public class RegisterUserHandler:IRequestHandler<RegisterUserCommand, Result<Guid>>
 {
     private readonly IUserRepository _repository;
-    private readonly IPasswordHasher _passwordHasher;
-    public RegisterUserHandler(IUserRepository repository, IPasswordHasher passwordHasher)
+    private readonly IStringHasher _stringHasher;
+    public RegisterUserHandler(IUserRepository repository, IStringHasher stringHasher)
     {
         _repository = repository;
-        _passwordHasher = passwordHasher;
+        _stringHasher = stringHasher;
     }
     public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ public class RegisterUserHandler:IRequestHandler<RegisterUserCommand, Result<Gui
             LastName = request.LastName,
             DateOfBirth = request.DateOfBirth,
             CreatedAt = DateTime.Now,
-            PasswordHash = _passwordHasher.HashPassword(request.Password),
+            PasswordHash = _stringHasher.Hash(request.Password),
         };
         await _repository.AddAsync(user,cancellationToken);
         return Result<Guid>.Success(user.Id);

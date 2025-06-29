@@ -11,13 +11,13 @@ public class UpdateUserHandler:IRequestHandler<UpdateUserCommand,Result<ReadUser
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly IStringHasher _stringHasher;
 
-    public UpdateUserHandler(IUserRepository userRepository, IMapper mapper, IPasswordHasher passwordHasher)
+    public UpdateUserHandler(IUserRepository userRepository, IMapper mapper, IStringHasher stringHasher)
     {
         _userRepository = userRepository;
         _mapper = mapper;
-        _passwordHasher = passwordHasher;
+        _stringHasher = stringHasher;
     }
     public async Task<Result<ReadUserDto>> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ public class UpdateUserHandler:IRequestHandler<UpdateUserCommand,Result<ReadUser
             return Result<ReadUserDto>.Failure("User not found");
         _mapper.Map(request.Dto, userEntity);
         if(request.Dto.Password!=null)
-            userEntity.PasswordHash=_passwordHasher.HashPassword(request.Dto.Password);
+            userEntity.PasswordHash=_stringHasher.Hash(request.Dto.Password);
         await _userRepository.UpdateAsync(userEntity,cancellationToken);
         return Result<ReadUserDto>.Success(_mapper.Map<ReadUserDto>(userEntity));
     }

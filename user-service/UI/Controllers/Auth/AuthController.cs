@@ -44,9 +44,19 @@ public class AuthController : Controller
             _logger.LogError("Error: {Error}", result.Error);
             return TypedResults.BadRequest(result.Error);
         }
+        var (accessToken, refreshToken)=result.Value;
         _logger.LogInformation("Login User: {Identity} - {Password}", loginDto.Identity, loginDto.Password);
-        _logger.LogInformation("Token generated for user - {Identity}. Token : {Token}", loginDto.Identity, result);
-        return TypedResults.Ok(result.Value);
+        _logger.LogInformation("Tokens generated for user - {Identity}. Access Token : {Token} ; Refresh Token : {RefreshToken}", 
+            loginDto.Identity, accessToken, refreshToken);
+        // Here store the refresh token in cookies 
+        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddDays(7)
+        });
+        return TypedResults.Ok(accessToken);
     }
 
     /// <summary>

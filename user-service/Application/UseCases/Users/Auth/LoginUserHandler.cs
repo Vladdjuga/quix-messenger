@@ -2,45 +2,54 @@
 using Application.Auth;
 using Application.Common;
 using Application.Interfaces.Security;
+using Application.Utilities;
 using Domain.Entities;
 using Domain.Repositories;
 using MediatR;
 
 namespace Application.UseCases.Users.Auth;
 
-public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<string>>
+public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<(string,string)>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPasswordHasher _passwordHasher;
+    private readonly IUserSessionRepository _userSessionRepository;
+    private readonly IStringHasher _stringHasher;
     private readonly IJwtProvider _jwtProvider;
 
-    public LoginUserHandler(IUserRepository userRepository, IPasswordHasher passwordHasher,
-        IJwtProvider jwtProvider)
+    public LoginUserHandler(IUserRepository userRepository, IStringHasher stringHasher,
+        IJwtProvider jwtProvider, IUserSessionRepository userSessionRepository)
     {
         _userRepository = userRepository;
-        _passwordHasher = passwordHasher;
+        _stringHasher = stringHasher;
         _jwtProvider = jwtProvider;
+        _userSessionRepository = userSessionRepository;
     }
-    public async Task<Result<string>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<Result<(string,string)>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
-        var emailPattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-        var nicknamePattern = @"^[a-zA-Z0-9_]{3,16}$";
         UserEntity? userEntity = null;
-        if (Regex.IsMatch(request.Identity, emailPattern))
+        if (IdentityValidator.IsEmail(request.Identity))
         {
             userEntity=await _userRepository.GetByEmailAsync(request.Identity,cancellationToken);
         }
-        else if (Regex.IsMatch(request.Identity, nicknamePattern))
+        else if (IdentityValidator.IsUsername(request.Identity))
         {
             userEntity = await _userRepository.GetByUserNameAsync(request.Identity,cancellationToken);
         }
         else
-            return Result<string>.Failure("Invalid Identity");
+            return Result<(string,string)>.Failure("Invalid Identity");
         if(userEntity == null)
-            return Result<string>.Failure("User not found");
-        if(!_passwordHasher.VerifyPassword(request.Password, userEntity.PasswordHash))
-            return Result<string>.Failure("Invalid Password");
-        var token = _jwtProvider.GenerateToken(userEntity.Id,userEntity.Username,userEntity.Email.Address);
-        return Result<string>.Success(token);
+            return Result<(string,string)>.Failure("User not found");
+        if(!_stringHasher.Verify(request.Password, userEntity.PasswordHash))
+            return Result<(string,string)>.Failure("Invalid Password");
+        var accessToken = _jwtProvider.GenerateToken(userEntity.Id,userEntity.Username,userEntity.Email.Address);
+        var refreshToken = _jwtProvider.GenerateRefreshToken();
+        var userSession = new UserSessionEntity
+        {
+            UserId = userEntity.Id,
+            HashedToken = _stringHasher.Hash(refreshToken),
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(7), // Set expiration for 7 days
+        };
+        return Result<(string,string)>.Success((accessToken, refreshToken));
     }
 }

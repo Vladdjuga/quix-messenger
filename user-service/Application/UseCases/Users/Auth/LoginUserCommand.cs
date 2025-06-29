@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.UseCases.Users.Auth;
 
-public record LoginUserCommand(string Identity,string Password):IRequest<Result<string>>;
+public record LoginUserCommand(string Identity,string Password):IRequest<Result<(string,string)>>;
