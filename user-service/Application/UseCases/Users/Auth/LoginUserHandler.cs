@@ -50,6 +50,7 @@ public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<(string,s
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7), // Set expiration for 7 days
         };
+        await _userSessionRepository.AddAsync(userSession, cancellationToken);
         return Result<(string,string)>.Success((accessToken, refreshToken));
     }
 }
