@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Application.Auth;
+﻿using Application.Auth;
 using Application.Common;
 using Application.Interfaces.Security;
 using Application.Utilities;
@@ -7,9 +6,9 @@ using Domain.Entities;
 using Domain.Repositories;
 using MediatR;
 
-namespace Application.UseCases.Users.Auth;
+namespace Application.UseCases.Users.Auth.Login;
 
-public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<(string,string)>>
+public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<(string, string)>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserSessionRepository _userSessionRepository;
@@ -49,6 +48,7 @@ public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<(string,s
             HashedToken = _stringHasher.Hash(refreshToken),
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7), // Set expiration for 7 days
+            IsActive = true
         };
         await _userSessionRepository.AddAsync(userSession, cancellationToken);
         return Result<(string,string)>.Success((accessToken, refreshToken));

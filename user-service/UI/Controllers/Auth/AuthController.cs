@@ -1,5 +1,7 @@
 ﻿using Application.DTOs.User;
 using Application.UseCases.Users.Auth;
+using Application.UseCases.Users.Auth.Login;
+using Application.UseCases.Users.Auth.Register;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -86,5 +88,21 @@ public class AuthController : Controller
         }
         _logger.LogInformation("Registered User: {Username} - {Email}", registerDto.Username, registerDto.Email);
         return TypedResults.Ok(result.Value);
+    }
+    /// <summary>
+    /// This method will logout the user from the application.
+    /// </summary>
+    /// <returns>
+    /// Will return an Ok result if the user was logged out successfully or a BadRequest if there was an error.
+    /// </returns>
+    [HttpPost("logout")]
+    public Results<Ok, BadRequest<string>> Logout()
+    {
+        _logger.LogInformation("Starting to logout user.");
+        // Here you can implement the logic to invalidate the refresh token
+        // For now, we will just remove the cookie
+        Response.Cookies.Delete("refreshToken");
+        _logger.LogInformation("User logged out successfully.");
+        return TypedResults.Ok();
     }
 }

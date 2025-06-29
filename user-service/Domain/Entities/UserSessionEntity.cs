@@ -8,4 +8,5 @@ public class UserSessionEntity
     public required string HashedToken { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime ExpiresAt { get; set; }
+    public required bool IsActive { get; set; }
 }

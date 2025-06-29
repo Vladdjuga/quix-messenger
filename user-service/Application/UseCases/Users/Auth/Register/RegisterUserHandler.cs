@@ -5,7 +5,7 @@ using Domain.Repositories;
 using Domain.ValueObjects;
 using MediatR;
 
-namespace Application.UseCases.Users.Auth;
+namespace Application.UseCases.Users.Auth.Register;
 
 public class RegisterUserHandler:IRequestHandler<RegisterUserCommand, Result<Guid>>
 {
