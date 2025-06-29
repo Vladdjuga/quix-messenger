@@ -35,9 +35,10 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IChatRepository,ChatRepository>();
+        services.AddScoped<IUserSessionRepository,UserSessionRepository>();
         services.AddScoped<IUserContactRepository,UserContactRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
-        services.AddTransient<IPasswordHasher, Pbkdf2PasswordHasher>();
+        services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();
         services.AddValidatorsFromAssemblyContaining<GetUserQueryValidator>();
         services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidationBehavior<,>));
