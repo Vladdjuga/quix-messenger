@@ -19,5 +19,6 @@ namespace Domain.Entities
         public required DateTime CreatedAt { get; init; }
         public virtual IEnumerable<UserChatEntity>? UserChatEntities { get; init; }
         public virtual IEnumerable<UserContactEntity>? Contacts { get; init; }
+        public virtual IEnumerable<UserSessionEntity>? Sessions { get; init; }
     }
 }

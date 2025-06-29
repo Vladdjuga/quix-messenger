@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Infrastructure\\Infrastructure.csproj": {}
+    "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Infrastructure\\Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\Application.csproj": {
+    "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\Application.csproj",
+        "projectUniqueName": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\Application.csproj",
         "projectName": "Application",
-        "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\Application.csproj",
+        "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\Application.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\obj\\",
+        "outputPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,17 +26,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj"
+              "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj"
               },
-              "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\Grpc.csproj": {
-                "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\Grpc.csproj"
+              "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\Grpc.csproj": {
+                "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\Grpc.csproj"
               }
             }
           }
@@ -86,17 +91,21 @@
         }
       }
     },
-    "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj": {
+    "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj",
+        "projectUniqueName": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj",
+        "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\obj\\",
+        "outputPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -104,6 +113,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -153,17 +163,21 @@
         }
       }
     },
-    "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\Grpc.csproj": {
+    "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\Grpc.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\Grpc.csproj",
+        "projectUniqueName": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\Grpc.csproj",
         "projectName": "Grpc",
-        "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\Grpc.csproj",
+        "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\Grpc.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Grpc\\obj\\",
+        "outputPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Grpc\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -171,6 +185,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -226,17 +241,21 @@
         }
       }
     },
-    "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Infrastructure\\Infrastructure.csproj": {
+    "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Infrastructure\\Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Infrastructure\\Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Infrastructure\\Infrastructure.csproj",
         "projectName": "Infrastructure",
-        "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Infrastructure\\Infrastructure.csproj",
+        "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Infrastructure\\Infrastructure.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Infrastructure\\obj\\",
+        "outputPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -244,17 +263,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\Application.csproj": {
-                "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Application\\Application.csproj"
+              "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\Application.csproj": {
+                "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Application\\Application.csproj"
               },
-              "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj": {
-                "projectPath": "C:\\Users\\User\\Documents\\projects\\quix-messenger\\message-service\\Domain\\Domain.csproj"
+              "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Users\\User\\source\\repos\\quix-messenger\\quix-messenger-monorepo\\message-service\\Domain\\Domain.csproj"
               }
             }
           }
