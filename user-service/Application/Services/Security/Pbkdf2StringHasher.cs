@@ -3,26 +3,25 @@ using System.Security.Cryptography;
 
 namespace Application.Services.Security;
 
-public class Pbkdf2PasswordHasher:IPasswordHasher
+public class Pbkdf2StringHasher:IStringHasher
 {
-    public string HashPassword(string password)
+    public string Hash(string str)
     {
         var salt = RandomNumberGenerator.GetBytes(18);
         var hash = Rfc2898DeriveBytes.Pbkdf2(
-            password,
+            str,
             salt,
             100,
             HashAlgorithmName.SHA256, 
             32);
         return Convert.ToBase64String(salt)+Convert.ToBase64String(hash);
     }
-
-    public bool VerifyPassword(string password, string hashedPassword)
+    public bool Verify(string str, string hashedStr)
     {
-        var salt = Convert.FromBase64String(hashedPassword.Substring(0,24));
-        var hash = Convert.FromBase64String(hashedPassword.Substring(24));
+        var salt = Convert.FromBase64String(hashedStr[..24]);
+        var hash = Convert.FromBase64String(hashedStr[24..]);
         var newHash = Rfc2898DeriveBytes.Pbkdf2(
-            password,
+            str,
             salt,
             100,
             HashAlgorithmName.SHA256, 
