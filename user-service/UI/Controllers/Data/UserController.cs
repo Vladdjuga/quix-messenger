@@ -5,6 +5,7 @@ using Application.Interfaces.DTOs;
 using Application.UseCases.Users.Data;
 using Application.UseCases.Users.Data.GetUser;
 using Application.UseCases.Users.Data.UpdateUser;
+using Application.Utilities;
 using AutoMapper;
 using Domain.Repositories;
 using MediatR;
@@ -13,11 +14,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using UI.Attributes;
+using UI.Utilities;
 
 namespace UI.Controllers.Data;
 
 /// <summary>
-/// This is a REST controller that will manage mainly user data.
+/// This is a REST controller that will mainly manage user data.
 /// Changing and reading user data will happen here.
 /// </summary>
 [Route("api/[controller]")]
@@ -47,17 +50,12 @@ public class UserController : Controller
     /// If the JWT authorizing token is user`s then it will return ReadUserDto if not ReadUserPublicDto.
     /// </returns>
     [Authorize]
+    [GetUserGuid]
     [HttpGet("getUserInfo/{username}")]
     public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<string>>> GetUserInfo(
         string username)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("Couldn\'t parse from {UserIdString} to {UserIdGuid}"
-                , userId, userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
 
         var query = new GetUserQuery(
             Username: username,
@@ -82,17 +80,13 @@ public class UserController : Controller
     /// <param name="userDto">This is a DTO where parameters that have to change will be passed. Alongside with the users ID</param>
     /// <returns>ReadUserDto or Bad Request if the exception was thrown.</returns>
     [Authorize]
+    [GetUserGuid]
     [HttpPatch("updateUserInfo")]
     public async Task<Results<Ok<ReadUserDto>, BadRequest<string>>> UpdateUserInfo(
         UpdateUserDto userDto)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
-
+        var userGuid = HttpContext.GetUserGuid();
+        
         var command = new UpdateUserCommand(userDto, userGuid);
         _logger.LogInformation("Starting to update user info for {Username}", userDto.Username);
         var result = await _mediator.Send(command);
@@ -107,20 +101,15 @@ public class UserController : Controller
     }
     
     [Authorize]
+    [GetUserGuid]
     [HttpGet("getMeInfo")]
     public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<string>>> GetMeInfo()
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("Couldn\'t parse from {UserIdString} to {UserIdGuid}"
-                , userId, userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
 
         var query = new GetUserQuery(
             Username: null,
-            UserGuid: userGuid
+            UserGuid: userGuid  
         );
         _logger.LogInformation("Starting to get user info for {Guid}", userGuid);
         var result = await _mediator.Send(query);

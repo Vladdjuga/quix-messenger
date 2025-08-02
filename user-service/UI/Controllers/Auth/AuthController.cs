@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using UI.Attributes;
+using UI.Utilities;
 
 namespace UI.Controllers.Auth;
 
@@ -99,21 +101,12 @@ public class AuthController : Controller
     /// Will return an Ok result if the user was logged out successfully or a BadRequest if there was an error.
     /// </returns>
     [Authorize]
+    [GetSessionGuid]
     [HttpPost("logout")]
     public async Task<Results<Ok, BadRequest<string>>> Logout()
     {
-        _logger.LogInformation("Trying to gather Session from user claims to refresh token.");
-        var sessionId = User.Claims.FirstOrDefault(c => c.Type == JwtCustomClaimNames.Session)?.Value;
-        if (string.IsNullOrEmpty(sessionId))
-        {
-            _logger.LogError("Session ID is missing in user claims. Possibly the user is not logged in or the session has expired.");
-            return TypedResults.BadRequest("Session ID is missing in user claims.");
-        }
-        if (!Guid.TryParse(sessionId, out var sessionGuid))
-        {
-            _logger.LogError("Session ID is not a valid GUID.");
-            return TypedResults.BadRequest("Session ID is not a valid GUID.");
-        }
+        var sessionGuid = HttpContext.GetSessionGuid();
+        
         _logger.LogInformation("Starting to logout user.");
         var command = new InvalidateTokenCommand(
             sessionGuid
@@ -137,6 +130,7 @@ public class AuthController : Controller
     /// Will return a new JWT token if the refresh token is valid, or a BadRequest if there was an error.
     /// </returns>
     [Authorize]
+    [GetSessionGuid]
     [HttpPost("refresh")]
     public async Task<Results<Ok<string>, BadRequest<string>>> RefreshToken()
     {
@@ -147,18 +141,9 @@ public class AuthController : Controller
             _logger.LogError("Refresh token is missing.");
             return TypedResults.BadRequest("Refresh token is missing.");
         }
-        _logger.LogInformation("Trying to gather Session from user claims to refresh token.");
-        var sessionId = User.Claims.FirstOrDefault(c => c.Type == JwtCustomClaimNames.Session)?.Value;
-        if (string.IsNullOrEmpty(sessionId))
-        {
-            _logger.LogError("Session ID is missing in user claims. Possibly the user is not logged in or the session has expired.");
-            return TypedResults.BadRequest("Session ID is missing in user claims.");
-        }
-        if (!Guid.TryParse(sessionId, out var sessionGuid))
-        {
-            _logger.LogError("Session ID is not a valid GUID.");
-            return TypedResults.BadRequest("Session ID is not a valid GUID.");
-        }
+        // Check if the session ID is present in HttpContext items
+        var sessionGuid = HttpContext.GetSessionGuid();
+        
         var command = new RefreshTokenCommand(refreshToken,sessionGuid);
         var result = await _mediator.Send(command);
         if (result.IsFailure)

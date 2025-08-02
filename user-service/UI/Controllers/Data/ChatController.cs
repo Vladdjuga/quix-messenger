@@ -4,12 +4,15 @@ using Application.DTOs.Chat;
 using Application.UseCases.Chats.AddUserToChat;
 using Application.UseCases.Chats.CreateChat;
 using Application.UseCases.Chats.GetChats;
+using Application.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using UI.Attributes;
+using UI.Utilities;
 
 namespace UI.Controllers.Data;
 
@@ -26,14 +29,12 @@ public class ChatController:Controller
     }
 
     [Authorize]
-    [HttpGet("getChats/{userId:Guid}")]
-    public async Task<Results<Ok<IEnumerable<ReadChatDto>>,BadRequest<string>>> GetChats(Guid userId)
+    [GetUserGuid]
+    [HttpGet("getChats")]
+    public async Task<Results<Ok<IEnumerable<ReadChatDto>>,
+        BadRequest<string>,UnauthorizedHttpResult>> GetChats()
     {
-        if (userId == Guid.Empty)
-        {
-            _logger.LogWarning("UserId is empty");
-            return TypedResults.BadRequest("UserId is empty");
-        }
+        var userId = HttpContext.GetUserGuid();
 
         var query = new GetChatsByUserIdQuery(userId);
         _logger.LogInformation("User {Username} tries to get chats", userId);
@@ -49,29 +50,26 @@ public class ChatController:Controller
     }
 
     [Authorize]
+    [GetUserGuid]
     [HttpPost("addChat")]
-    public async Task<Results<Ok<ReadChatDto>,BadRequest<string>,NotFound<string>>> AddChat([FromBody] CreateChatDto createChatDto)
+    public async Task<Results<Ok<ReadChatDto>,BadRequest<string>,NotFound<string>,UnauthorizedHttpResult>> AddChat([FromBody] CreateChatDto createChatDto)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("User {Username} not found", userGuid);
-            return TypedResults.NotFound("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
+        
         var command = new CreateChatCommand(
             createChatDto.Title,
             createChatDto.ChatType,
             userGuid
         );
-        _logger.LogInformation("User {UserId} tries to create chat", userId);
+        _logger.LogInformation("User {UserId} tries to create chat", userGuid);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
-            _logger.LogError("User {Username} failed to create chat", userId);
+            _logger.LogError("User {Username} failed to create chat", userGuid);
             _logger.LogError("Error : {Message}", result.Error);
             return TypedResults.BadRequest(result.Error);
         }
-        _logger.LogInformation("User {Username} added chat", userId);
+        _logger.LogInformation("User {Username} added chat", userGuid);
         return TypedResults.Ok(result.Value);
     }
 

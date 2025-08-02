@@ -4,6 +4,7 @@ using Application.UseCases.Contacts.ChangeContactStatus;
 using Application.UseCases.Contacts.CreateContact;
 using Application.UseCases.Contacts.GetContact;
 using Application.UseCases.Contacts.GetUsersContacts;
+using Application.Utilities;
 using AutoMapper;
 using Domain.Enums;
 using Domain.Repositories;
@@ -13,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using UI.Attributes;
+using UI.Utilities;
 
 namespace UI.Controllers.Data;
 
@@ -29,15 +32,11 @@ public class ContactController:Controller
     }
 
     [Authorize]
+    [GetUserGuid]
     [HttpPost("addContact/{contactId:guid}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>>> CreateContactById(Guid contactId)
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,UnauthorizedHttpResult>> CreateContactById(Guid contactId)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogInformation("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
         
         var command = new CreateContactCommand(
             userGuid,
@@ -56,15 +55,13 @@ public class ContactController:Controller
         return TypedResults.Ok(result.Value);
     }
     [Authorize]
+    [GetUserGuid]
     [HttpGet("getContact/{contactId:guid}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>>> GetContactById(Guid contactId)
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,UnauthorizedHttpResult>> GetContactById(
+        Guid contactId)
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
+        
         var query=new GetContactQuery(userGuid,contactId);
         _logger.LogInformation("Getting contact {ContactId}", contactId);
         var result = await _mediator.Send(query);
@@ -78,15 +75,12 @@ public class ContactController:Controller
         return TypedResults.Ok(result.Value);
     }
     [Authorize]
+    [GetUserGuid]
     [HttpGet("getContacts")]
-    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, BadRequest<string>>> GetContacts()
+    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
+        BadRequest<string>,UnauthorizedHttpResult>> GetContacts()
     {
-        var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogInformation("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
+        var userGuid = HttpContext.GetUserGuid();
 
         var query = new GetUsersContactsQuery(userGuid);
         _logger.LogInformation("Getting contacts for {UserId}", userGuid);
@@ -102,17 +96,13 @@ public class ContactController:Controller
     }
 
     [Authorize]
+    [GetUserGuid]
     [HttpPatch("changeContactStatus{contactId:guid}/{status}")]
-    public async Task<Results<Ok, BadRequest<string>>> ChangeContactStatus(Guid contactId,
+    public async Task<Results<Ok, BadRequest<string>,UnauthorizedHttpResult>> ChangeContactStatus(Guid contactId,
         ContactStatus status)
     {
-        var userId=User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        if (!Guid.TryParse(userId, out Guid userGuid))
-        {
-            _logger.LogError("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
-        }
-
+        var userGuid = HttpContext.GetUserGuid();
+        
         var command = new ChangeContactStatusCommand(
             userGuid,
             contactId,
