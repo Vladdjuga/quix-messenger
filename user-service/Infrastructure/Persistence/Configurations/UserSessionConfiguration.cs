@@ -23,10 +23,10 @@ public class UserSessionConfiguration:IEntityTypeConfiguration<UserSessionEntity
             .HasMaxLength(255);
         builder.Property(us => us.CreatedAt)
             .IsRequired()
-            .HasColumnType("timestamp")
+            .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
         builder.Property(us => us.ExpiresAt)
             .IsRequired()
-            .HasColumnType("timestamp");
+            .HasColumnType("timestamp with time zone");
     }
 }

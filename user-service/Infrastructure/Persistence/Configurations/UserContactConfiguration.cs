@@ -30,6 +30,7 @@ public class UserContactConfiguration : IEntityTypeConfiguration<UserContactEnti
             .IsRequired();
         builder.Property(x => x.CreatedAt)
             .ValueGeneratedOnAdd()
+            .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP")
             .IsRequired();
         builder.HasIndex(x => new { x.UserId, x.ContactId }).IsUnique();

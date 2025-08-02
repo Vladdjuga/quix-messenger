@@ -41,7 +41,7 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasColumnType("date");
         builder.Property(u => u.CreatedAt)
             .IsRequired()
-            .HasColumnType("timestamp")
+            .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
     }
 }
