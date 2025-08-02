@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Application.Auth;
+using Application.Utilities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Auth;
@@ -11,19 +13,22 @@ namespace Infrastructure.Auth;
 public class JwtProvider:IJwtProvider
 {
     private readonly IConfiguration _config;
+    private readonly JwtSettings _jwtSettings;
 
-    public JwtProvider(IConfiguration config)
+    public JwtProvider(IConfiguration config, IOptions<JwtSettings> jwtSettings)
     {
         _config = config;
+        _jwtSettings = jwtSettings.Value;
     }
-    public string GenerateToken(Guid userSubject, string userName, string userEmail)
+    public string GenerateToken(Guid userSubject, string userName, string userEmail,Guid sessionId)
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userSubject.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, userEmail),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.UniqueName, userName)
+            new (JwtRegisteredClaimNames.Sub, userSubject.ToString()),
+            new (JwtRegisteredClaimNames.Email, userEmail),
+            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new (JwtRegisteredClaimNames.UniqueName, userName),
+            new (JwtCustomClaimNames.Session, sessionId.ToString())
         };
         var audiences=_config.GetSection("JwtSettings:Audiences")
             .Get<List<string>>();
@@ -42,7 +47,7 @@ public class JwtProvider:IJwtProvider
         var token = new JwtSecurityToken(
             issuer: _config["JwtSettings:Issuer"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes),
             signingCredentials: creds
         );
 

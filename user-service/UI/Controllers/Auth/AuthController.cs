@@ -1,8 +1,12 @@
 ﻿using Application.DTOs.User;
 using Application.UseCases.Users.Auth;
+using Application.UseCases.Users.Auth.InvalidateToken;
 using Application.UseCases.Users.Auth.Login;
+using Application.UseCases.Users.Auth.RefreshToken;
 using Application.UseCases.Users.Auth.Register;
+using Application.Utilities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
@@ -38,7 +42,7 @@ public class AuthController : Controller
             Identity: loginDto.Identity,
             Password: loginDto.Password
         );
-        _logger.LogInformation("Starting to login User: {Identity} - {Password}", loginDto.Identity, loginDto.Password);
+        _logger.LogInformation("Starting to login User: {Identity}", loginDto.Identity);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
@@ -46,19 +50,18 @@ public class AuthController : Controller
             _logger.LogError("Error: {Error}", result.Error);
             return TypedResults.BadRequest(result.Error);
         }
-        var (accessToken, refreshToken)=result.Value;
-        _logger.LogInformation("Login User: {Identity} - {Password}", loginDto.Identity, loginDto.Password);
-        _logger.LogInformation("Tokens generated for user - {Identity}. Access Token : {Token} ; Refresh Token : {RefreshToken}", 
-            loginDto.Identity, accessToken, refreshToken);
+        var dto=result.Value;
+        _logger.LogInformation("Login User: {Identity}", loginDto.Identity);
+        _logger.LogInformation("Tokens generated for user - {Identity}.", loginDto.Identity);
         // Here store the refresh token in cookies 
-        Response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+        Response.Cookies.Append("refreshToken", dto.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = false,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddDays(7)
+            Expires = dto.ExpiresAt,
         });
-        return TypedResults.Ok(accessToken);
+        return TypedResults.Ok(dto.AccessToken);
     }
 
     /// <summary>
@@ -95,14 +98,88 @@ public class AuthController : Controller
     /// <returns>
     /// Will return an Ok result if the user was logged out successfully or a BadRequest if there was an error.
     /// </returns>
+    [Authorize]
     [HttpPost("logout")]
-    public Results<Ok, BadRequest<string>> Logout()
+    public async Task<Results<Ok, BadRequest<string>>> Logout()
     {
+        _logger.LogInformation("Trying to gather Session from user claims to refresh token.");
+        var sessionId = User.Claims.FirstOrDefault(c => c.Type == JwtCustomClaimNames.Session)?.Value;
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            _logger.LogError("Session ID is missing in user claims. Possibly the user is not logged in or the session has expired.");
+            return TypedResults.BadRequest("Session ID is missing in user claims.");
+        }
+        if (!Guid.TryParse(sessionId, out var sessionGuid))
+        {
+            _logger.LogError("Session ID is not a valid GUID.");
+            return TypedResults.BadRequest("Session ID is not a valid GUID.");
+        }
         _logger.LogInformation("Starting to logout user.");
-        // Here you can implement the logic to invalidate the refresh token
-        // For now, we will just remove the cookie
+        var command = new InvalidateTokenCommand(
+            sessionGuid
+        );
+        _logger.LogInformation("Invalidating session with ID: {SessionId}", sessionGuid);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failure while logging out user. Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
         Response.Cookies.Delete("refreshToken");
-        _logger.LogInformation("User logged out successfully.");
+        _logger.LogInformation("User logged out successfully. Session ID: {SessionId}", sessionGuid);
         return TypedResults.Ok();
+    }
+    
+    /// <summary>
+    /// This method will refresh the JWT token using the refresh token stored in cookies.
+    /// </summary>
+    /// <returns>
+    /// Will return a new JWT token if the refresh token is valid, or a BadRequest if there was an error.
+    /// </returns>
+    [Authorize]
+    [HttpPost("refresh")]
+    public async Task<Results<Ok<string>, BadRequest<string>>> RefreshToken()
+    {
+        _logger.LogInformation("Starting to refresh token.");
+        var refreshToken = Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            _logger.LogError("Refresh token is missing.");
+            return TypedResults.BadRequest("Refresh token is missing.");
+        }
+        _logger.LogInformation("Trying to gather Session from user claims to refresh token.");
+        var sessionId = User.Claims.FirstOrDefault(c => c.Type == JwtCustomClaimNames.Session)?.Value;
+        if (string.IsNullOrEmpty(sessionId))
+        {
+            _logger.LogError("Session ID is missing in user claims. Possibly the user is not logged in or the session has expired.");
+            return TypedResults.BadRequest("Session ID is missing in user claims.");
+        }
+        if (!Guid.TryParse(sessionId, out var sessionGuid))
+        {
+            _logger.LogError("Session ID is not a valid GUID.");
+            return TypedResults.BadRequest("Session ID is not a valid GUID.");
+        }
+        var command = new RefreshTokenCommand(refreshToken,sessionGuid);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failure while refreshing token. Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
+        
+        var dto = result.Value;
+        _logger.LogInformation("Token refreshed successfully. For session ID: {SessionId}", sessionGuid);
+        
+        // Here store the new refresh token in cookies
+        Response.Cookies.Append("refreshToken", dto.RefreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Strict,
+            Expires = dto.ExpiresAt,
+            
+        });
+        
+        return TypedResults.Ok(dto.AccessToken);
     }
 }

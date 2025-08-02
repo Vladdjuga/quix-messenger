@@ -31,24 +31,16 @@ public class ValidationBehavior<TRequest, TResponse>
             .Where(f => f != null)
             .ToList();
 
-        if (failures.Count != 0)
-        {
-            string failuresString = "Validation failed: \n";
-            foreach (var failure in failures)
-                failuresString += failure.ErrorMessage + '\n';
-            var responseType = typeof(TResponse);
-            if (responseType == typeof(Result))
-                return (TResponse)Result.Failure(failuresString);
-            if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
-            {
-                var failureMethod = responseType.GetMethod("Failure", [typeof(string)]);
-                if (failureMethod is not null)
-                {
-                    var failureResult = failureMethod.Invoke(null, [failuresString]);
-                    return (TResponse)failureResult!;
-                }
-            }
-        }
-        return await next();
+        if (failures.Count == 0) return await next();
+        var failuresString = failures.Aggregate("Validation failed: \n", (current, failure) => current + (failure.ErrorMessage + '\n'));
+        var responseType = typeof(TResponse);
+        if (responseType == typeof(Result))
+            return (TResponse)Result.Failure(failuresString);
+        if (!responseType.IsGenericType || responseType.GetGenericTypeDefinition() != typeof(Result<>))
+            return await next();
+        var failureMethod = responseType.GetMethod("Failure", [typeof(string)]);
+        if (failureMethod is null) return await next();
+        var failureResult = failureMethod.Invoke(null, [failuresString]);
+        return (TResponse)failureResult!;
     }
 }

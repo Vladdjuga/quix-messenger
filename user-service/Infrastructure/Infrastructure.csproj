@@ -8,6 +8,10 @@
     <ItemGroup>
         <Folder Include="DI\" />
     </ItemGroup>
+    <ItemGroup>
+        <!-- This is important -->
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
