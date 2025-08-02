@@ -50,13 +50,13 @@ public class ChatController:Controller
 
     [Authorize]
     [HttpPost("addChat")]
-    public async Task<Results<Ok<ReadChatDto>,BadRequest<string>>> AddChat([FromBody] CreateChatDto createChatDto)
+    public async Task<Results<Ok<ReadChatDto>,BadRequest<string>,NotFound<string>>> AddChat([FromBody] CreateChatDto createChatDto)
     {
         var userId = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         if (!Guid.TryParse(userId, out Guid userGuid))
         {
             _logger.LogError("User {Username} not found", userGuid);
-            return TypedResults.BadRequest("User not found");
+            return TypedResults.NotFound("User not found");
         }
         var command = new CreateChatCommand(
             createChatDto.Title,
