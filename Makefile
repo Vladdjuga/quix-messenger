@@ -3,20 +3,23 @@ SHELL := /bin/bash
 
 SERVICES = message-service real-time-service user-service frontend
 
-.PHONY: build up down restart
+.PHONY: build
+build: $(patsubst %,build-service-%,$(SERVICES))
+	@echo "All Docker images built successfully!"
 
-build:
-	@echo "Building all Docker images..."
-	@for service in $(SERVICES); do \
-		docker build -t $$service ./$$service || exit 1; \
-	done
+build-service-%:
+	@echo "Building Docker image for '$*'"
+	@docker build -t $* ./$*
 
+.PHONY: up
 up:
 	@echo "Starting services with docker-compose..."
-	docker-compose up -d
+	@docker-compose up -d
 
+.PHONY: down
 down:
 	@echo "Stopping all containers..."
-	docker-compose down
+	@docker-compose down
 
+.PHONY: restart
 restart: down build up
