@@ -80,7 +80,8 @@ using (var scope = app.Services.CreateScope())
 }
 //app.UseHttpsRedirection();
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
+// If global exception handling middleware is needed, uncomment the line below
+//app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.MapGet("/health", () => Results.Ok("OK"))
     .WithName("HealthCheck")

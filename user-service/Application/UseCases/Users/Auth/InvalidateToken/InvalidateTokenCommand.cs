@@ -3,4 +3,4 @@ using MediatR;
 
 namespace Application.UseCases.Users.Auth.InvalidateToken;
 
-public record InvalidateTokenCommand(Guid? UserId):IRequest<IResult>;
+public record InvalidateTokenCommand(Guid SessionId):IRequest<IResult>;

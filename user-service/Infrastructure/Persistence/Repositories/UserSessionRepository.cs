@@ -21,6 +21,14 @@ public class UserSessionRepository:IUserSessionRepository
             .FirstOrDefaultAsync(us => us.Id == id, cancellationToken);
     }
 
+    public async Task<UserSessionEntity?> GetByIdWithUserAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(us => us.User)
+            .FirstOrDefaultAsync(us => us.Id == id, cancellationToken);
+    }
+
     public async Task<UserSessionEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await _dbSet
