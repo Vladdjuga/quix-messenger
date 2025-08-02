@@ -14,6 +14,7 @@ using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using Infrastructure.Auth;
+using Infrastructure.ExceptionHandlers;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
 using Infrastructure.Persistence.Repositories;
@@ -32,19 +33,34 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("PostgresSQLConnection"),
                     b => b.MigrationsAssembly("Infrastructure"))
                 .UseLazyLoadingProxies());
+        
+        services.Configure<JwtSettings>(opt =>
+            configuration.GetSection(nameof(JwtSettings)).Bind(opt));
+
+        // Comment this if you want to use global exception middleware
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IUserSessionRepository,UserSessionRepository>();
         services.AddScoped<IUserContactRepository,UserContactRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
+        
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();
+        
         services.AddValidatorsFromAssemblyContaining<GetUserQueryValidator>();
+        
         services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ValidationBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>),typeof(ExceptionHandlingBehavior<,>));
+        
+        services.AddTransient(typeof(IPipelineBehavior<,>),typeof(UseCaseExceptionHandlingBehavior<,>));
+        
         services.AddAutoMapper(typeof(MappingProfile));
+        
         services.AddMediatR(typeof(CreateChatHandler).Assembly);
+        
         return services;
     }
 }

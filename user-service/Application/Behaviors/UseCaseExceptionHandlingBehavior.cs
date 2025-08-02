@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Behaviors;
 
-public class ExceptionHandlingBehavior<TRequest,TResponse>:IPipelineBehavior<TRequest,TResponse> 
+public class UseCaseExceptionHandlingBehavior<TRequest,TResponse>:IPipelineBehavior<TRequest,TResponse> 
     where TRequest : notnull, IRequest<TResponse>
     where TResponse:IResult
 {
     private readonly ILogger _logger;
 
-    public ExceptionHandlingBehavior(ILogger<ExceptionHandlingBehavior<TRequest, TResponse>> logger)
+    public UseCaseExceptionHandlingBehavior(ILogger<UseCaseExceptionHandlingBehavior<TRequest, TResponse>> logger)
     {
         _logger = logger;
     }
@@ -28,16 +28,12 @@ public class ExceptionHandlingBehavior<TRequest,TResponse>:IPipelineBehavior<TRe
             var responseType = typeof(TResponse);
             if (responseType == typeof(Result))
                 return (TResponse)Result.Failure(ex.Message);
-            if (responseType.IsGenericType && responseType.GetGenericTypeDefinition() == typeof(Result<>))
-            {
-                var failureMethod = responseType.GetMethod("Failure", [typeof(string)]);
-                if (failureMethod is not null)
-                {
-                    var failureResult = failureMethod.Invoke(null, [ex.Message]);
-                    return (TResponse)failureResult!;
-                }
-            }
-            throw;
+            if (!responseType.IsGenericType || responseType.GetGenericTypeDefinition() != typeof(Result<>))
+                throw;
+            var failureMethod = responseType.GetMethod("Failure", [typeof(string)]);
+            if (failureMethod is null) throw;
+            var failureResult = failureMethod.Invoke(null, [ex.Message]);
+            return (TResponse)failureResult!;
         }
     }
 }
