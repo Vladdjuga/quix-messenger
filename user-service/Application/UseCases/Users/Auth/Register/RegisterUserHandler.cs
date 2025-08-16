@@ -1,8 +1,8 @@
 ﻿using Application.Common;
 using Application.Interfaces.Security;
+using Application.Utilities;
 using Domain.Entities;
 using Domain.Repositories;
-using Domain.ValueObjects;
 using MediatR;
 
 namespace Application.UseCases.Users.Auth.Register;
@@ -18,14 +18,19 @@ public class RegisterUserHandler:IRequestHandler<RegisterUserCommand, Result<Gui
     }
     public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+        // Validate email and username uniqueness
+        if (await _repository.GetByEmailAsync(request.Email, cancellationToken) is not null)
+            return Result<Guid>.Failure("Email already exists");
+        if (await _repository.GetByUserNameAsync(request.Username, cancellationToken) is not null)
+            return Result<Guid>.Failure("Username already exists");
         var user = new UserEntity
         {
             Username = request.Username,
-            Email = new Email(request.Email),
+            Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            DateOfBirth = request.DateOfBirth,
-            CreatedAt = DateTime.Now,
+            DateOfBirth = request.DateOfBirth.ToUniversalTime(),
+            CreatedAt = DateTime.UtcNow,
             PasswordHash = _stringHasher.Hash(request.Password),
         };
         await _repository.AddAsync(user,cancellationToken);

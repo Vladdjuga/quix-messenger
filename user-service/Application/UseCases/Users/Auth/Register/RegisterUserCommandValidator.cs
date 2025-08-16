@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Application.Utilities;
+using FluentValidation;
 
 namespace Application.UseCases.Users.Auth.Register;
 
@@ -8,17 +9,18 @@ public class RegisterUserCommandValidator:AbstractValidator<RegisterUserCommand>
     {
         RuleFor(x => x.Password)
             .NotEmpty()
-            .Matches(@"^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?])[^\s]{8,128}$")
+            .Must(RegexValidator.IsValidPassword)
             .WithMessage("Password must be 8-128 characters long, contain at least one uppercase letter, one lowercase letter, one digit, one special character, and no spaces.");
 
         RuleFor(x => x.Username)
             .NotEmpty()
-            .Matches(@"^[a-zA-Z0-9_]{3,32}$")
+            .Must(RegexValidator.IsUsername)
             .WithMessage("Username must be 3-32 characters long and can only contain letters, digits, and underscores.");
 
         RuleFor(x => x.Email)
             .NotEmpty()
             .EmailAddress()
+            .Must(RegexValidator.IsEmail) // IMPORTANT: This ensures the email format is valid
             .WithMessage("Email must be a valid email address.");
 
         RuleFor(x => x.FirstName)

@@ -31,15 +31,13 @@ public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<TokenDto>
     public async Task<Result<TokenDto>> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         UserEntity? userEntity = null;
-        if (IdentityValidator.IsEmail(request.Identity))
-            userEntity=await _userRepository.GetByEmailAsync(request.Identity,cancellationToken);
-        else if (IdentityValidator.IsUsername(request.Identity))
+        if (RegexValidator.IsEmail(request.Identity))
+            userEntity = await _userRepository.GetByEmailAsync(request.Identity,cancellationToken);
+        if (RegexValidator.IsUsername(request.Identity) && userEntity is null)
             userEntity = await _userRepository.GetByUserNameAsync(request.Identity, cancellationToken);
-        else
-            return Result<TokenDto>.Failure("Invalid Identity");
-        
         if(userEntity == null)
             return Result<TokenDto>.Failure("User not found");
+        
         if(!_stringHasher.Verify(request.Password, userEntity.PasswordHash))
             return Result<TokenDto>.Failure("Invalid Password");
         var refreshToken = _jwtProvider.GenerateRefreshToken();
@@ -51,13 +49,13 @@ public class LoginUserHandler:IRequestHandler<LoginUserCommand, Result<TokenDto>
             ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays),
             IsActive = true
         };
+        await _userSessionRepository.AddAsync(userSession, cancellationToken);
+        
         var accessToken = _jwtProvider.GenerateToken(
             userEntity.Id,
             userEntity.Username,
-            userEntity.Email.Address,
+            userEntity.Email,
             userSession.Id);
-
-        await _userSessionRepository.AddAsync(userSession, cancellationToken);
         var dto = new TokenDto(accessToken, refreshToken, userSession.ExpiresAt);
         return Result<TokenDto>.Success(dto);
     }
