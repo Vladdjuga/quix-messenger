@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,10 +20,7 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasMaxLength(50);
         builder.Property(u => u.Email)
             .IsRequired()
-            .HasConversion(
-                v => v.Address,
-                v => new Email(v)
-            );
+            .HasMaxLength(100);
         builder.HasIndex(u => u.Email)
             .IsUnique();
         builder.Property(u => u.PasswordHash)

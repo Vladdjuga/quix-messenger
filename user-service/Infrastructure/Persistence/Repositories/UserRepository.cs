@@ -26,14 +26,14 @@ public sealed class UserRepository : IUserRepository
 
     public async Task<UserEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        var userEntity = await _dbSet.AsNoTracking().FirstOrDefaultAsync(o=>o.Email.Equals(email)
+        var userEntity = await _dbSet.AsNoTracking().FirstOrDefaultAsync(o=>o.Email == email
             ,cancellationToken);
         return userEntity;
     }
 
     public async Task<UserEntity?> GetByUserNameAsync(string userName, CancellationToken cancellationToken)
     {
-        var userEntity= await _dbSet.AsNoTracking().FirstOrDefaultAsync(o=>o.Username.Equals(userName)
+        var userEntity= await _dbSet.AsNoTracking().FirstOrDefaultAsync(o=>o.Username == userName
             ,cancellationToken);
         return userEntity;
     }
