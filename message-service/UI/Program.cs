@@ -21,6 +21,18 @@ builder.WebHost.ConfigureKestrel((context,options) =>
     options.Configure(context.Configuration.GetSection("Kestrel"));
 });
 
+// Add CORS
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
         {

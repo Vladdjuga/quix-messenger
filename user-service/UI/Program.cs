@@ -27,6 +27,17 @@ builder.WebHost.ConfigureKestrel((context,options) =>
     options.Configure(context.Configuration.GetSection("Kestrel"));
 });
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -86,6 +97,9 @@ using (var scope = app.Services.CreateScope())
 app.MapGet("/health", () => Results.Ok("OK"))
     .WithName("HealthCheck")
     .WithTags("HealthCheck");
+
+// Use CORS before authentication and authorization
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
