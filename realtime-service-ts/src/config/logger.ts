@@ -1,0 +1,77 @@
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+
+const levels = {
+    error: 0,
+    warn: 1,
+    info: 2,
+    http: 3,
+    debug: 4,
+};
+
+const level = () => {
+    const env = process.env.NODE_ENV || 'development';
+    return env === 'development' ? 'debug' : 'warn';
+};
+
+const colors = {
+    error: 'red',
+    warn: 'yellow',
+    info: 'green',
+    http: 'magenta',
+    debug: 'white',
+};
+winston.addColors(colors);
+
+
+const consoleFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+    winston.format.colorize({ all: true }),
+    winston.format.printf(
+        (info) => `${info.timestamp} ${info.level}: ${info.message}`
+    )
+);
+
+const fileFormat = winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+);
+
+const transports = [
+    new winston.transports.Console({ format: consoleFormat }),
+
+    // All logs to a file with daily rotation
+    new winston.transports.DailyRotateFile({
+        filename: 'logs/all-%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
+        level: 'info',
+        format: fileFormat,
+    }),
+
+    // Error logs to a separate file with daily rotation
+    new winston.transports.DailyRotateFile({
+        filename: 'logs/error-%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
+        level: 'error',
+        format: fileFormat,
+    }),
+];
+import { format } from 'winston';
+const logger = winston.createLogger({
+    level: level(),
+    levels,
+    format: format.combine(
+        format.errors({ stack: true }), // Handle errors with stack traces
+        format.splat(), // Enable string interpolation
+        format.simple() // Output logs in a simple format
+    ),
+    transports,
+});
+
+export default logger;

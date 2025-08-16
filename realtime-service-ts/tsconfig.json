@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    // 1. Basic options
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    // 2. Environment settings
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node"],
+
+    // 3. Source maps and module resolution
+    "sourceMap": true,
+
+    // 4. Set strict type-checking options
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    // 5. Style and best practices
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+  },
+  // 6. Files and directories to include
+  "include": ["src/**/*"]
+}
