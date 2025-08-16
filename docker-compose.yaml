@@ -77,10 +77,27 @@ services:
       - user-service
       - message-service
       - real-time-service
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - app-network
+    depends_on:
+      - postgres
 volumes:
   pgdata:
     driver: local
   mongodata:
+    driver: local
+  pgadmin_data:
     driver: local
 networks:
   app-network:
