@@ -19,12 +19,17 @@ public class GetSessionGuidAttribute: ActionFilterAttribute
             return;
         }
         var sessionGuid = GuidParser.SafeParse(sessionId);
-        if (sessionGuid is null)
+        if (sessionGuid is null || sessionGuid == Guid.Empty)
         {
             logger?.LogError("Invalid session ID format: {SessionId}", sessionId);
             context.Result = new BadRequestObjectResult("Invalid user ID format.");
             return;
         }
+        if (context.HttpContext.Items.ContainsKey(SessionGuidKey))
+        {
+            logger?.LogWarning("Session GUID already exists in HttpContext, overwriting it.");
+        }
+        logger?.LogInformation("Setting Session GUID in HttpContext: {SessionGuid}", sessionGuid.Value);
         context.HttpContext.Items[SessionGuidKey] = sessionGuid.Value;
         base.OnActionExecuting(context);
     }
