@@ -44,7 +44,7 @@ public class RefreshTokenHandler:IRequestHandler<RefreshTokenCommand, Result<Tok
         var accessToken = _jwtProvider.GenerateToken(
             userSession.UserId,
             userSession.User.Username,
-            userSession.User.Email.Address,
+            userSession.User.Email,
             userSession.Id);
         // Update the session's expiration time and hashed token
         userSession.ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
