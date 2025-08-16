@@ -5,14 +5,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import DefaultButton from "@/components/buttons/DefaultButton";
 import PasswordInput from "@/components/inputs/PasswordInput";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import {LoginFormData, loginSchema} from "@/lib/schemas/loginSchema";
 
 export default function LoginForm() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [loginError, setLoginError] = useState<string | null>(null);
+    
     const {
         register,
         handleSubmit,
         formState: { errors },
+        reset,
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
@@ -20,14 +24,25 @@ export default function LoginForm() {
             password: "",
         }
     });
+
     const onSubmit = async (data: LoginFormData) => {
+        if (isLoading) return; // Prevent multiple submissions
+        
+        setIsLoading(true);
+        setLoginError(null);
+        
         try {
-            const { loginUser } = await import("@/lib/usecases/auth/loginUser");
-            await loginUser(data);
+            const { loginUseCase } = await import("@/lib/usecases/auth/loginUseCase");
+            await loginUseCase(data);
+            
+            // Clear form and redirect
+            reset();
             window.location.href = "/";
         } catch (error) {
             console.error("Login failed:", error);
-            alert("Login failed. Please check your credentials and try again.");
+            setLoginError(error instanceof Error ? error.message : "Login failed. Please check your credentials and try again.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -38,12 +53,20 @@ export default function LoginForm() {
                     <h1 className="text-white text-2xl">Login</h1>
                     <hr className="my-4" />
 
+                    {/* Global Error Display */}
+                    {loginError && (
+                        <div className="mb-4 p-3 bg-red-500 text-white rounded text-sm">
+                            {loginError}
+                        </div>
+                    )}
+
                     <div className="mb-4">
                         <label className="text-white">Username or email:</label>
                         <input
                             {...register("identity")}
                             className="w-full p-3 border rounded"
                             placeholder="Identity..."
+                            disabled={isLoading}
                         />
                         {errors.identity && (
                             <p className="text-red-500 text-sm">{errors.identity.message}</p>
@@ -56,6 +79,7 @@ export default function LoginForm() {
                             {...register("password")}
                             className="w-full p-3 border rounded"
                             required
+                            disabled={isLoading}
                         />
                         {errors.password && (
                             <p className="text-red-500 text-sm">{errors.password.message}</p>
@@ -63,12 +87,21 @@ export default function LoginForm() {
                     </div>
 
                     <hr className="my-4" />
-                    <div className="w-full flex justify-between">
-                        <Link className="underline text-gray-400 hover:text-white" href="#">
-                            Forgot password?
-                        </Link>
-                        <DefaultButton color="blue" type="submit">
-                            Login
+                    <div className="w-full flex justify-between items-center">
+                        <div className="flex flex-col gap-2">
+                            <Link className="underline text-gray-400 hover:text-white text-sm" href="/register">
+                                Don&apos;t have an account? Register
+                            </Link>
+                            <Link className="underline text-gray-400 hover:text-white text-sm" href="#">
+                                Forgot password?
+                            </Link>
+                        </div>
+                        <DefaultButton 
+                            color="blue" 
+                            type="submit" 
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "Logging in..." : "Login"}
                         </DefaultButton>
                     </div>
                 </div>

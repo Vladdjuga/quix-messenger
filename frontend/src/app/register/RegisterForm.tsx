@@ -50,13 +50,18 @@ export default function RegisterForm() {
 
     const onSubmit = async (data: RegisterFormData) => {
         try {
-            const { registerUser } = await import("@/lib/usecases/auth/registerUser");
-
-            await registerUser({
-                ...data,
-                dateOfBirth: new Date(data.dateOfBirth),
+            const response = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
             });
-
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert("Registration failed: " + errorData.message|| "An error occurred");
+                return;
+            }
             window.location.href = "/login";
         } catch (error) {
             console.error("Registration failed:", error);
@@ -99,7 +104,7 @@ export default function RegisterForm() {
                             control={control}
                             render={({ field }) => (
                                 <PasswordInput
-                                    {...field} // передаёт value, onChange, ref
+                                    {...field}
                                     className="w-full p-3 border rounded"
                                 />
                             )}

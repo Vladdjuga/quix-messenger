@@ -5,21 +5,39 @@ type PasswordProps = {
     className?: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+    name?: string;
     required?: boolean;
+    disabled?: boolean;
+    ref?: React.Ref<HTMLInputElement>;
 };
 
-export default function PasswordInput({ placeholder = "Password...",
-                                          className = "" ,value,onChange,required}:PasswordProps) {
+export default function PasswordInput({ 
+    placeholder = "Password...",
+    className = "",
+    value,
+    onChange,
+    onBlur,
+    name,
+    required,
+    disabled,
+    ref
+}: PasswordProps) {
     const [showPassword, setShowPassword] = React.useState(false);
+    
     return (
         <div className={`relative w-full`}>
             <input
+                ref={ref}
                 type={showPassword ? "text" : "password"}
                 placeholder={placeholder}
                 className={`${className}`}
                 value={value}
                 onChange={onChange}
+                onBlur={onBlur}
+                name={name}
                 required={required}
+                disabled={disabled}
             />
             <button
                 type="button"
@@ -27,6 +45,7 @@ export default function PasswordInput({ placeholder = "Password...",
                 className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-300 text-gray-500 hover:text-blue-600
                 bg-gray-800 rounded-full p-1 "
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                disabled={disabled}
             >
                 {showPassword ? (
                     <svg
