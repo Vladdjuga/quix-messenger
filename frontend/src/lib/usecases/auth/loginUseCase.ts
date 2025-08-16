@@ -1,5 +1,5 @@
 
-import {loginRequest} from '../../api/auth-api';
+import {loginRequest} from '../../api/auth/login';
 import {LoginUserDto} from "@/lib/dto/LoginUserDto";
 
 export async function loginUser(dto:LoginUserDto) {
