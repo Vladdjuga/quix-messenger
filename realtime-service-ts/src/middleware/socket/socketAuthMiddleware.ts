@@ -1,6 +1,7 @@
 import type {User} from "../../types/user.js";
 import type {ExtendedError, Socket} from "socket.io";
 import jwt from "jsonwebtoken";
+import logger from "../../config/logger.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'some-default-secret';
 
@@ -14,12 +15,14 @@ export const socketAuthMiddleware = (
     socket: Socket,
     next:(err?: ExtendedError) => void
 ) => {
+    logger.error(JWT_SECRET)
     const req = socket.handshake; // Access the request object from the socket handshake
     const authHeader = req.headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         next(new Error('Unauthorized: Missing token'));
         return;
     }
+    logger.debug(`Received ${authHeader}`);
     const token = authHeader.split(' ')[1];
     if (!token) {
         next(new Error('Unauthorized: Missing token'));
@@ -29,6 +32,7 @@ export const socketAuthMiddleware = (
         socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
         next();
     } catch (error) {
+        logger.error(`Socket authentication error: ${error}`);
         next(new Error('Forbidden: Invalid or expired token'));
         return;
     }

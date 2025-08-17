@@ -11,6 +11,7 @@ import type {
 } from '../types/grpcTypes.js';
 
 const GRPC_SERVER_CHAT = process.env.GRPC_SERVER_CHAT || 'localhost:50052';
+const PROTO_PATH = path.resolve(process.cwd(), 'protos/messenger.proto');
 
 export class MessengerClient {
     private readonly client: any;
@@ -19,7 +20,7 @@ export class MessengerClient {
 
     constructor(serverAddress: string = GRPC_SERVER_CHAT) {
         const packageDefinition = protoLoader.loadSync(
-            path.join(__dirname, '../../protos/messenger.proto'),
+            PROTO_PATH,
             {
                 keepCase: true,
                 longs: String,
@@ -28,14 +29,31 @@ export class MessengerClient {
                 oneofs: true,
             }
         );
+        //console.log('Package definition loaded:', Object.keys(packageDefinition));
 
         const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
+
+        //console.log('Proto descriptor keys:', Object.keys(protoDescriptor));
+        //console.log('Messenger package:', protoDescriptor.messenger);
+
+        if (!protoDescriptor.messenger) {
+            //console.error('Available packages:', Object.keys(protoDescriptor));
+            throw new Error('Package "messenger" not found in proto file. Available packages: ' + Object.keys(protoDescriptor).join(', '));
+        }
+
         const Messenger = (protoDescriptor.messenger as any).Messenger;
+
+        if (!Messenger) {
+            //console.error('Available services in messenger package:', Object.keys(protoDescriptor.messenger));
+            throw new Error('Service "Messenger" not found in messenger package. Available services: ' + Object.keys(protoDescriptor.messenger).join(', '));
+        }
 
         this.client = new Messenger(
             serverAddress,
             grpc.credentials.createInsecure()
         );
+
+        console.log('Messenger client created successfully');
 
         this.sendMessageAsync = promisify(this.client.SendMessage.bind(this.client));
         this.getMessageAsync = promisify(this.client.GetMessage.bind(this.client));
@@ -44,7 +62,6 @@ export class MessengerClient {
     async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
         try {
             const protoRequest = {
-                // Convert Date to protobuf Timestamp format
                 sentAt: {
                     seconds: Math.floor(request.sentAt.getTime() / 1000),
                     nanos: (request.sentAt.getTime() % 1000) * 1000000,
@@ -64,9 +81,7 @@ export class MessengerClient {
     async getMessage(request: GetMessageRequest): Promise<GetMessageResponse> {
         try {
             const response = await this.getMessageAsync(request);
-            if (!response || !response.messages) {
-                return { messages: [] };
-            }
+
             const messages: MessageResponse[] = response.messages.map((msg: any) => ({
                 id: msg.id,
                 sentAt: new Date(msg.sentAt.seconds * 1000 + msg.sentAt.nanos / 1000000),
@@ -83,6 +98,9 @@ export class MessengerClient {
             throw error;
         }
     }
+
+
+
     close(): void {
         this.client.close();
     }

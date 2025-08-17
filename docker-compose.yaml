@@ -67,13 +67,16 @@ services:
     depends_on:
       - user-service
       - message-service
-  real-time-service-ts:
-    image: real-time-service-ts
+  realtime-service-ts:
+    image: realtime-service-ts
     ports:
       - "8081:8080"
     environment:
       GRPC_SERVER_MESSENGER: message-service:7000
       GRPC_SERVER_CHAT: user-service:7000
+      PORT: 8080
+      JWT_SECRET: "a-string-secret-at-least-256-bits-long"
+      PROTO_PATH: "./protos"
     networks:
       - app-network
     depends_on:

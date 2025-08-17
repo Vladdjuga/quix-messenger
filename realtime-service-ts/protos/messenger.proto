@@ -2,12 +2,13 @@
 import "google/protobuf/timestamp.proto";
 package messenger;
 
-enum MessageStatus{
-  Read=0;
-  Sent=1;
-  Delivered=2;
-  Modified=3;
+enum MessageStatus {
+  READ = 0;
+  SENT = 1;
+  DELIVERED = 2;
+  MODIFIED = 3;
 }
+
 message GetMessageRequest{
   string userId=1;
   string chatId=2;

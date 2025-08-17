@@ -2,10 +2,10 @@ import {setupMiddleware} from "./middleware/index.js";
 import {setupRoutes} from "./routes/index.js";
 import {Server} from "socket.io";
 import {setupSocket} from "./sockets/index.js";
+import express from "express";
+import * as http from "node:http";
 
 export function startServer(port:number|string){
-    const express = require('express');
-    const http = require("http");
     const app = express();
     const server = http.createServer(app);
 

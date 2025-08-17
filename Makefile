@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -ec
 
-SERVICES = message-service real-time-service user-service frontend
+SERVICES = message-service real-time-service user-service frontend realtime-service-ts
 
 .PHONY: build
 build: $(patsubst %,build-service-%,$(SERVICES))
