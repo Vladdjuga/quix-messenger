@@ -1,15 +1,11 @@
 import type {NextFunction, Request, Response} from 'express';
-import type {User} from "../models/user.js";
+import type {User} from "../types/user.js";
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'some-default-secret'; // Ensure you set this in your environment variables
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: User;
-    }
-  }
+export interface AuthenticatedRequest extends Request {
+    user?: User; // Optional user property to hold authenticated user info
 }
 
 /**
@@ -33,7 +29,7 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
         return;
     }
   try {
-    req.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+    (req as AuthenticatedRequest).user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
     next();
   } catch (error) {
     res.status(403).json({ message: 'Forbidden: Invalid or expired token' });

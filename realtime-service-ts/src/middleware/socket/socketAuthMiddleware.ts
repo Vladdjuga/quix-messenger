@@ -1,12 +1,8 @@
-import type {User} from "../models/user.js";
+import type {User} from "../../types/user.js";
 import type {ExtendedError, Socket} from "socket.io";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'some-default-secret';
-
-export interface AuthenticatedSocket extends Socket {
-    user?: User; // Optional user property to hold authenticated user info
-}
 
 /**
  * Middleware to authenticate WebSocket connections using JWT.
@@ -15,7 +11,7 @@ export interface AuthenticatedSocket extends Socket {
  * @param next - The next middleware function to call if authentication is successful.
  */
 export const socketAuthMiddleware = (
-    socket: AuthenticatedSocket,
+    socket: Socket,
     next:(err?: ExtendedError) => void
 ) => {
     const req = socket.handshake; // Access the request object from the socket handshake
@@ -30,7 +26,7 @@ export const socketAuthMiddleware = (
         return;
     }
     try {
-        socket.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+        socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
         next();
     } catch (error) {
         next(new Error('Forbidden: Invalid or expired token'));
