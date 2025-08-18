@@ -50,33 +50,12 @@ services:
       - ConnectionStrings__MongoDbName=MessageMongoDb
     depends_on:
       - mongodb
-  #load-service:
-  #  command: sh -c "sleep 4000 && docker run -it --rm --network app-network loadtester"
-  #  depends_on:
-  #    - user-chat-service
-  #    - msg-service
-  #  image: loadtester
-  #  networks:
-  #    - app-network
-  real-time-service:
-    image: real-time-service
-    ports:
-      - "8080:8080"
-    networks:
-      - app-network
-    depends_on:
-      - user-service
-      - message-service
   realtime-service-ts:
     image: realtime-service-ts
     ports:
       - "8081:8080"
-    environment:
-      GRPC_SERVER_MESSENGER: message-service:7000
-      GRPC_SERVER_CHAT: user-service:7000
-      PORT: 8080
-      JWT_SECRET: "a-string-secret-at-least-256-bits-long"
-      PROTO_PATH: "./protos"
+    env_file:
+      - ./realtime-service-ts/production.env
     networks:
       - app-network
     depends_on:
@@ -91,7 +70,7 @@ services:
     depends_on:
       - user-service
       - message-service
-      - real-time-service
+      - realtime-service-ts
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
