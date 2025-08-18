@@ -9,6 +9,7 @@ import type {
     SendMessageRequest,
     SendMessageResponse
 } from '../types/grpcTypes.js';
+import logger from "../config/logger.js";
 
 const GRPC_SERVER_CHAT = process.env.GRPC_SERVER_CHAT || 'localhost:50052';
 const PROTO_PATH = path.resolve(process.cwd(), 'protos/messenger.proto');
@@ -29,22 +30,16 @@ export class MessengerClient {
                 oneofs: true,
             }
         );
-        //console.log('Package definition loaded:', Object.keys(packageDefinition));
 
         const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 
-        //console.log('Proto descriptor keys:', Object.keys(protoDescriptor));
-        //console.log('Messenger package:', protoDescriptor.messenger);
-
         if (!protoDescriptor.messenger) {
-            //console.error('Available packages:', Object.keys(protoDescriptor));
             throw new Error('Package "messenger" not found in proto file. Available packages: ' + Object.keys(protoDescriptor).join(', '));
         }
 
         const Messenger = (protoDescriptor.messenger as any).Messenger;
 
         if (!Messenger) {
-            //console.error('Available services in messenger package:', Object.keys(protoDescriptor.messenger));
             throw new Error('Service "Messenger" not found in messenger package. Available services: ' + Object.keys(protoDescriptor.messenger).join(', '));
         }
 
@@ -54,6 +49,16 @@ export class MessengerClient {
         );
 
         console.log('Messenger client created successfully');
+
+        // ping the server to ensure connection
+        this.client.waitForReady(Date.now() + 5000, (error: Error | null) => {
+            if (error) {
+                logger.error('MessageService client connection error:', error);
+                throw new Error(`MessageService client connection failed: ${error.message}`);
+            } else {
+                logger.info('MessageService client is ready');
+            }
+        });
 
         this.sendMessageAsync = promisify(this.client.SendMessage.bind(this.client));
         this.getMessageAsync = promisify(this.client.GetMessage.bind(this.client));
@@ -78,6 +83,7 @@ export class MessengerClient {
         }
     }
 
+    // possibly won't be used
     async getMessage(request: GetMessageRequest): Promise<GetMessageResponse> {
         try {
             const response = await this.getMessageAsync(request);

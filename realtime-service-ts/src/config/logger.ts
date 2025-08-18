@@ -11,7 +11,7 @@ const levels = {
 };
 
 const level = () => {
-    const env = process.env.NODE_ENV || 'development';
+    const env = 'development'; // Replace with process.env.NODE_ENV or similar in production
     return env === 'development' ? 'debug' : 'warn';
 };
 

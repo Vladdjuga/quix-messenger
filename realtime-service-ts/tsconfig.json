@@ -26,6 +26,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
+
+    // 6. Decorators and experimental features
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
   },
   // 6. Files and directories to include
   "include": ["src/**/*"]

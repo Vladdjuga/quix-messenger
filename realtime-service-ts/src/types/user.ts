@@ -1,10 +1,22 @@
 import type {UUID} from "node:crypto";
+import {IsDefined, IsString, IsUUID} from "class-validator";
 
 
 export class User{
+
+    @IsDefined()
+    @IsUUID()
     id: UUID;
+
+    @IsDefined()
+    @IsString()
     username: string;
+
+    @IsDefined()
+    @IsString()
     email: string;
+
+    @IsDefined()
     sessionId?: UUID;
 
     constructor(id: UUID, username: string, email: string, sessionId: UUID) {

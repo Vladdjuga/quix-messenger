@@ -15,7 +15,6 @@ export const socketAuthMiddleware = (
     socket: Socket,
     next:(err?: ExtendedError) => void
 ) => {
-    logger.error(JWT_SECRET)
     const req = socket.handshake; // Access the request object from the socket handshake
     const authHeader = req.headers['authorization'];
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
