@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const BASE_URL = 'http://user-service:7001/api/Auth';
+const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
 export async function POST(req: Request) {
     try {
