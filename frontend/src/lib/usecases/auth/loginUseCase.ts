@@ -1,22 +1,20 @@
 import {LoginUserDto} from "@/lib/dto/LoginUserDto";
+import {api} from "@/app/api";
 
 export async function loginUseCase(dto:LoginUserDto) {
-    const result = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(dto),
-    });
-    if (!result.ok) {
-        const error = await result.json();
-        throw new Error(error || 'Login failed');
+    try {
+        const response = await api.auth.login(dto.identity, dto.password);
+        const data = response.data;
+
+        if (!data.token) {
+            throw new Error("Login failed: No token received");
+        }
+        localStorage.setItem("jwt", data.token);
+        return data.token;
+    } catch (error: any) {
+        if (error.response) {
+            throw new Error(error.response.data?.message || "Login failed");
+        }
+        throw new Error(error.message || "Network error");
     }
-    const data = await result.json();
-    if (!data.token) {
-        throw new Error('Login failed: No token received');
-    }
-    // Store the token in localStorage
-    localStorage.setItem('jwt', data.token);
-    return data.token; // Return the token for further use
 }

@@ -15,18 +15,11 @@ export const socketAuthMiddleware = (
     socket: Socket,
     next:(err?: ExtendedError) => void
 ) => {
-    const req = socket.handshake; // Access the request object from the socket handshake
-    const authHeader = req.headers['authorization'];
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        next(new Error('Unauthorized: Missing token'));
-        return;
-    }
-    logger.debug(`Received ${authHeader}`);
-    const token = authHeader.split(' ')[1];
+    const token = socket.handshake.auth.token;
     if (!token) {
         next(new Error('Unauthorized: Missing token'));
         return;
-    }
+    } 
     try {
         socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
         next();
