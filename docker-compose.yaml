@@ -65,6 +65,10 @@ services:
     image: frontend
     ports:
       - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_SOCKET_URL: ws://realtime-service-ts:8080
+      - NEXT_PUBLIC_MESSAGE_SERVICE_URL: http://message-service:7000
+      - NEXT_PUBLIC_USER_SERVICE_URL: http://user-service:7000
     networks:
       - app-network
     depends_on:
