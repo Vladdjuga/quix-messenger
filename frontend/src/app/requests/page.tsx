@@ -14,9 +14,11 @@ export default function RequestsPage() {
             setLoading(true);
             try {
                 const { data } = await api.contact.searchByUsernamePaged("", 50);
-                setItems(Array.isArray(data) ? data.filter((x: any) => x.status === "Pending") : []);
-            } catch (e: any) {
-                setError(e?.response?.data ?? "Failed to load requests");
+                const list: ReadContactDto[] = Array.isArray(data) ? (data as ReadContactDto[]) : [];
+                setItems(list.filter((x) => x.status === "Pending"));
+            } catch (e) {
+                const err = e as { response?: { data?: string } };
+                setError(err.response?.data ?? "Failed to load requests");
             } finally {
                 setLoading(false);
             }
@@ -43,8 +45,9 @@ export default function RequestsPage() {
                                         setLoading(true);
                                         await api.contact.acceptFriendship(c.id);
                                         setItems(prev => prev.filter(x => x.id !== c.id));
-                                    } catch (e: any) {
-                                        setError(e?.response?.data ?? "Failed to accept");
+                                    } catch (e) {
+                                        const err = e as { response?: { data?: string } };
+                                        setError(err.response?.data ?? "Failed to accept");
                                     } finally {
                                         setLoading(false);
                                     }

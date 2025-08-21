@@ -4,6 +4,7 @@ import Link from "next/link";
 import {useEffect, useState} from "react";
 import {ReadUserDto} from "@/lib/dto/ReadUserDto";
 import {logoutUseCase} from "@/lib/usecases/auth/logoutUseCase";
+import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 export default function Header() {
     const [user, setUser] = useState<ReadUserDto|null>(null);

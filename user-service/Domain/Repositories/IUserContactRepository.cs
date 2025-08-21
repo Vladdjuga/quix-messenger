@@ -24,4 +24,10 @@ public interface IUserContactRepository
         Func<IQueryable<UserContactEntity>, IQueryable<UserContactEntity>>? include = null);
     Task<UserContactEntity?> GetUserContactByUsernameAsync(Guid userId,
         string contactUsername, CancellationToken cancellationToken);
+    Task<IEnumerable<UserEntity>> SearchContactsByUsernameAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        CancellationToken cancellationToken);
 }

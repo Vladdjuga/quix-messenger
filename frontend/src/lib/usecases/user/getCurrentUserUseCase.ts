@@ -1,7 +1,8 @@
 import {api} from "@/app/api";
 import {ReadUserDto} from "@/lib/dto/ReadUserDto";
+type AxiosErrorLike = { response?: { data?: { message?: string } }; message?: string };
 
-export async function getCurrentUserUseCase() {
+export async function getCurrentUserUseCase(): Promise<ReadUserDto> {
     try {
         const response = await api.user.getCurrentUser();
         const data = response.data;
@@ -9,8 +10,9 @@ export async function getCurrentUserUseCase() {
             throw new Error('No user data received');
         }
         return data; // Return the user data for further use
-    } catch (err: any) {
-        const msg = err.response?.data?.message || err.message || "Failed to fetch current user";
+    } catch (err) {
+        const e = err as AxiosErrorLike;
+        const msg = e.response?.data?.message || e.message || "Failed to fetch current user";
         throw new Error(msg);
     }
 

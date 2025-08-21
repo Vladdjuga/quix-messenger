@@ -1,5 +1,6 @@
 ﻿using Application.Common;
 using Application.DTOs.Contact;
+using Application.UseCases.Contacts.SearchUsersContacts;
 using AutoMapper;
 using Domain.Repositories;
 using MediatR;
@@ -7,7 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Contacts.GetUsersContacts;
 
-public class GetUsersContactsHandler:IRequestHandler<GetUsersContactsQuery,Result<IEnumerable<ReadContactDto>>>
+public class GetUsersContactsHandler:
+    IRequestHandler<GetUsersContactsQuery,Result<IEnumerable<ReadContactDto>>>
 {
     private readonly IUserContactRepository _userContactRepository;
     private readonly IMapper _mapper;

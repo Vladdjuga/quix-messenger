@@ -1,5 +1,6 @@
 // lib/api/axios.ts
 import axios from "axios";
+import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 const apiClient = axios.create({
     baseURL: "/api",
@@ -9,9 +10,9 @@ const apiClient = axios.create({
 });
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: Function; reject: Function }> = [];
+let failedQueue: Array<{ resolve: (token: string | null) => void; reject: (error: unknown) => void }> = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
     failedQueue.forEach(({ resolve, reject }) => {
         if (error) reject(error);
         else resolve(token);
@@ -44,11 +45,11 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                const refreshToken = localStorage.getItem("refreshToken");
-                if (!refreshToken) throw new Error("No refresh token");
-
-                const res = await axios.post("/api/auth/refresh", { refreshToken });
+                const res = await axios.post("/api/auth/refresh", {}, { withCredentials: true });
                 const newAccessToken = res.data.accessToken;
+                if (!newAccessToken) {
+                    throw new Error("No access token received from refresh endpoint");
+                }
                 localStorage.setItem("jwt", newAccessToken);
 
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

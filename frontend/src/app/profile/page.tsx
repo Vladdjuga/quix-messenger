@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 export default function ProfilePage() {
-    const [loading, setLoading] = useState(true);
+    const [loading] = useState(true);
     const user = useCurrentUser();
 
     if (loading) {

@@ -7,6 +7,7 @@ import PasswordInput from "@/components/inputs/PasswordInput";
 import DefaultButton from "@/components/buttons/DefaultButton";
 import Link from "next/link";
 import React from "react";
+import {api} from "@/app/api";
 
 const registerSchema = z
     .object({
@@ -50,19 +51,20 @@ export default function RegisterForm() {
 
     const onSubmit = async (data: RegisterFormData) => {
         try {
-            const response = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
+            const response = await api.auth.register({
+                username: data.username,
+                email: data.email,
+                password: data.password,
+                confirmPassword: data.confirmPassword,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                dateOfBirth: new Date(data.dateOfBirth),
             });
-            if (!response.ok) {
-                const errorData = await response.json();
-                alert("Registration failed: " + errorData.message|| "An error occurred");
-                return;
+            if (response.status === 201 || response.status === 200) {
+                window.location.href = "/login"; // Redirect to login page on successful registration
+            } else {
+                alert("Registration failed. Please try again.");
             }
-            window.location.href = "/login";
         } catch (error) {
             console.error("Registration failed:", error);
             alert("Registration failed. Please try again.");

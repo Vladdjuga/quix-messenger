@@ -3,7 +3,7 @@ import {useEffect} from "react";
 
 export const useChatRoom = (
     chatId: string,
-    handleNewMessage: (msg:any) => void
+    handleNewMessage: (msg: unknown) => void
 ) => {
     const socket = useSocket();
 
@@ -15,5 +15,5 @@ export const useChatRoom = (
             socket.emit("leaveRoom", { chatId });
             socket.off("message", handleNewMessage);
         };
-    }, [chatId, socket]);
+    }, [chatId, socket, handleNewMessage]);
 };

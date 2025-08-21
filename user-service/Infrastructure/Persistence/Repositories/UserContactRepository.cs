@@ -112,4 +112,32 @@ public class UserContactRepository:IUserContactRepository
                                        el.Contact.Username == contactUsername, cancellationToken);
         return userContact;
     }
+
+    public async Task<IEnumerable<UserEntity>> SearchContactsByUsernameAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var q = _dbSet.Where(el => el.UserId == userId && el.ContactStatus == ContactStatus.Active)
+            .Include(el => el.Contact)
+            .AsQueryable();
+
+        if (lastCreatedAt is not null)
+            q = q.Where(el => el.CreatedAt < lastCreatedAt);
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var lowered = query.ToLower();
+            q = q.Where(el => el.Contact != null && el.Contact.Username.ToLower().Contains(lowered));
+        }
+
+        var contacts = await q
+            .OrderByDescending(el => el.CreatedAt)
+            .Take(pageSize)
+            .Select(el => el.Contact!)
+            .ToListAsync(cancellationToken);
+        return contacts;
+    }
 }

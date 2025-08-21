@@ -7,6 +7,7 @@ using Application.UseCases.Contacts.RequestFriendship;
 using Application.UseCases.Contacts.CreateContactByUsername;
 using Application.UseCases.Contacts.GetContact;
 using Application.UseCases.Contacts.GetUsersContacts;
+using Application.UseCases.Contacts.SearchUsersContacts;
 using Application.Utilities;
 using AutoMapper;
 using Domain.Enums;
@@ -122,7 +123,31 @@ public class ContactController:Controller
 
     [Authorize]
     [GetUserGuid]
-    [HttpPatch("changeContactStatus{contactId:guid}/{status}")]
+    [HttpGet("searchContacts")]
+    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
+        BadRequest<string>,UnauthorizedHttpResult>> SearchContacts(
+        [FromQuery] string query,
+        [FromQuery] int pageSize,
+        [FromQuery] DateTime? lastCreatedAt)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        var q = new SearchUsersContactsQuery(userGuid, query, lastCreatedAt, pageSize);
+        _logger.LogInformation("Searching contacts for {UserId}", userGuid);
+        var result = await _mediator.Send(q);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error searching contacts for {UserId}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
+        _logger.LogInformation("Retrieved searched contacts for {UserId}", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
+
+    [Authorize]
+    [GetUserGuid]
+    [HttpPatch("changeContactStatus/{contactId:guid}/{status}")]
     public async Task<Results<Ok, BadRequest<string>,
         UnauthorizedHttpResult>> ChangeContactStatus(Guid contactId,
         ContactStatus status)

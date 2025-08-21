@@ -1,10 +1,11 @@
 import { io, Socket } from "socket.io-client";
+import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 let socket: Socket | null = null;
 
 export const initSocket = () => {
     if (!socket) {
-        const token = localStorage.getItem("jwt") || "";
+        const token = localStorage.getItem("jwt");
         socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
             auth: { token },
             autoConnect: true,
