@@ -9,7 +9,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const response = await fetch(`${BASE_URL}/refresh`, {
+        const response = await fetch(`${BASE_URL}/Auth/refresh`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

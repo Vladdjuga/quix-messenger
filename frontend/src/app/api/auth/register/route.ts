@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         console.log('Request body:', body);
         
         console.log('Making request to:', `${BASE_URL}/register`);
-        const response = await fetch(`${BASE_URL}/register`, {
+        const response = await fetch(`${BASE_URL}/Auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
