@@ -5,7 +5,9 @@ namespace Domain.Repositories;
 
 public interface IUserContactRepository
 {
-    Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id, CancellationToken cancellationToken);
+    Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id,
+        DateTime? lastCreatedAt, int pageSize,
+        CancellationToken cancellationToken);
     Task<UserContactEntity?> GetUserContactAsync(Guid userId, Guid contactId,
         CancellationToken cancellationToken);
     Task<UserContactEntity?> GetUserContactAsync(Guid userId, Guid contactId,
@@ -20,4 +22,6 @@ public interface IUserContactRepository
         CancellationToken cancellationToken);
     Task<UserContactEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken,
         Func<IQueryable<UserContactEntity>, IQueryable<UserContactEntity>>? include = null);
+    Task<UserContactEntity?> GetUserContactByUsernameAsync(Guid userId,
+        string contactUsername, CancellationToken cancellationToken);
 }

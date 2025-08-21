@@ -2,6 +2,7 @@
 
 public enum ContactStatus
 {
+    Pending,
     Active,
     Blocked,
     Archived

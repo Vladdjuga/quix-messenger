@@ -16,9 +16,16 @@ public class UserContactRepository:IUserContactRepository
         _dbContext = dbContext;
         _dbSet = _dbContext.Set<UserContactEntity>();
     }
-    public async Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id,
+        DateTime? lastCreatedAt, int pageSize,
+        CancellationToken cancellationToken)
     {
-        var contacts = await _dbSet.Where(el => el.UserId == id)
+        var contacts = await _dbSet.Where(
+                el => el.UserId == id && el.ContactStatus == ContactStatus.Active
+                    && (lastCreatedAt == null || el.CreatedAt < lastCreatedAt)
+                )
+            .OrderByDescending(el => el.CreatedAt)
+            .Take(pageSize)
             .Include(el=>el.Contact)
             .Select(el => el.Contact).ToListAsync(cancellationToken);
         return contacts;
@@ -94,6 +101,15 @@ public class UserContactRepository:IUserContactRepository
             query = include(query);
         var userContact = await query.FirstOrDefaultAsync(cancellationToken)??
                           throw new ApplicationException("Entity not found");
+        return userContact;
+    }
+
+    public async Task<UserContactEntity?> GetUserContactByUsernameAsync(Guid userId, string contactUsername, CancellationToken cancellationToken)
+    {
+        var userContact = await _dbSet.Where(el => el.UserId == userId)
+            .Include(el => el.Contact)
+            .FirstOrDefaultAsync(el => el.Contact != null && 
+                                       el.Contact.Username == contactUsername, cancellationToken);
         return userContact;
     }
 }

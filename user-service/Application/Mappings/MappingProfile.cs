@@ -30,10 +30,7 @@ public class MappingProfile:Profile
             .ForMember(dest=>dest.IsPrivate,opt=>opt.MapFrom(src=>src.Chat.IsPrivate));
         //Make sure to Include Contacts when mapping this
         CreateMap<UserContactEntity, ReadContactDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ContactId))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.ContactStatus))
-            .ForMember(dest => dest.PrivateChatId, opt => opt.MapFrom(src => src.PrivateChatId))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Contact.Email))
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Contact.Username))
             .ForMember(dest => dest.DateOfBirth, opt => opt.MapFrom(src => src.Contact.DateOfBirth));

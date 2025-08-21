@@ -20,7 +20,10 @@ public class GetUsersContactsHandler:IRequestHandler<GetUsersContactsQuery,Resul
     public async Task<Result<IEnumerable<ReadContactDto>>> Handle(GetUsersContactsQuery request, CancellationToken cancellationToken)
     {
         var userContacts=await _userContactRepository
-            .GetAllUsersContactsAsync(request.UserId,cancellationToken);
+            .GetAllUsersContactsAsync(request.UserId,
+                request.LastCreatedAt,
+                request.PageSize,
+                cancellationToken);
         return !userContacts.Any() ?
             Result<IEnumerable<ReadContactDto>>.Failure("User contact not found") : 
             Result<IEnumerable<ReadContactDto>>.Success(_mapper.Map<IEnumerable<ReadContactDto>>(userContacts));

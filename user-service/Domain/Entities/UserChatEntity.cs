@@ -5,7 +5,7 @@ namespace Domain.Entities;
 public class UserChatEntity
 {
     public Guid UserId { get; init; }
-    public Guid ChatId { get; init; }
+    public Guid ChatId { get; set; }
     
     public virtual UserEntity? User { get; init; }
     public virtual ChatEntity? Chat { get; init; }

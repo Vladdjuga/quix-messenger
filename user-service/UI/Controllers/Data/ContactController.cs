@@ -1,7 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using Application.DTOs.Contact;
 using Application.UseCases.Contacts.ChangeContactStatus;
+using Application.UseCases.Contacts.AcceptFriendship;
 using Application.UseCases.Contacts.CreateContact;
+using Application.UseCases.Contacts.RequestFriendship;
+using Application.UseCases.Contacts.CreateContactByUsername;
 using Application.UseCases.Contacts.GetContact;
 using Application.UseCases.Contacts.GetUsersContacts;
 using Application.Utilities;
@@ -33,25 +36,24 @@ public class ContactController:Controller
 
     [Authorize]
     [GetUserGuid]
-    [HttpPost("addContact/{contactId:guid}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,UnauthorizedHttpResult>> CreateContactById(Guid contactId)
+    [HttpPost("acceptFriendship/{contactId:guid}")]
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,
+        UnauthorizedHttpResult>> AcceptFriendship(
+        Guid contactId)
     {
         var userGuid = HttpContext.GetUserGuid();
         
-        var command = new CreateContactCommand(
-            userGuid,
-            contactId
-        );
-        _logger.LogInformation("Creating contact {ContactId}", contactId);
+        var command = new AcceptFriendshipCommand(userGuid, contactId);
+        _logger.LogInformation("Accepting friendship {ContactId}", contactId);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to create contact for {UserId} and {ContactId}",
+            _logger.LogError("Failed to accept friendship for {UserId} and {ContactId}",
                 userGuid, contactId);
             _logger.LogError("Error: {Error}", result.Error);
             return TypedResults.BadRequest(result.Error);
         }
-        _logger.LogInformation("Created contact {ContactId}", contactId);
+        _logger.LogInformation("Accepted friendship {ContactId}", contactId);
         return TypedResults.Ok(result.Value);
     }
     [Authorize]
@@ -94,11 +96,35 @@ public class ContactController:Controller
         _logger.LogInformation("Retrieved contacts for {UserId}", userGuid);
         return TypedResults.Ok(result.Value);
     }
+    
+    [Authorize]
+    [GetUserGuid]
+    [HttpGet("getContacts")]
+    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
+        BadRequest<string>,UnauthorizedHttpResult>> GetContacts(
+        [FromQuery] int pageSize,
+        [FromQuery] DateTime? lastCreatedAt)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        var query = new GetUsersContactsQuery(userGuid, lastCreatedAt, pageSize);
+        _logger.LogInformation("Getting contacts for {UserId}", userGuid);
+        var result = await _mediator.Send(query);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error getting contacts for {UserId}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
+        _logger.LogInformation("Retrieved contacts for {UserId}", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
 
     [Authorize]
     [GetUserGuid]
     [HttpPatch("changeContactStatus{contactId:guid}/{status}")]
-    public async Task<Results<Ok, BadRequest<string>,UnauthorizedHttpResult>> ChangeContactStatus(Guid contactId,
+    public async Task<Results<Ok, BadRequest<string>,
+        UnauthorizedHttpResult>> ChangeContactStatus(Guid contactId,
         ContactStatus status)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -118,5 +144,27 @@ public class ContactController:Controller
         }
         _logger.LogInformation("Successfully changed contact status to {Status}", status);
         return TypedResults.Ok();
+    }
+    [Authorize]
+    [GetUserGuid]
+    [HttpPost("requestFriendship/{username}")]
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,
+        UnauthorizedHttpResult>> RequestFriendship(
+        string username
+        )
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        _logger.LogInformation("Requesting friendship by username {Username}", username);
+        var command = new RequestFriendshipCommand(userGuid, username);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to request friendship for {Username}", username);
+            _logger.LogError("Error: {Error}", result.Error);
+            return TypedResults.BadRequest(result.Error);
+        }
+        _logger.LogInformation("Friendship request created for {Username}", username);
+        return TypedResults.Ok(result.Value);
     }
 }
