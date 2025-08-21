@@ -1,25 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getCurrentUserUseCase } from "@/lib/usecases/user/getCurrentUserUseCase";
-import {ReadUserDto} from "@/lib/dto/ReadUserDto";
+import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 export default function ProfilePage() {
-    const [user, setUser] = useState<ReadUserDto|null>(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const currentUser = await getCurrentUserUseCase();
-                setUser(currentUser);
-            } catch (error) {
-                console.error("Failed to fetch user:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchUser();
-    }, []);
+    const user = useCurrentUser();
 
     if (loading) {
         return (
