@@ -9,7 +9,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const response = await fetch(`$${BASE_URL}/Auth/logout`, {
+        const response = await fetch(`${BASE_URL}/Auth/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -29,6 +29,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Logout successful' });
     } catch (err) {
         console.error(err);
-        return NextResponse.json({ message: 'Server error' }, { status: 500 });
+        return NextResponse.json({ message: 'Server error', status: 500 });
     }
 } 

@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 export default function ProfilePage() {
-    const [loading] = useState(true);
-    const user = useCurrentUser();
+    const { user, loading } = useCurrentUser();
 
     if (loading) {
         return (
@@ -14,13 +12,9 @@ export default function ProfilePage() {
             </div>
         );
     }
-
     if (!user) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <h1 className="text-2xl text-gray-700">You are not logged in.</h1>
-            </div>
-        );
+        window.location.href = "/login";
+        return null;
     }
 
     return (

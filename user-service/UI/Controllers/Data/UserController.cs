@@ -121,6 +121,7 @@ public class UserController : Controller
         }
 
         _logger.LogInformation("User {Guid} found", userGuid);
+        
         return TypedResults.Ok(result.Value);
     }
 

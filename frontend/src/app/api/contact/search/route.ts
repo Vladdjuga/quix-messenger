@@ -26,6 +26,7 @@ export async function POST(req: Request) {
         const response = await fetch(backendUrl, {
             method: 'GET',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': authorizationHeader,
             },
         });

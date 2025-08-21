@@ -3,11 +3,14 @@ import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 let socket: Socket | null = null;
 
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+
 export const initSocket = () => {
     if (!socket) {
         const token = localStorage.getItem("jwt");
-        socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+        socket = io(SOCKET_URL, {
             auth: { token },
+            transports: ["websocket"],
             autoConnect: true,
         });
 

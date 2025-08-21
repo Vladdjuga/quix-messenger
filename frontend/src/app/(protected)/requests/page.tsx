@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { api } from "@/app/api";
 import { ReadContactDto } from "@/lib/dto/ReadContactDto";
 
+const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
+
 export default function RequestsPage() {
     const [items, setItems] = useState<ReadContactDto[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -13,7 +15,7 @@ export default function RequestsPage() {
         (async () => {
             setLoading(true);
             try {
-                const { data } = await api.contact.searchByUsernamePaged("", 50);
+                const { data } = await api.contact.searchByUsernamePaged("", PAGE_SIZE);
                 const list: ReadContactDto[] = Array.isArray(data) ? (data as ReadContactDto[]) : [];
                 setItems(list.filter((x) => x.status === "Pending"));
             } catch (e) {
@@ -29,7 +31,7 @@ export default function RequestsPage() {
         <div className="p-6 max-w-2xl mx-auto space-y-4">
             <h1 className="text-2xl font-semibold">Friend requests</h1>
             {loading && <p>Loading...</p>}
-            {error && <p className="text-red-600">{String(error)}</p>}
+            {error && <p className="text-red-600">{error}</p>}
             <ul className="divide-y">
                 {items.map((c) => (
                     <li key={c.id} className="py-3 flex items-center justify-between">

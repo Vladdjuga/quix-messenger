@@ -46,7 +46,7 @@ apiClient.interceptors.response.use(
 
             try {
                 const res = await axios.post("/api/auth/refresh", {}, { withCredentials: true });
-                const newAccessToken = res.data.accessToken;
+                const newAccessToken = res.data.token;
                 if (!newAccessToken) {
                     throw new Error("No access token received from refresh endpoint");
                 }

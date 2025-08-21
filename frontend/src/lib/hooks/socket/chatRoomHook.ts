@@ -8,6 +8,10 @@ export const useChatRoom = (
     const socket = useSocket();
 
     useEffect(() => {
+        if(!socket) {
+            console.error("Socket is not initialized");
+            return;
+        }
         socket.emit("joinRoom", { chatId });
         socket.on("newMessage", handleNewMessage);
 
