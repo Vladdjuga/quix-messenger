@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+using Application.DTOs;
 using Application.UseCases.Messages;
 using Application.UseCases.Messages.Commands;
 using Application.UseCases.Messages.Queries;
@@ -8,6 +8,8 @@ using Domain.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using UI.Common;
+using Application.Common;
 
 namespace UI.Endpoints;
 
@@ -29,7 +31,7 @@ public class MessageEndpoints:ICarterModule
     /// <param name="mediator">This is a mediator that will be injected using DI</param>
     /// <param name="logger">This is a logger that will be injected using DI</param>
     /// <returns>Guid or bad request if exception was thrown</returns>
-    private static async Task<Results<Ok<Guid>,BadRequest<string>>> AddMessage(
+    private static async Task<Results<Ok<Guid>,BadRequest<ErrorResponse>>> AddMessage(
         [FromBody] CreateMessageRequest request,
         IMediator mediator,
         ILogger<MessageEndpoints> logger)
@@ -48,7 +50,7 @@ public class MessageEndpoints:ICarterModule
             if (result.IsFailure)
             {
                 logger.LogError(result.Error, "Failed to create message.");
-                return TypedResults.BadRequest(result.Error);
+                return ErrorResult.Create(result.Error);
             }
             logger.LogInformation("Message {id} created by {UserId}.", result.Value, request.UserId);
             return TypedResults.Ok(result.Value);
@@ -56,7 +58,7 @@ public class MessageEndpoints:ICarterModule
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create message. Error : {ErrorMessage}", ex.Message);
-            return TypedResults.BadRequest("Failed to create message.");
+            return ErrorResult.Create("Failed to create message.");
         }
     }
     /// <summary>
@@ -66,7 +68,7 @@ public class MessageEndpoints:ICarterModule
     /// <param name="mediator">This is a mediator that will be injected using DI</param>
     /// <param name="logger">This is a logger that will be injected using DI</param>
     /// <returns>ReadMessageDto`s or bad request if exception was thrown</returns>
-    private static async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<string>>> GetMessages(
+    private static async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>>> GetMessages(
         [AsParameters] GetMessagesRequest request
         , IMediator mediator,
         ILogger<MessageEndpoints> logger)
@@ -84,7 +86,7 @@ public class MessageEndpoints:ICarterModule
             if (result.IsFailure)
             {
                 logger.LogError(result.Error,"Failed to query messages.");
-                return TypedResults.BadRequest(result.Error);
+                return ErrorResult.Create(result.Error);
             }
             logger.LogInformation("Queried {Count} were returned to {UserId}.",request.Count, request.UserId);
             return TypedResults.Ok(result.Value);
@@ -92,7 +94,7 @@ public class MessageEndpoints:ICarterModule
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to get messages. Error : {ErrorMessage}", ex.Message);
-            return TypedResults.BadRequest("Failed to get messages");
+            return ErrorResult.Create("Failed to get messages");
         }
     }
 }

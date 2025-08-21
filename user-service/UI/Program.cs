@@ -41,22 +41,19 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidIssuer = config["JwtSettings:Issuer"],
-                ValidAudiences = config.GetSection("JwtSettings:Audiences")
-                    .Get<List<string>>(),
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateIssuerSigningKey = true,
-                ValidateLifetime = true
-            };
-            options.MapInboundClaims = false;
-        }
-    );
+            ValidIssuer = config["JwtSettings:Issuer"],
+            ValidAudiences = config.GetSection("JwtSettings:Audiences").Get<List<string>>(),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
+            ValidateIssuer = true,
+            ValidateAudience = false, // Do not validate audience
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true // Standard JWT lifetime validation
+        };
+        options.MapInboundClaims = false;
+    });
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug() 
     .WriteTo.Console() 
@@ -66,6 +63,7 @@ builder.Host.UseSerilog();
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

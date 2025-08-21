@@ -15,7 +15,7 @@ export default function FriendsSearchPage() {
     const [hasMore, setHasMore] = useState(false);
     const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>();
 
-    const fetchContacts = async (append = false) => {
+    async function fetchContacts(append = false) {
         if (!query) {
             setResults([]);
             setHasMore(false);
@@ -40,8 +40,17 @@ export default function FriendsSearchPage() {
             const lastItem = data.at(-1);
             setLastCreatedAt(lastItem?.createdAt ? new Date(lastItem.createdAt).toISOString() : undefined);
         } catch (e) {
-            const err = e as { response?: { data?: string } };
-            setError(err.response?.data ?? "Failed to load contacts");
+            const err = e as { response?: { data?: { message?: string } | string } };
+            let msg = "Failed to load contacts";
+            const data = err.response?.data;
+            if (data) {
+                if (typeof data === "string") {
+                    msg = data;
+                } else if (typeof data === "object" && typeof data.message === "string") {
+                    msg = data.message;
+                }
+            }
+            setError(msg);
         } finally {
             setIsLoading(false);
         }

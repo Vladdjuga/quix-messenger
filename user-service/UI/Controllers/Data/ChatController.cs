@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using Application.Common;
 using Application.DTOs.Chat;
 using Application.UseCases.Chats.AddUserToChat;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using UI.Attributes;
 using UI.Utilities;
+using UI.Common;
 
 namespace UI.Controllers.Data;
 
@@ -32,7 +33,7 @@ public class ChatController:Controller
     [GetUserGuid]
     [HttpGet("getChats")]
     public async Task<Results<Ok<IEnumerable<ReadChatDto>>,
-        BadRequest<string>,UnauthorizedHttpResult>> GetChats()
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetChats()
     {
         var userId = HttpContext.GetUserGuid();
 
@@ -43,7 +44,7 @@ public class ChatController:Controller
         {
             _logger.LogError("User {Username} failed to get chats", userId);
             _logger.LogError("Error : {Message}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("User {Username} gets the chats", userId);
         return TypedResults.Ok(result.Value);
@@ -52,7 +53,7 @@ public class ChatController:Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost("addChat")]
-    public async Task<Results<Ok<ReadChatDto>,BadRequest<string>,NotFound<string>,UnauthorizedHttpResult>> AddChat([FromBody] CreateChatDto createChatDto)
+    public async Task<Results<Ok<ReadChatDto>,BadRequest<ErrorResponse>,NotFound<string>,UnauthorizedHttpResult>> AddChat([FromBody] CreateChatDto createChatDto)
     {
         var userGuid = HttpContext.GetUserGuid();
         
@@ -67,7 +68,7 @@ public class ChatController:Controller
         {
             _logger.LogError("User {Username} failed to create chat", userGuid);
             _logger.LogError("Error : {Message}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("User {Username} added chat", userGuid);
         return TypedResults.Ok(result.Value);
@@ -75,7 +76,7 @@ public class ChatController:Controller
 
     [Authorize]
     [HttpPost("addUserToChat")]
-    public async Task<Results<Ok, BadRequest<string>>> AddUserToChat([FromBody] AddUserToChatDto addUserToChatDto)
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> AddUserToChat([FromBody] AddUserToChatDto addUserToChatDto)
     {
         var command = new AddUserToChatCommand(
             addUserToChatDto.ChatId,
@@ -90,7 +91,7 @@ public class ChatController:Controller
             _logger.LogError("Error while adding user {UserId} to chat {ChatId}",
                 addUserToChatDto.UserId, addUserToChatDto.ChatId);
             _logger.LogError("Error : {Message}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Added user {UserId} to chat {ChatId}",
             addUserToChatDto.UserId, addUserToChatDto.ChatId);

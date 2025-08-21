@@ -1,4 +1,5 @@
-﻿using Application.DTOs.User;
+using Application.Common;
+using Application.DTOs.User;
 using Application.UseCases.Users.Auth;
 using Application.UseCases.Users.Auth.InvalidateToken;
 using Application.UseCases.Users.Auth.Login;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using UI.Attributes;
 using UI.Utilities;
+using UI.Common;
 
 namespace UI.Controllers.Auth;
 
@@ -38,7 +40,7 @@ public class AuthController : Controller
     /// <param name="loginDto">This is login information.</param>
     /// <returns>Will return a generated JWT token or bad request if the exception was thrown.</returns>
     [HttpPost("login")]
-    public async Task<Results<Ok<string>, BadRequest<string>>> Login([FromBody] LoginUserDto loginDto)
+    public async Task<Results<Ok<string>, BadRequest<ErrorResponse>>> Login([FromBody] LoginUserDto loginDto)
     {
         var command = new LoginUserCommand(
             Identity: loginDto.Identity,
@@ -50,7 +52,7 @@ public class AuthController : Controller
         {
             _logger.LogError("Failure while login user {User}.", loginDto.Identity);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         var dto=result.Value;
         _logger.LogInformation("Login User: {Identity}", loginDto.Identity);
@@ -72,7 +74,7 @@ public class AuthController : Controller
     /// <param name="registerDto">This is a registration information.</param>
     /// <returns>Will return a newly added users Guid key or bad request if the exception was thrown.</returns>
     [HttpPost("register")]
-    public async Task<Results<Ok<Guid>, BadRequest<string>>> Register([FromBody] RegisterUserDto registerDto)
+    public async Task<Results<Ok<Guid>, BadRequest<ErrorResponse>>> Register([FromBody] RegisterUserDto registerDto)
     {
         var command = new RegisterUserCommand(
             Username: registerDto.Username,
@@ -89,7 +91,7 @@ public class AuthController : Controller
         {
             _logger.LogError("Failure while registering user {Username} - {Email}", registerDto.Username, registerDto.Email);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Registered User: {Username} - {Email}", registerDto.Username, registerDto.Email);
         return TypedResults.Ok(result.Value);
@@ -103,7 +105,7 @@ public class AuthController : Controller
     [Authorize]
     [GetSessionGuid]
     [HttpPost("logout")]
-    public async Task<Results<Ok, BadRequest<string>>> Logout()
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> Logout()
     {
         var sessionGuid = HttpContext.GetSessionGuid();
         
@@ -116,7 +118,7 @@ public class AuthController : Controller
         if (result.IsFailure)
         {
             _logger.LogError("Failure while logging out user. Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         Response.Cookies.Delete("refreshToken");
         _logger.LogInformation("User logged out successfully. Session ID: {SessionId}", sessionGuid);
@@ -132,14 +134,14 @@ public class AuthController : Controller
     [Authorize]
     [GetSessionGuid]
     [HttpPost("refresh")]
-    public async Task<Results<Ok<string>, BadRequest<string>>> RefreshToken()
+    public async Task<Results<Ok<string>, BadRequest<ErrorResponse>>> RefreshToken()
     {
         _logger.LogInformation("Starting to refresh token.");
         var refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
         {
             _logger.LogError("Refresh token is missing.");
-            return TypedResults.BadRequest("Refresh token is missing.");
+            return ErrorResult.Create("Refresh token is missing.");
         }
         // Check if the session ID is present in HttpContext items
         var sessionGuid = HttpContext.GetSessionGuid();
@@ -149,7 +151,7 @@ public class AuthController : Controller
         if (result.IsFailure)
         {
             _logger.LogError("Failure while refreshing token. Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         
         var dto = result.Value;

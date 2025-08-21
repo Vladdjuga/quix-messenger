@@ -1,4 +1,5 @@
 import {NextResponse} from 'next/server'
+import { safeParseJSON } from '@/lib/utils'
 
 const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
@@ -30,8 +31,8 @@ export async function POST(req: Request) {
             return new NextResponse(null, { status: response.status });
         }
 
-        const data = await response.json();
-        return NextResponse.json(data, { status: response.status });
+    const data = await safeParseJSON(response);
+    return NextResponse.json(data, { status: response.status });
 
     } catch (error) {
         console.error('Error accepting friendship:', error);

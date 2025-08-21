@@ -1,5 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Application.Common;
 using Application.DTOs.User;
 using Application.Interfaces.DTOs;
 using Application.UseCases.Users.Data;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using UI.Attributes;
 using UI.Utilities;
+using UI.Common;
 
 namespace UI.Controllers.Data;
 
@@ -52,7 +54,7 @@ public class UserController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("getUserInfo/{username}")]
-    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<string>>> GetUserInfo(
+    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetUserInfo(
         string username)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -67,7 +69,7 @@ public class UserController : Controller
         {
             _logger.LogError("Failed to get user info for {Username}", username);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
 
         _logger.LogInformation("User {Username} found", username);
@@ -82,7 +84,7 @@ public class UserController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpPatch("updateUserInfo")]
-    public async Task<Results<Ok<ReadUserDto>, BadRequest<string>>> UpdateUserInfo(
+    public async Task<Results<Ok<ReadUserDto>, BadRequest<ErrorResponse>>> UpdateUserInfo(
         UpdateUserDto userDto)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -94,7 +96,7 @@ public class UserController : Controller
         {
             _logger.LogError("Failed to update user info for {Username}", userDto.Username);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("User {Username} updated", userDto.Username);
         return TypedResults.Ok(result.Value);
@@ -103,7 +105,7 @@ public class UserController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("getMeInfo")]
-    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<string>>> GetMeInfo()
+    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetMeInfo()
     {
         var userGuid = HttpContext.GetUserGuid();
 
@@ -117,7 +119,7 @@ public class UserController : Controller
         {
             _logger.LogError("Failed to get user info for {Guid}", userGuid);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
 
         _logger.LogInformation("User {Guid} found", userGuid);

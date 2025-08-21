@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
+using Application.Common;
 using Application.DTOs.Contact;
 using Application.UseCases.Contacts.ChangeContactStatus;
 using Application.UseCases.Contacts.AcceptFriendship;
@@ -20,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using UI.Attributes;
 using UI.Utilities;
+using UI.Common;
 
 namespace UI.Controllers.Data;
 
@@ -38,7 +40,7 @@ public class ContactController:Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost("acceptFriendship/{contactId:guid}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<ErrorResponse>,
         UnauthorizedHttpResult>> AcceptFriendship(
         Guid contactId)
     {
@@ -52,7 +54,7 @@ public class ContactController:Controller
             _logger.LogError("Failed to accept friendship for {UserId} and {ContactId}",
                 userGuid, contactId);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Accepted friendship {ContactId}", contactId);
         return TypedResults.Ok(result.Value);
@@ -60,7 +62,7 @@ public class ContactController:Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("getContact/{contactId:guid}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,UnauthorizedHttpResult>> GetContactById(
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetContactById(
         Guid contactId)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -72,7 +74,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Error getting contact {ContactId}", contactId);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Retrieved contact {ContactId}", contactId);
         return TypedResults.Ok(result.Value);
@@ -81,7 +83,7 @@ public class ContactController:Controller
     [GetUserGuid]
     [HttpGet("getContacts")]
     public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
-        BadRequest<string>,UnauthorizedHttpResult>> GetContacts()
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetContacts()
     {
         var userGuid = HttpContext.GetUserGuid();
 
@@ -92,7 +94,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Error getting contacts for {UserId}", userGuid);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Retrieved contacts for {UserId}", userGuid);
         return TypedResults.Ok(result.Value);
@@ -102,7 +104,7 @@ public class ContactController:Controller
     [GetUserGuid]
     [HttpGet("getContacts")]
     public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
-        BadRequest<string>,UnauthorizedHttpResult>> GetContacts(
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetContacts(
         [FromQuery] int pageSize,
         [FromQuery] DateTime? lastCreatedAt)
     {
@@ -115,7 +117,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Error getting contacts for {UserId}", userGuid);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Retrieved contacts for {UserId}", userGuid);
         return TypedResults.Ok(result.Value);
@@ -125,7 +127,7 @@ public class ContactController:Controller
     [GetUserGuid]
     [HttpGet("searchContacts")]
     public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
-        BadRequest<string>,UnauthorizedHttpResult>> SearchContacts(
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> SearchContacts(
         [FromQuery] string query,
         [FromQuery] int pageSize,
         [FromQuery] DateTime? lastCreatedAt)
@@ -139,7 +141,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Error searching contacts for {UserId}", userGuid);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Retrieved searched contacts for {UserId}", userGuid);
         return TypedResults.Ok(result.Value);
@@ -148,7 +150,7 @@ public class ContactController:Controller
     [Authorize]
     [GetUserGuid]
     [HttpPatch("changeContactStatus/{contactId:guid}/{status}")]
-    public async Task<Results<Ok, BadRequest<string>,
+    public async Task<Results<Ok, BadRequest<ErrorResponse>,
         UnauthorizedHttpResult>> ChangeContactStatus(Guid contactId,
         ContactStatus status)
     {
@@ -165,7 +167,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Error changing status for contact : {ContactId}", contactId);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Successfully changed contact status to {Status}", status);
         return TypedResults.Ok();
@@ -173,7 +175,7 @@ public class ContactController:Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost("requestFriendship/{username}")]
-    public async Task<Results<Ok<ReadContactDto>,BadRequest<string>,
+    public async Task<Results<Ok<ReadContactDto>,BadRequest<ErrorResponse>,
         UnauthorizedHttpResult>> RequestFriendship(
         string username
         )
@@ -187,7 +189,7 @@ public class ContactController:Controller
         {
             _logger.LogError("Failed to request friendship for {Username}", username);
             _logger.LogError("Error: {Error}", result.Error);
-            return TypedResults.BadRequest(result.Error);
+            return ErrorResult.Create(result.Error);
         }
         _logger.LogInformation("Friendship request created for {Username}", username);
         return TypedResults.Ok(result.Value);

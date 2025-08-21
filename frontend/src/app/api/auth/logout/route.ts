@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { safeParseJSON } from '@/lib/utils'
 
 const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await safeParseJSON(response);
             return NextResponse.json(errorData, { status: response.status });
         }
         // Optionally clear client-side JWT storage

@@ -18,12 +18,14 @@ export const api = {
             apiClient.get<ReadUserDto>('/user/getCurrentUser'),
     },
     contact: {
-        searchByUsernamePaged: (query: string, pageSize: number, lastCreatedAt?: string) =>
-            apiClient.post<ReadContactDto[]>('/contact/search', {
+        searchByUsernamePaged: (query: string, pageSize: number, lastCreatedAt?: string) => {
+            const params = new URLSearchParams({
                 query,
-                pageSize,
-                lastCreatedAt,
-            }),
+                pageSize: pageSize.toString(),
+            });
+            if (lastCreatedAt) params.append('lastCreatedAt', lastCreatedAt);
+            return apiClient.get<ReadContactDto[]>(`/contact/search?${params.toString()}`);
+        },
         requestFriendship: (username: string) =>
             apiClient.post<ReadContactDto>('/contact/requestFriendship', { username }),
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { safeParseJSON } from '@/lib/utils'
 
 const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
@@ -17,7 +18,7 @@ export async function POST(req: Request) {
         });
         
         console.log('Response status:', response.status);
-        const data = await response.json();
+        const data = await safeParseJSON(response);
         console.log('Response data:', data);
         
         if (!response.ok) {

@@ -17,11 +17,23 @@ export async function GET(req: Request) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            let errorData;
+            try {
+                const text = await response.text();
+                errorData = text ? JSON.parse(text) : { message: 'Unknown error' };
+            } catch {
+                errorData = { message: 'Invalid error response' };
+            }
             return NextResponse.json(errorData, { status: response.status });
         }
 
-        const data = await response.json();
+        let data;
+        try {
+            const text = await response.text();
+            data = text ? JSON.parse(text) : {};
+    } catch {
+            data = { message: 'Invalid JSON response' };
+        }
         return NextResponse.json(data);
     } catch (error) {
         console.error('Error fetching current user:', error);
