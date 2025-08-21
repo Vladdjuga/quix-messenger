@@ -110,6 +110,22 @@ export default function Header() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link
+                                        href="/friends"
+                                        className="transition-colors hover:text-black duration-300"
+                                    >
+                                        Friends
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href="/requests"
+                                        className="transition-colors hover:text-black duration-300"
+                                    >
+                                        Requests
+                                    </Link>
+                                </li>
+                                <li>
                                     <button
                                         onClick={handleLogout}
                                         className="transition-colors hover:text-black duration-300"
