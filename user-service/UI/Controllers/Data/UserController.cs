@@ -6,6 +6,7 @@ using Application.Interfaces.DTOs;
 using Application.UseCases.Users.Data;
 using Application.UseCases.Users.Data.GetUser;
 using Application.UseCases.Users.Data.UpdateUser;
+using Application.UseCases.Users.SearchUsers;
 using Application.Utilities;
 using AutoMapper;
 using Domain.Repositories;
@@ -124,6 +125,45 @@ public class UserController : Controller
 
         _logger.LogInformation("User {Guid} found", userGuid);
         
+        return TypedResults.Ok(result.Value);
+    }
+
+    /// <summary>
+    /// Search for users by username. This is for finding new people to add as contacts.
+    /// </summary>
+    /// <param name="query">The search query (username partial match)</param>
+    /// <param name="pageSize">Number of results to return</param>
+    /// <param name="lastCreatedAt">Cursor for pagination</param>
+    /// <returns>List of users matching the search criteria</returns>
+    [Authorize]
+    [GetUserGuid]
+    [HttpGet("search")]
+    public async Task<Results<Ok<IEnumerable<ReadUserDto>>, 
+        BadRequest<ErrorResponse>, UnauthorizedHttpResult>> SearchUsers(
+        [FromQuery] string query,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] DateTime? lastCreatedAt = null)
+    {
+        var currentUserId = HttpContext.GetUserGuid();
+        
+        var searchQuery = new SearchUsersQuery(
+            query.Trim(),
+            lastCreatedAt,
+            pageSize,
+            currentUserId);
+            
+        _logger.LogInformation("Searching users with query: {Query}, pageSize: {PageSize}, excludeUserId: {ExcludeUserId}", 
+            query, pageSize, currentUserId);
+        var result = await _mediator.Send(searchQuery);
+        
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to search users with query: {Query}", query);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+
+        _logger.LogInformation("Found {Count} users for query: {Query} (excluding current user)", result.Value.Count(), query);
         return TypedResults.Ok(result.Value);
     }
 

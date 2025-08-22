@@ -12,4 +12,10 @@ public interface IUserRepository
     Task AddAsync(UserEntity entity,CancellationToken cancellationToken);
     Task UpdateAsync(UserEntity entity,CancellationToken cancellationToken);
     Task DeleteAsync(Guid id,CancellationToken cancellationToken);
+    Task<IEnumerable<UserEntity>> SearchUsersByUsernameAsync(
+        string query, 
+        DateTime? lastCreatedAt, 
+        int pageSize, 
+        CancellationToken cancellationToken,
+        Guid? excludeUserId = null);
 }

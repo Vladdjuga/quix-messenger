@@ -68,4 +68,29 @@ public sealed class UserRepository : IUserRepository
         _dbContext.Entry(existingEntity).Property(x => x.CreatedAt).IsModified = false;
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<UserEntity>> SearchUsersByUsernameAsync(
+        string query, 
+        DateTime? lastCreatedAt, 
+        int pageSize, 
+        CancellationToken cancellationToken,
+        Guid? excludeUserId = null)
+    {
+        var searchQuery = _dbSet.AsNoTracking()
+            .Where(u => string.IsNullOrEmpty(query) 
+                        || EF.Functions.Like(u.Username.ToLower(), $"%{query}%"));
+
+        // Exclude the current user from search results
+        if (excludeUserId.HasValue)
+            searchQuery = searchQuery.Where(u => u.Id != excludeUserId.Value);
+
+        // Add pagination using cursor-based approach
+        if (lastCreatedAt.HasValue)
+            searchQuery = searchQuery.Where(u => u.CreatedAt < lastCreatedAt.Value);
+
+        return await searchQuery
+            .OrderByDescending(u => u.CreatedAt)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
 }
