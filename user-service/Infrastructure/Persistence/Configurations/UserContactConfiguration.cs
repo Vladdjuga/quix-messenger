@@ -27,7 +27,7 @@ public class UserContactConfiguration : IEntityTypeConfiguration<UserContactEnti
             .WithMany()
             .HasForeignKey(x => x.PrivateChatId)
             .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
+            .IsRequired(false);
         builder.Property(x => x.CreatedAt)
             .ValueGeneratedOnAdd()
             .HasColumnType("timestamp with time zone")

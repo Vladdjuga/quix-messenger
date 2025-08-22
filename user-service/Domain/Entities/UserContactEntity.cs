@@ -15,6 +15,6 @@ public class UserContactEntity
     public required ContactStatus ContactStatus { get; set; }
     public required DateTime CreatedAt { get; init; }
     
-    public required Guid PrivateChatId { get; set; }
+    public Guid? PrivateChatId { get; set; }
     public virtual ChatEntity? PrivateChat { get; init; }
 }

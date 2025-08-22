@@ -50,7 +50,7 @@ public class RequestFriendshipHandler
             ContactId = contact.Id,
             ContactStatus = ContactStatus.Pending,
             CreatedAt = DateTime.UtcNow,
-            PrivateChatId = Guid.Empty
+            PrivateChatId = null
         };
 
         await _userContactRepository.AddAsync(pending, cancellationToken);
