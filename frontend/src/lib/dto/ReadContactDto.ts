@@ -6,7 +6,7 @@ export interface ReadContactDto {
     email: string;
     dateOfBirth: Date;
     status: ContactStatus;
-    privateChatId: string;
+    privateChatId?: string;
     createdAt: Date;
 }
 

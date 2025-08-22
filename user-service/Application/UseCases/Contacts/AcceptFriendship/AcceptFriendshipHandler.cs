@@ -38,20 +38,28 @@ public class AcceptFriendshipHandler
         if (user is null)
             return Result<ReadContactDto>.Failure("User does not exist");
 
-        var contact = await _userRepository.GetByIdAsync(request.ContactId, cancellationToken);
-        if (contact is null)
-            return Result<ReadContactDto>.Failure("Contact does not exist");
-
-        var existing = await _userContactRepository.GetUserContactAsync(
-            request.UserId, contact.Id, cancellationToken);
+        // Find the UserContactEntity by UserContactId (which is actually the UserContactEntity.Id)
+        // This represents the friendship request sent to the current user
+        var existing = await _userContactRepository.GetByIdAsync(request.UserContactId, cancellationToken,
+            include => include.Include(x => x.User).Include(x => x.Contact));
+        
         if (existing is null || existing.ContactStatus != ContactStatus.Pending)
             return Result<ReadContactDto>.Failure("Friendship request not found");
+            
+        // The existing entity has UserId = sender, ContactId = receiver (current user)
+        // We need to verify that the current user is indeed the receiver
+        if (existing.ContactId != request.UserId)
+            return Result<ReadContactDto>.Failure("Unauthorized to accept this friendship request");
+
+        var sender = existing.User;
+        if (sender is null)
+            return Result<ReadContactDto>.Failure("Sender does not exist");
 
         // Create private chat on acceptance
         var privateChat = new ChatEntity
         {
             Id = Guid.NewGuid(),
-            Title = "Direct chat between "+user.Username+" and "+contact.Username,
+            Title = $"Direct chat between {user.Username} and {sender.Username}",
             CreatedAt = DateTime.UtcNow,
             IsPrivate = true,
             ChatType = ChatType.Direct
@@ -65,24 +73,27 @@ public class AcceptFriendshipHandler
             ChatRole = ChatRole.Admin,
             IsMuted = false
         };
-        var contactChat = new UserChatEntity
+        var senderChat = new UserChatEntity
         {
             ChatId = privateChat.Id,
-            UserId = contact.Id,
+            UserId = sender.Id,
             ChatRole = ChatRole.Admin,
             IsMuted = false
         };
         await _userChatRepository.AddAsync(userChat,cancellationToken);
-        await _userChatRepository.AddAsync(contactChat,cancellationToken);
+        await _userChatRepository.AddAsync(senderChat,cancellationToken);
 
+        // Update the existing relationship to Active and set the private chat
         existing.PrivateChatId = privateChat.Id;
         existing.ContactStatus = ContactStatus.Active;
         await _userContactRepository.UpdateAsync(existing, cancellationToken);
 
-        var loaded = await _userContactRepository.GetByIdAsync(existing.Id, cancellationToken,
-            include => include.Include(x => x.Contact));
-
-        var dto = _mapper.Map<ReadContactDto>(loaded);
+        // No need to create a reverse relationship - we'll use the single record for both users
+        // Return the relationship from the current user's perspective (accepting user)
+        var dto = _mapper.Map<ReadContactDto>(existing, opts =>
+        {
+            opts.Items["CurrentUserId"] = request.UserId;
+        });
         return Result<ReadContactDto>.Success(dto);
     }
 }

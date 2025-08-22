@@ -73,6 +73,14 @@ export default function AuthenticatedHeader() {
                                 </li>
                                 <li>
                                     <Link
+                                        href="/find-people"
+                                        className="transition-colors hover:text-black duration-300"
+                                    >
+                                        Find People
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
                                         href="/requests"
                                         className="transition-colors hover:text-black duration-300"
                                     >

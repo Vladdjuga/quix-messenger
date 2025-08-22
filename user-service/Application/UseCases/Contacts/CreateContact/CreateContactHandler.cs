@@ -77,7 +77,10 @@ public class CreateContactHandler:IRequestHandler<CreateContactCommand,Result<Re
             include => include
                 .Include(x => x.Contact)
         );
-        var dto=_mapper.Map<ReadContactDto>(loadedUserContact);
+        var dto=_mapper.Map<ReadContactDto>(loadedUserContact, opts =>
+        {
+            opts.Items["CurrentUserId"] = request.UserId;
+        });
         return Result<ReadContactDto>.Success(dto);
     }
 }

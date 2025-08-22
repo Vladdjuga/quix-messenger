@@ -11,13 +11,23 @@ export async function POST(req: Request){
         body: JSON.stringify({ identity, password }),
         credentials: 'include',
     });
-    const data = await safeParseJSON(response);
+    
     if (!response.ok) {
-        return NextResponse.json(data, { status: response.status });
+        const errorData = await safeParseJSON(response);
+        return NextResponse.json(errorData, { status: response.status });
+    }
+    
+    // Backend returns the access token as a raw string
+    let accessToken = (await response.text()).trim();
+    if (accessToken.startsWith('"') && accessToken.endsWith('"')) {
+        accessToken = accessToken.slice(1, -1);
+    }
+    if (accessToken.toLowerCase().startsWith('bearer ')) {
+        accessToken = accessToken.slice(7).trim();
     }
     
     // Forward cookies from backend to client
-    const nextResponse = NextResponse.json({ accessToken: data });
+    const nextResponse = NextResponse.json({ accessToken });
     const setCookieHeader = response.headers.get('set-cookie');
     if (setCookieHeader) {
         nextResponse.headers.set('Set-Cookie', setCookieHeader);

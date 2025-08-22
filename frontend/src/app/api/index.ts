@@ -42,5 +42,26 @@ export const api = {
                 {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
+
+        // Get existing friends (active contacts)
+        getContacts: (pageSize: number = 20, lastCreatedAt?: string) => {
+            return apiClient.get<ReadContactDto[]>(
+                `/contact/getContacts`,
+                {params: {pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
+            );
+        },
+
+        // Search through existing friends
+        searchContacts: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
+            return apiClient.get<ReadContactDto[]>(
+                `/contact/searchContacts`,
+                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
+            );
+        },
+
+        // Get contact relationship by contact user ID
+        getContact: (contactId: string) => {
+            return apiClient.get<ReadContactDto>(`/contact/getContact/${contactId}`);
+        },
     }
 }

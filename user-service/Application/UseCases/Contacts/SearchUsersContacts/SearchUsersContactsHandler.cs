@@ -28,8 +28,13 @@ public class SearchUsersContactsHandler:
                 request.TargetStatus,
                 cancellationToken);
 
-        return !userContacts.Any() ?
-            Result<IEnumerable<ReadContactDto>>.Success([]) : // return empty list if no contacts found
-            Result<IEnumerable<ReadContactDto>>.Success(_mapper.Map<IEnumerable<ReadContactDto>>(userContacts));
+        if (!userContacts.Any())
+            return Result<IEnumerable<ReadContactDto>>.Success([]);
+
+        var mapped = _mapper.Map<IEnumerable<ReadContactDto>>(userContacts, opts =>
+        {
+            opts.Items["CurrentUserId"] = request.UserId;
+        });
+        return Result<IEnumerable<ReadContactDto>>.Success(mapped);
     }
 }

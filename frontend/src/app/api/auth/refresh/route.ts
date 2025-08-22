@@ -24,7 +24,14 @@ export async function POST(req: Request) {
 
         // Backend returns the access token as a raw string
         const rawToken = await response.text();
-        const accessToken = rawToken.trim();
+        let accessToken = rawToken.trim();
+        // Remove surrounding quotes if any and accidental Bearer prefix
+        if (accessToken.startsWith('"') && accessToken.endsWith('"')) {
+            accessToken = accessToken.slice(1, -1);
+        }
+        if (accessToken.toLowerCase().startsWith('bearer ')) {
+            accessToken = accessToken.slice(7).trim();
+        }
         
         // Validate JWT format (should have 3 parts separated by dots)
         const tokenParts = accessToken.split('.');

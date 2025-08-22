@@ -3,7 +3,6 @@
 import {ReadUserDto} from "@/lib/dto/ReadUserDto";
 import React, {createContext, useEffect, useState} from "react";
 import {getCurrentUserUseCase} from "@/lib/usecases/user/getCurrentUserUseCase";
-import {SocketProvider} from "@/lib/contexts/SocketContext";
 import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 type UserContextType = {
@@ -66,10 +65,12 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
     };
 
     return (
+        // For now , SocketProvider is not nested here to avoid issues with useEffect in SocketProvider
+        // <SocketProvider>
+        // </SocketProvider>
+        // If you need sockets to depend on user context, consider restructuring the providers
         <UserContext.Provider value={contextValue}>
-            <SocketProvider>
                 {children}
-            </SocketProvider>
         </UserContext.Provider>
     );
 };

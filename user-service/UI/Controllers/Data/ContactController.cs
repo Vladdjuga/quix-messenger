@@ -8,6 +8,7 @@ using Application.UseCases.Contacts.RequestFriendship;
 using Application.UseCases.Contacts.CreateContactByUsername;
 using Application.UseCases.Contacts.GetContact;
 using Application.UseCases.Contacts.GetUsersContacts;
+using Application.UseCases.Contacts.SearchIncomingFriendRequests;
 using Application.UseCases.Contacts.SearchUsersContacts;
 using Application.Utilities;
 using AutoMapper;
@@ -39,24 +40,24 @@ public class ContactController:Controller
 
     [Authorize]
     [GetUserGuid]
-    [HttpPost("acceptFriendship/{contactId:guid}")]
+    [HttpPost("acceptFriendship/{userContactId:guid}")]
     public async Task<Results<Ok<ReadContactDto>,BadRequest<ErrorResponse>,
         UnauthorizedHttpResult>> AcceptFriendship(
-        Guid contactId)
+        Guid userContactId)
     {
         var userGuid = HttpContext.GetUserGuid();
         
-        var command = new AcceptFriendshipCommand(userGuid, contactId);
-        _logger.LogInformation("Accepting friendship {ContactId}", contactId);
+        var command = new AcceptFriendshipCommand(userGuid, userContactId);
+        _logger.LogInformation("Accepting friendship {UserContactId}", userContactId);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to accept friendship for {UserId} and {ContactId}",
-                userGuid, contactId);
+            _logger.LogError("Failed to accept friendship for {UserId} and {UserContactId}",
+                userGuid, userContactId);
             _logger.LogError("Error: {Error}", result.Error);
             return ErrorResult.Create(result.Error);
         }
-        _logger.LogInformation("Accepted friendship {ContactId}", contactId);
+        _logger.LogInformation("Accepted friendship {UserContactId}", userContactId);
         return TypedResults.Ok(result.Value);
     }
     [Authorize]
@@ -83,34 +84,16 @@ public class ContactController:Controller
     [GetUserGuid]
     [HttpGet("getContacts")]
     public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
-        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetContacts()
-    {
-        var userGuid = HttpContext.GetUserGuid();
-
-        var query = new GetUsersContactsQuery(userGuid);
-        _logger.LogInformation("Getting contacts for {UserId}", userGuid);
-        var result = await _mediator.Send(query);
-        if (result.IsFailure)
-        {
-            _logger.LogError("Error getting contacts for {UserId}", userGuid);
-            _logger.LogError("Error: {Error}", result.Error);
-            return ErrorResult.Create(result.Error);
-        }
-        _logger.LogInformation("Retrieved contacts for {UserId}", userGuid);
-        return TypedResults.Ok(result.Value);
-    }
-    
-    [Authorize]
-    [GetUserGuid]
-    [HttpGet("getContacts")]
-    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
         BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetContacts(
-        [FromQuery] int pageSize,
+        [FromQuery] int? pageSize,
         [FromQuery] DateTime? lastCreatedAt)
     {
         var userGuid = HttpContext.GetUserGuid();
-
-        var query = new GetUsersContactsQuery(userGuid, lastCreatedAt, pageSize);
+        
+        // If pageSize is not provided, return all contacts (legacy behavior); otherwise, return paged results
+        var query = pageSize.HasValue
+            ? new GetUsersContactsQuery(userGuid, lastCreatedAt, pageSize.Value)
+            : new GetUsersContactsQuery(userGuid);
         _logger.LogInformation("Getting contacts for {UserId}", userGuid);
         var result = await _mediator.Send(query);
         if (result.IsFailure)
@@ -129,17 +112,34 @@ public class ContactController:Controller
     public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
         BadRequest<ErrorResponse>,UnauthorizedHttpResult>> SearchContacts(
         [FromQuery] string query,
-        [FromQuery] int pageSize,
+    [FromQuery] int? pageSize,
         [FromQuery] DateTime? lastCreatedAt)
     {
         var userGuid = HttpContext.GetUserGuid();
+    var size = (pageSize.HasValue && pageSize.Value > 0) ? Math.Min(pageSize.Value, 100) : 20;
+
+        // When query is empty or whitespace, fall back to the regular paginated contacts list
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            var getContactsQuery = new GetUsersContactsQuery(userGuid, lastCreatedAt, size);
+            _logger.LogInformation("Query empty. Returning paged contacts for {UserId}", userGuid);
+            var contactsResult = await _mediator.Send(getContactsQuery);
+            if (contactsResult.IsFailure)
+            {
+                _logger.LogError("Error getting paged contacts for {UserId}", userGuid);
+                _logger.LogError("Error: {Error}", contactsResult.Error);
+                return ErrorResult.Create(contactsResult.Error);
+            }
+            _logger.LogInformation("Retrieved paged contacts for {UserId}", userGuid);
+            return TypedResults.Ok(contactsResult.Value);
+        }
 
         var q = new SearchUsersContactsQuery(
             userGuid,
             query,
             ContactStatus.Active, // Only search active contacts
             lastCreatedAt,
-            pageSize);
+            size);
         _logger.LogInformation("Searching contacts for {UserId}", userGuid);
         var result = await _mediator.Send(q);
         if (result.IsFailure)
@@ -163,21 +163,20 @@ public class ContactController:Controller
     {
         var userGuid = HttpContext.GetUserGuid();
 
-        var q = new SearchUsersContactsQuery(
+        var q = new SearchIncomingFriendRequestsQuery(
             userGuid,
             query,
-            ContactStatus.Pending, // Only search pending contacts (friend requests)
             lastCreatedAt,
             pageSize);
-        _logger.LogInformation("Searching contacts for {UserId}", userGuid);
+        _logger.LogInformation("Searching incoming friend requests for {UserId}", userGuid);
         var result = await _mediator.Send(q);
         if (result.IsFailure)
         {
-            _logger.LogError("Error searching contacts for {UserId}", userGuid);
+            _logger.LogError("Error searching incoming friend requests for {UserId}", userGuid);
             _logger.LogError("Error: {Error}", result.Error);
             return ErrorResult.Create(result.Error);
         }
-        _logger.LogInformation("Retrieved searched contacts for {UserId}", userGuid);
+        _logger.LogInformation("Retrieved incoming friend requests for {UserId}", userGuid);
         return TypedResults.Ok(result.Value);
     }
 

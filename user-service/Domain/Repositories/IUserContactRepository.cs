@@ -6,7 +6,7 @@ namespace Domain.Repositories;
 
 public interface IUserContactRepository
 {
-    Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id,
+    Task<IEnumerable<UserContactEntity>> GetAllUsersContactsAsync(Guid id,
         DateTime? lastCreatedAt, int pageSize,
         CancellationToken cancellationToken);
     Task<UserContactEntity?> GetUserContactAsync(Guid userId, Guid contactId,
@@ -25,7 +25,15 @@ public interface IUserContactRepository
         Func<IQueryable<UserContactEntity>, IQueryable<UserContactEntity>>? include = null);
     Task<UserContactEntity?> GetUserContactByUsernameAsync(Guid userId,
         string contactUsername, CancellationToken cancellationToken);
-    Task<IEnumerable<UserEntity>> SearchContactsByUsernameAsync(
+    Task<IEnumerable<UserContactEntity>> SearchContactsByUsernameAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        ContactStatus targetStatus,
+        CancellationToken cancellationToken);
+    
+    Task<IEnumerable<UserContactEntity>> SearchIncomingContactRequestsAsync(
         Guid userId,
         string query,
         DateTime? lastCreatedAt,

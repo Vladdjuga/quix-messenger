@@ -13,7 +13,11 @@ public class ChatConfiguration: IEntityTypeConfiguration<ChatEntity>
             .HasDefaultValueSql("gen_random_uuid()");
         builder.Property(x => x.Title)
             .IsRequired()
-            .HasMaxLength(20);
+            .HasMaxLength(200)
+            .HasConversion(
+                v => v.Length > 200 ? v.Substring(0, 197) + "..." : v,
+                v => v
+            );
         builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");

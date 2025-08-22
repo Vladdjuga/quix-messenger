@@ -17,25 +17,32 @@ public class UserContactRepository:IUserContactRepository
         _dbContext = dbContext;
         _dbSet = _dbContext.Set<UserContactEntity>();
     }
-    public async Task<IEnumerable<UserEntity?>> GetAllUsersContactsAsync(Guid id,
+    public async Task<IEnumerable<UserContactEntity>> GetAllUsersContactsAsync(Guid id,
         DateTime? lastCreatedAt, int pageSize,
         CancellationToken cancellationToken)
     {
+        // Get contacts where user is either UserId or ContactId (bidirectional search)
         var contacts = await _dbSet.Where(
-                el => el.UserId == id && el.ContactStatus == ContactStatus.Active
+                el => (el.UserId == id || el.ContactId == id) 
+                    && el.ContactStatus == ContactStatus.Active
                     && (lastCreatedAt == null || el.CreatedAt < lastCreatedAt)
                 )
             .OrderByDescending(el => el.CreatedAt)
             .Take(pageSize)
             .Include(el=>el.Contact)
-            .Select(el => el.Contact).ToListAsync(cancellationToken);
+            .Include(el=>el.User)
+            .ToListAsync(cancellationToken);
+
         return contacts;
     }
 
     public async Task<UserContactEntity?> GetUserContactAsync(Guid userId, Guid contactId,
         CancellationToken cancellationToken)
     {
-        var userContacts= await _dbSet.Where(el => el.UserId == userId && el.ContactId == contactId)
+        // Search in both directions: (userId, contactId) or (contactId, userId)
+        var userContacts= await _dbSet.Where(el => 
+                (el.UserId == userId && el.ContactId == contactId) ||
+                (el.UserId == contactId && el.ContactId == userId))
             .Include(el => el.Contact)
             .Include(el => el.User)
             .FirstOrDefaultAsync(cancellationToken);
@@ -97,10 +104,10 @@ public class UserContactRepository:IUserContactRepository
     public async Task<UserContactEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken,
         Func<IQueryable<UserContactEntity>, IQueryable<UserContactEntity>>? include = null)
     {
-        IQueryable<UserContactEntity> query = _dbSet;
-        if(include!=null)
+        IQueryable<UserContactEntity> query = _dbSet.Where(el => el.Id == id);
+        if(include != null)
             query = include(query);
-        var userContact = await query.FirstOrDefaultAsync(cancellationToken)??
+        var userContact = await query.FirstOrDefaultAsync(cancellationToken) ??
                           throw new ApplicationException("Entity not found");
         return userContact;
     }
@@ -114,7 +121,7 @@ public class UserContactRepository:IUserContactRepository
         return userContact;
     }
 
-    public async Task<IEnumerable<UserEntity>> SearchContactsByUsernameAsync(
+    public async Task<IEnumerable<UserContactEntity>> SearchContactsByUsernameAsync(
         Guid userId,
         string query,
         DateTime? lastCreatedAt,
@@ -141,7 +148,37 @@ public class UserContactRepository:IUserContactRepository
         var contacts = await q
             .OrderByDescending(el => el.CreatedAt)
             .Take(pageSize)
-            .Select(el => el.Contact!)
+            .ToListAsync(cancellationToken);
+        return contacts;
+    }
+
+    public async Task<IEnumerable<UserContactEntity>> SearchIncomingContactRequestsAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        ContactStatus targetStatus,
+        CancellationToken cancellationToken)
+    {
+        var q = _dbSet
+            .Where(el => el.ContactId == userId && el.ContactStatus == targetStatus)
+            .Include(el => el.User)
+            .AsQueryable();
+
+        if (lastCreatedAt is not null)
+            q = q.Where(el => el.CreatedAt < lastCreatedAt);
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var lowered = query.ToLower();
+            q = q.Where(el => el.User != null && 
+                              EF.Functions.Like(el.User.Username.ToLower(),
+                                  $"%{query}%"));
+        }
+
+        var contacts = await q
+            .OrderByDescending(el => el.CreatedAt)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
         return contacts;
     }

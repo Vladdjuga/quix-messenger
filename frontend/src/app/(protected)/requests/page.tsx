@@ -17,7 +17,7 @@ export default function RequestsPage() {
             try {
                 const { data } = await api.contact.getFriendRequests("", PAGE_SIZE);
                 const list: ReadContactDto[] = Array.isArray(data) ? (data as ReadContactDto[]) : [];
-                setItems(list.filter((x) => x.status === "Pending"));
+                setItems(list);
             } catch (e) {
                 const err = e as { response?: { data?: string } };
                 setError(err.response?.data ?? "Failed to load requests");
@@ -39,9 +39,9 @@ export default function RequestsPage() {
                             <p className="font-medium">{c.username}</p>
                             <p className="text-sm text-gray-500">{c.email}</p>
                         </div>
-                        <div className="flex items-center">
+                        <div className="flex items-center space-x-2">
                             <button
-                                className="ml-3 border rounded px-2 py-1 text-sm"
+                                className="bg-green-500 hover:bg-green-600 text-white border rounded px-3 py-1 text-sm"
                                 onClick={async () => {
                                     try {
                                         setLoading(true);
@@ -54,11 +54,31 @@ export default function RequestsPage() {
                                         setLoading(false);
                                     }
                                 }}
+                                disabled={loading}
                             >Accept</button>
+                            <button
+                                className="bg-red-500 hover:bg-red-600 text-white border rounded px-3 py-1 text-sm"
+                                onClick={async () => {
+                                    try {
+                                        setLoading(true);
+                                        // For now, we'll just remove from the list. You might want to add a reject endpoint later
+                                        setItems(prev => prev.filter(x => x.id !== c.id));
+                                    } catch (e) {
+                                        const err = e as { response?: { data?: string } };
+                                        setError(err.response?.data ?? "Failed to reject");
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                disabled={loading}
+                            >Reject</button>
                         </div>
                     </li>
                 ))}
             </ul>
+            {items.length === 0 && !loading && !error && (
+                <p className="text-gray-500 text-center py-8">No friend requests found.</p>
+            )}
         </div>
     );
 }

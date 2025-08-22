@@ -21,13 +21,20 @@ public class GetUsersContactsHandler:
     }
     public async Task<Result<IEnumerable<ReadContactDto>>> Handle(GetUsersContactsQuery request, CancellationToken cancellationToken)
     {
-        var userContacts=await _userContactRepository
+        var userContacts = await _userContactRepository
             .GetAllUsersContactsAsync(request.UserId,
                 request.LastCreatedAt,
                 request.PageSize,
                 cancellationToken);
-        return !userContacts.Any() ?
-            Result<IEnumerable<ReadContactDto>>.Failure("User contact not found") : 
-            Result<IEnumerable<ReadContactDto>>.Success(_mapper.Map<IEnumerable<ReadContactDto>>(userContacts));
+
+        if (!userContacts.Any())
+            return Result<IEnumerable<ReadContactDto>>.Success([]);
+
+        // Pass current user id so mapper can choose the opposite side
+        var mapped = _mapper.Map<IEnumerable<ReadContactDto>>(userContacts, opts =>
+        {
+            opts.Items["CurrentUserId"] = request.UserId;
+        });
+        return Result<IEnumerable<ReadContactDto>>.Success(mapped);
     }
 }
