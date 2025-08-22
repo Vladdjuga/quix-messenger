@@ -2,6 +2,7 @@
 using Application.Common;
 using Application.DTOs.Auth;
 using Application.Interfaces.Security;
+using Domain.Entities;
 using Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Options;
@@ -26,10 +27,20 @@ public class RefreshTokenHandler:IRequestHandler<RefreshTokenCommand, Result<Tok
 
     public async Task<Result<TokenDto>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var userSession = await _userSessionRepository.GetByIdWithUserAsync(request.SessionId, cancellationToken);
+        // Get all active sessions and find the one with matching refresh token
+        var allActiveSessions = await _userSessionRepository
+            .GetAllActiveSessionsAsync(cancellationToken);
+        
+        var userSession = allActiveSessions
+            .Where(s => s.User != null)
+            .FirstOrDefault(session => 
+                _stringHasher.Verify(request.RefreshToken, session.HashedToken));
+
+        if (userSession is null)
+            return Result<TokenDto>.Failure("Invalid refresh token.");
         
         // Validate the user session
-        if (userSession is null || !userSession.IsActive || userSession.ExpiresAt < DateTime.UtcNow)
+        if (!userSession.IsActive || userSession.ExpiresAt < DateTime.UtcNow)
             return Result<TokenDto>.Failure("Invalid or expired session");
         if(userSession.User is null)
             return Result<TokenDto>.Failure("User not found");

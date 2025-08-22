@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.UseCases.Users.Auth.RefreshToken;
 
-public record RefreshTokenCommand(string RefreshToken,Guid SessionId) : IRequest<Result<TokenDto>>;
+public record RefreshTokenCommand(string RefreshToken) : IRequest<Result<TokenDto>>;

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.IdentityModel.Tokens.Jwt;
 using UI.Attributes;
 using UI.Utilities;
 using UI.Common;
@@ -61,10 +62,12 @@ public class AuthController : Controller
         Response.Cookies.Append("refreshToken", dto.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Strict,
+            Secure = false, // Set to true in production with HTTPS
+            SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
             Expires = dto.ExpiresAt,
+            Path = "/", // Ensure cookie is available for all paths
         });
+        _logger.LogInformation("Set refreshToken cookie with expiration: {ExpiresAt}", dto.ExpiresAt);
         return TypedResults.Ok(dto.AccessToken);
     }
 
@@ -131,22 +134,22 @@ public class AuthController : Controller
     /// <returns>
     /// Will return a new JWT token if the refresh token is valid, or a BadRequest if there was an error.
     /// </returns>
-    [Authorize]
-    [GetSessionGuid]
     [HttpPost("refresh")]
     public async Task<Results<Ok<string>, BadRequest<ErrorResponse>>> RefreshToken()
     {
         _logger.LogInformation("Starting to refresh token.");
+        
+        // Debug: Log all cookies received
+        _logger.LogInformation("Received cookies: {Cookies}", string.Join(", ", Request.Cookies.Select(c => $"{c.Key}={c.Value}")));
+        
         var refreshToken = Request.Cookies["refreshToken"];
         if (string.IsNullOrEmpty(refreshToken))
         {
             _logger.LogError("Refresh token is missing.");
             return ErrorResult.Create("Refresh token is missing.");
         }
-        // Check if the session ID is present in HttpContext items
-        var sessionGuid = HttpContext.GetSessionGuid();
         
-        var command = new RefreshTokenCommand(refreshToken,sessionGuid);
+        var command = new RefreshTokenCommand(refreshToken);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
@@ -155,16 +158,16 @@ public class AuthController : Controller
         }
         
         var dto = result.Value;
-        _logger.LogInformation("Token refreshed successfully. For session ID: {SessionId}", sessionGuid);
+        _logger.LogInformation("Token refreshed successfully.");
         
         // Here store the new refresh token in cookies
         Response.Cookies.Append("refreshToken", dto.RefreshToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Strict,
+            Secure = false, // Set to true in production with HTTPS
+            SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
             Expires = dto.ExpiresAt,
-            
+            Path = "/", // Ensure cookie is available for all paths
         });
         
         return TypedResults.Ok(dto.AccessToken);

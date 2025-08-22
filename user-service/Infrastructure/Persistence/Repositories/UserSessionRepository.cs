@@ -35,6 +35,29 @@ public class UserSessionRepository:IUserSessionRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(us => us.UserId == userId, cancellationToken);
     }
+
+    public async Task<UserSessionEntity?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        // Get all non-expired sessions with users loaded
+        var sessions = await _dbSet
+            .AsNoTracking()
+            .Include(us => us.User)
+            .Where(us => us.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+
+        // Return all sessions so we can verify hashes in the handler
+        return sessions.FirstOrDefault(); // This will be updated in handler
+    }
+
+    public async Task<IEnumerable<UserSessionEntity>> GetAllActiveSessionsAsync(CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .AsNoTracking()
+            .Include(us => us.User)
+            .Where(us => us.ExpiresAt > DateTime.UtcNow)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task AddAsync(UserSessionEntity userSession, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(userSession);

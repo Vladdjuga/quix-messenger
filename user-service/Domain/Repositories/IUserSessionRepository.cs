@@ -8,6 +8,8 @@ public interface IUserSessionRepository
     // Same as GetByIdAsync but with loaded user
     Task<UserSessionEntity?> GetByIdWithUserAsync(Guid id, CancellationToken cancellationToken);
     Task<UserSessionEntity?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    // Get all active sessions (for refresh token verification)
+    Task<IEnumerable<UserSessionEntity>> GetAllActiveSessionsAsync(CancellationToken cancellationToken);
     Task AddAsync(UserSessionEntity userSession, CancellationToken cancellationToken);
     Task UpdateAsync(UserSessionEntity userSession, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
