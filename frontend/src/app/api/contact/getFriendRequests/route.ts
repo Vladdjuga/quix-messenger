@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
-import { safeParseJSON } from '@/lib/utils'
+import {NextResponse} from "next/server";
+import {safeParseJSON} from "@/lib/utils";
 
 const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
@@ -18,8 +18,7 @@ export async function GET(req: Request) {
         });
         if (lastCreatedAt) params.append('lastCreatedAt', lastCreatedAt);
 
-        const backendUrl = `${BASE_URL}/Contact/searchContacts?${params.toString()}`;
-
+        const backendUrl = `${BASE_URL}/Contact/getFriendRequests?${params.toString()}`;
 
         const response = await fetch(backendUrl, {
             method: 'GET',

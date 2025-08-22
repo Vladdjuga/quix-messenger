@@ -134,7 +134,41 @@ public class ContactController:Controller
     {
         var userGuid = HttpContext.GetUserGuid();
 
-        var q = new SearchUsersContactsQuery(userGuid, query, lastCreatedAt, pageSize);
+        var q = new SearchUsersContactsQuery(
+            userGuid,
+            query,
+            ContactStatus.Active, // Only search active contacts
+            lastCreatedAt,
+            pageSize);
+        _logger.LogInformation("Searching contacts for {UserId}", userGuid);
+        var result = await _mediator.Send(q);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error searching contacts for {UserId}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        _logger.LogInformation("Retrieved searched contacts for {UserId}", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
+    
+    [Authorize]
+    [GetUserGuid]
+    [HttpGet("getFriendRequests")]
+    public async Task<Results<Ok<IEnumerable<ReadContactDto>>, 
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetUsersFriendRequests(
+        [FromQuery] string query,
+        [FromQuery] int pageSize,
+        [FromQuery] DateTime? lastCreatedAt)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        var q = new SearchUsersContactsQuery(
+            userGuid,
+            query,
+            ContactStatus.Pending, // Only search pending contacts (friend requests)
+            lastCreatedAt,
+            pageSize);
         _logger.LogInformation("Searching contacts for {UserId}", userGuid);
         var result = await _mediator.Send(q);
         if (result.IsFailure)
@@ -161,7 +195,7 @@ public class ContactController:Controller
             contactId,
             status
         );
-        _logger.LogInformation("Changing contact status to {Status}", status);
+        _logger.LogInformation("Changing contact status to {TargetStatus}", status);
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
@@ -169,7 +203,7 @@ public class ContactController:Controller
             _logger.LogError("Error: {Error}", result.Error);
             return ErrorResult.Create(result.Error);
         }
-        _logger.LogInformation("Successfully changed contact status to {Status}", status);
+        _logger.LogInformation("Successfully changed contact status to {TargetStatus}", status);
         return TypedResults.Ok();
     }
     [Authorize]

@@ -15,7 +15,7 @@ export default function RequestsPage() {
         (async () => {
             setLoading(true);
             try {
-                const { data } = await api.contact.searchByUsernamePaged("", PAGE_SIZE);
+                const { data } = await api.contact.getFriendRequests("", PAGE_SIZE);
                 const list: ReadContactDto[] = Array.isArray(data) ? (data as ReadContactDto[]) : [];
                 setItems(list.filter((x) => x.status === "Pending"));
             } catch (e) {

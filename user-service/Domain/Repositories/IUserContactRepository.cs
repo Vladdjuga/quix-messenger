@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using System.Linq.Expressions;
+using Domain.Entities;
 using Domain.Enums;
 
 namespace Domain.Repositories;
@@ -29,5 +30,6 @@ public interface IUserContactRepository
         string query,
         DateTime? lastCreatedAt,
         int pageSize,
+        ContactStatus targetStatus,
         CancellationToken cancellationToken);
 }

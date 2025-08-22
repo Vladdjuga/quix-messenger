@@ -20,11 +20,16 @@ public class SearchUsersContactsHandler:
     public async Task<Result<IEnumerable<ReadContactDto>>> Handle(SearchUsersContactsQuery request, CancellationToken cancellationToken)
     {
         var userContacts = await _userContactRepository
-            .SearchContactsByUsernameAsync(request.UserId, request.Query,
-                request.LastCreatedAt, request.PageSize, cancellationToken);
+            .SearchContactsByUsernameAsync(
+                request.UserId,
+                request.Query,
+                request.LastCreatedAt,
+                request.PageSize,
+                request.TargetStatus,
+                cancellationToken);
 
         return !userContacts.Any() ?
-            Result<IEnumerable<ReadContactDto>>.Failure("User contact not found") :
+            Result<IEnumerable<ReadContactDto>>.Success([]) : // return empty list if no contacts found
             Result<IEnumerable<ReadContactDto>>.Success(_mapper.Map<IEnumerable<ReadContactDto>>(userContacts));
     }
 }

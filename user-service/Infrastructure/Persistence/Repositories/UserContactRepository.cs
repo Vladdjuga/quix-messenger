@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using System.Linq.Expressions;
+using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
 using Infrastructure.Persistence.Contexts;
@@ -118,9 +119,11 @@ public class UserContactRepository:IUserContactRepository
         string query,
         DateTime? lastCreatedAt,
         int pageSize,
+        ContactStatus targetStatus,
         CancellationToken cancellationToken)
     {
-        var q = _dbSet.Where(el => el.UserId == userId && el.ContactStatus == ContactStatus.Active)
+        var q = _dbSet
+            .Where(el => el.UserId == userId && el.ContactStatus == targetStatus)
             .Include(el => el.Contact)
             .AsQueryable();
 
