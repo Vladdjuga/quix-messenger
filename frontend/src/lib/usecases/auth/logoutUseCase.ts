@@ -1,15 +1,20 @@
 import {api} from "@/app/api";
 
-type AxiosErrorLike = { response?: { data?: { message?: string } }; message?: string };
-
 export async function logoutUseCase(): Promise<void> {
     try {
+        // Call logout endpoint to invalidate server-side session
         await api.auth.logout();
-        localStorage.removeItem("jwt");
         console.log("Logout successful");
-    } catch (err) {
-        const e = err as AxiosErrorLike;
-        const msg = e.response?.data?.message || e.message || "Logout failed";
-        throw new Error(msg);
+    } catch (error) {
+        console.error("Logout API call failed:", error);
+        // Continue with client-side cleanup even if server call fails
+    } finally {
+        // Always clear client-side data
+        localStorage.removeItem("jwt");
+        
+        // Redirect to login page
+        if (typeof window !== "undefined") {
+            window.location.href = "/login";
+        }
     }
 }

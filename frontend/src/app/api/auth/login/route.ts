@@ -9,10 +9,19 @@ export async function POST(req: Request){
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identity, password }),
+        credentials: 'include',
     });
     const data = await safeParseJSON(response);
     if (!response.ok) {
         return NextResponse.json(data, { status: response.status });
     }
-    return NextResponse.json({ token: data });
+    
+    // Forward cookies from backend to client
+    const nextResponse = NextResponse.json({ accessToken: data });
+    const setCookieHeader = response.headers.get('set-cookie');
+    if (setCookieHeader) {
+        nextResponse.headers.set('Set-Cookie', setCookieHeader);
+    }
+    
+    return nextResponse;
 } 

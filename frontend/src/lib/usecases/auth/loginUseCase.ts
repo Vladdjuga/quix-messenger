@@ -8,11 +8,12 @@ export async function loginUseCase(dto:LoginUserDto): Promise<string> {
         const response = await api.auth.login(dto.identity, dto.password);
         const data = response.data;
 
-        if (!data.token) {
+        if (!data.accessToken) {
             throw new Error("Login failed: No token received");
         }
-        localStorage.setItem("jwt", data.token);
-        return data.token;
+        localStorage.setItem("jwt", data.accessToken);
+        
+        return data.accessToken;
     } catch (error) {
         const e = error as AxiosErrorLike;
         if (e.response) {

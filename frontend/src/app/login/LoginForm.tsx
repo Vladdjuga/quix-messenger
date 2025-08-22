@@ -35,9 +35,9 @@ export default function LoginForm() {
             const { loginUseCase } = await import("@/lib/usecases/auth/loginUseCase");
             await loginUseCase(data);
             
-            // Clear form and redirect
+            // Clear form and redirect to protected area
             reset();
-            window.location.href = "/";
+            window.location.href = "/friends";
         } catch (error) {
             console.error("Login failed:", error);
             setLoginError(error instanceof Error ? error.message : "Login failed. Please check your credentials and try again.");

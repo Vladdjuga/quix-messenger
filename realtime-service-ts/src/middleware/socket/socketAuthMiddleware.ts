@@ -25,6 +25,8 @@ export const socketAuthMiddleware = (
         next();
     } catch (error) {
         logger.error(`Socket authentication error: ${error}`);
+        logger.error(error instanceof Error ? error.stack : 'No stack trace available');
+        logger.error(`Socket JWT verification failed for token: ${token}`);
         next(new Error('Forbidden: Invalid or expired token'));
         return;
     }
