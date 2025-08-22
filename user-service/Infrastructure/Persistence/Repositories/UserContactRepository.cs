@@ -133,7 +133,9 @@ public class UserContactRepository:IUserContactRepository
         if (!string.IsNullOrWhiteSpace(query))
         {
             var lowered = query.ToLower();
-            q = q.Where(el => el.Contact != null && el.Contact.Username.ToLower().Contains(lowered));
+            q = q.Where(el => el.Contact != null && 
+                              EF.Functions.Like(el.Contact.Username.ToLower(),
+                                  $"%{query}%"));
         }
 
         var contacts = await q
