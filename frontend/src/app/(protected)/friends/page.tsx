@@ -1,22 +1,22 @@
 "use client";
 
 import {useEffect, useState} from "react";
+import {ReadUserDto} from "@/lib/dto/ReadUserDto";
+import {searchUsersUseCase} from "@/lib/usecases/user/searchUsersUseCase";
 import {api} from "@/app/api";
-import {ReadContactDto} from "@/lib/dto/ReadContactDto";
-import {ContactStatus} from "@/lib/types/enums";
 
 const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
 
 export default function FriendsSearchPage() {
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState<ReadContactDto[]>([]);
+    const [results, setResults] = useState<ReadUserDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>();
 
-    async function fetchContacts(append = false) {
-        if (!query) {
+    async function fetchUsers(append = false) {
+        if (!query.trim()) {
             setResults([]);
             setHasMore(false);
             setLastCreatedAt(undefined);
@@ -27,8 +27,11 @@ export default function FriendsSearchPage() {
         setError(null);
 
         try {
-            const {data} = await api.contact.searchByUsernamePaged(query, PAGE_SIZE,
-                append ? lastCreatedAt : undefined);
+            const data = await searchUsersUseCase(
+                query, 
+                PAGE_SIZE,
+                append ? lastCreatedAt : undefined
+            );
 
             if (append) {
                 setResults(prev => [...prev, ...data]);
@@ -37,32 +40,60 @@ export default function FriendsSearchPage() {
             }
 
             setHasMore(data.length === PAGE_SIZE);
-            const lastItem = data.at(-1);
-            setLastCreatedAt(lastItem?.createdAt ? new Date(lastItem.createdAt).toISOString() : undefined);
+            // For now, we'll use simple pagination without cursor-based approach
+            // since ReadUserDto doesn't have createdAt
+            setLastCreatedAt(undefined);
         } catch (e) {
-            const err = e as { response?: { data?: { message?: string } | string } };
-            let msg = "Failed to load contacts";
-            const data = err.response?.data;
-            if (data) {
-                if (typeof data === "string") {
-                    msg = data;
-                } else if (typeof data === "object" && typeof data.message === "string") {
-                    msg = data.message;
-                }
-            }
-            setError(msg);
+            const err = e as Error;
+            setError(err.message || "Failed to search users");
         } finally {
             setIsLoading(false);
         }
-    };
+    }
+
+    async function sendFriendRequest(username: string) {
+        try {
+            await api.contact.requestFriendship(username);
+            // Optionally show success message or remove user from results
+            setResults(prev => prev.filter(user => user.username !== username));
+        } catch (error) {
+            const err = error as Error;
+            setError(err.message || "Failed to send friend request");
+        }
+    }
 
     useEffect(() => {
-        fetchContacts(false)
-            .catch(err => {
-                console.error("Error fetching contacts:", err);
-                setError("Failed to load contacts");
+        const searchUsers = async () => {
+            if (!query.trim()) {
+                setResults([]);
+                setHasMore(false);
+                setLastCreatedAt(undefined);
+                return;
+            }
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                const data = await searchUsersUseCase(
+                    query, 
+                    PAGE_SIZE,
+                    undefined
+                );
+
+                setResults(data);
+                setHasMore(data.length === PAGE_SIZE);
+                setLastCreatedAt(undefined);
+            } catch (e) {
+                const err = e as Error;
+                setError(err.message || "Failed to search users");
+                console.error("Error fetching users:", err);
+            } finally {
                 setIsLoading(false);
-            });
+            }
+        };
+
+        searchUsers();
     }, [query]);
 
     return (
@@ -77,49 +108,35 @@ export default function FriendsSearchPage() {
             {isLoading && <p>Loading...</p>}
             {error && <p className="text-red-600">{error}</p>}
             <ul className="divide-y">
-                {results.map(c => (
-                    <li key={c.id} className="py-3 flex items-center justify-between">
+                {results.map(user => (
+                    <li key={user.id} className="py-3 flex items-center justify-between">
                         <div>
-                            <p className="font-medium">{c.username}</p>
-                            <p className="text-sm text-gray-500">{c.email}</p>
+                            <p className="font-medium">{user.username}</p>
+                            <p className="text-sm text-gray-500">{user.firstName} {user.lastName}</p>
+                            <p className="text-xs text-gray-400">{user.email}</p>
                         </div>
                         <div className="flex items-center">
-                            <span className="text-xs uppercase bg-gray-100 px-2 py-1 rounded">
-                                {c.status}
-                            </span>
-                            {c.status === "Pending" ? (
-                                <button
-                                    className="ml-3 border rounded px-2 py-1 text-sm"
-                                    onClick={async () => {
-                                        setIsLoading(true);
-                                        await api.contact.acceptFriendship(c.id);
-                                        setResults(prev => {
-                                            return prev.map(x => x.id === c.id ?
-                                                {...x, status: ContactStatus.Active} : x);
-                                        });
-                                        setIsLoading(false);
-                                    }}
-                                >Accept</button>
-                            ) : (
-                                <button
-                                    className="ml-3 border rounded px-2 py-1 text-sm"
-                                    onClick={async () => {
-                                        setIsLoading(true);
-                                        await api.contact.requestFriendship(c.username);
-                                        setResults(prev => prev.map(
-                                            x => x.id === c.id ?
-                                            {...x, status: ContactStatus.Pending} : x));
-                                        setIsLoading(false);
-                                    }}
-                                >Request</button>
-                            )}
+                            <button
+                                className="border rounded px-3 py-1 text-sm bg-blue-500 text-white hover:bg-blue-600"
+                                onClick={() => sendFriendRequest(user.username)}
+                                disabled={isLoading}
+                            >
+                                Add Friend
+                            </button>
                         </div>
                     </li>
                 ))}
             </ul>
+            {results.length === 0 && query && !isLoading && (
+                <p className="text-gray-500 text-center py-8">No users found for &ldquo;{query}&rdquo;</p>
+            )}
             {hasMore && !isLoading && (
                 <div className="pt-3">
-                    <button className="border rounded px-3 py-2" onClick={() => fetchContacts(true)}>
+                    <button 
+                        className="border rounded px-3 py-2" 
+                        onClick={() => fetchUsers(true)}
+                        disabled={isLoading}
+                    >
                         Load more
                     </button>
                 </div>

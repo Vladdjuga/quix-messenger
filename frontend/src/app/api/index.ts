@@ -16,6 +16,12 @@ export const api = {
     user: {
         getCurrentUser: () =>
             apiClient.get<ReadUserDto>('/user/getCurrentUser'),
+        searchUsers: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
+            return apiClient.get<ReadUserDto[]>(
+                `/user/search`,
+                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
+            );
+        },
     },
     contact: {
         searchByUsernamePaged: (query: string, pageSize: number, lastCreatedAt?: string) => {
