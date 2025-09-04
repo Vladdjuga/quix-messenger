@@ -27,9 +27,9 @@ export default function FindPeoplePage() {
     async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
         try {
             const [requests, friends] = await Promise.all([
-                api.contact.getFriendRequests("", PAGE_SIZE)
+                api.friendship.getFriendRequests("", PAGE_SIZE)
                     .then(res => res.data),
-                api.contact.getContacts(PAGE_SIZE)
+                api.friendship.getFriendships(PAGE_SIZE)
                     .then(res => res.data),
             ]);
 
@@ -74,7 +74,7 @@ export default function FindPeoplePage() {
     async function sendRequest(username: string) {
         setSending(username);
         try {
-            await api.contact.requestFriendship(username);
+            await api.friendship.requestFriendship(username);
             setResults(prev =>
                 prev.map(u =>
                     u.user.username === username ? { ...u, status: "pending_sent" } : u

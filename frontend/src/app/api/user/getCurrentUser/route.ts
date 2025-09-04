@@ -1,50 +1,5 @@
-import { NextResponse } from 'next/server'
-
-const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
+import { BackendApiClient } from '@/lib/backend-api';
 
 export async function GET(req: Request) {
-    let authorizationHeader = req.headers.get('authorization');
-    if (!authorizationHeader) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    // Normalize header: remove duplicate Bearer or quotes around token
-    const value = authorizationHeader.trim();
-    if (value.toLowerCase().startsWith('bearer ')) {
-        let token = value.slice(7).trim();
-        if (token.startsWith('"') && token.endsWith('"')) token = token.slice(1, -1);
-        if (token.toLowerCase().startsWith('bearer ')) token = token.slice(7).trim();
-        authorizationHeader = `Bearer ${token}`;
-    }
-    try {
-        const response = await fetch(`${BASE_URL}/User/getMeInfo`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authorizationHeader,
-            },
-        });
-
-        if (!response.ok) {
-            let errorData;
-            try {
-                const text = await response.text();
-                errorData = text ? JSON.parse(text) : { message: 'Unknown error' };
-            } catch {
-                errorData = { message: 'Invalid error response' };
-            }
-            return NextResponse.json(errorData, { status: response.status });
-        }
-
-        let data;
-        try {
-            const text = await response.text();
-            data = text ? JSON.parse(text) : {};
-    } catch {
-            data = { message: 'Invalid JSON response' };
-        }
-        return NextResponse.json(data);
-    } catch (error) {
-        console.error('Error fetching current user:', error);
-        return NextResponse.json({ message: 'Server error' }, { status: 500 });
-    }
+    return BackendApiClient.request(req, '/User/getMeInfo');
 } 

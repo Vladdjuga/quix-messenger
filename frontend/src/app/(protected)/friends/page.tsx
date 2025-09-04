@@ -20,12 +20,12 @@ export default function FriendsPage() {
 
         try {
             const data = query.trim() 
-                ? await api.contact.searchContacts(
+                ? await api.friendship.searchFriendships(
                     query, 
                     PAGE_SIZE,
                     append ? lastCreatedAt : undefined
                 ).then(res => res.data)
-                : await api.contact.getContacts(
+                : await api.friendship.getFriendships(
                     PAGE_SIZE,
                     append ? lastCreatedAt : undefined
                 ).then(res => res.data);

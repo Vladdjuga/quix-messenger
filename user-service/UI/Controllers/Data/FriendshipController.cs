@@ -116,7 +116,7 @@ public class FriendshipController:Controller
         [FromQuery] DateTime? lastCreatedAt)
     {
         var userGuid = HttpContext.GetUserGuid();
-    var size = (pageSize.HasValue && pageSize.Value > 0) ? Math.Min(pageSize.Value, 100) : 20;
+        var size = pageSize is > 0 ? Math.Min(pageSize.Value, 100) : 20;
 
         // When query is empty or whitespace, fall back to the regular paginated friendships list
         if (string.IsNullOrWhiteSpace(query))

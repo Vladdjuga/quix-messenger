@@ -15,7 +15,7 @@ export default function RequestsPage() {
         (async () => {
             setLoading(true);
             try {
-                const { data } = await api.contact.getFriendRequests("", PAGE_SIZE);
+                const { data } = await api.friendship.getFriendRequests("", PAGE_SIZE);
                 const list: ReadFriendshipDto[] = Array.isArray(data) ? (data as ReadFriendshipDto[]) : [];
                 setItems(list);
             } catch (e) {
@@ -45,7 +45,7 @@ export default function RequestsPage() {
                                 onClick={async () => {
                                     try {
                                         setLoading(true);
-                                        await api.contact.acceptFriendship(c.id);
+                                        await api.friendship.acceptFriendship(c.id);
                                         setItems(prev => prev.filter(x => x.id !== c.id));
                                     } catch (e) {
                                         const err = e as { response?: { data?: string } };

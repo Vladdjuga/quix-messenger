@@ -23,45 +23,37 @@ export const api = {
             );
         },
     },
-    contact: {
-        searchByUsernamePaged: (query: string, pageSize: number, lastCreatedAt?: string) => {
+    friendship: {
+        searchFriendships: (query: string, pageSize: number, lastCreatedAt?: string) => {
             return apiClient.get<ReadFriendshipDto[]>(
-                `/contact/search`,
+                `/friendship/searchFriendships`,
                 {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
         requestFriendship: (username: string) =>
-            apiClient.post<ReadFriendshipDto>('/contact/requestFriendship', {username}),
+            apiClient.post<ReadFriendshipDto>('/friendship/requestFriendship', {username}),
 
-        acceptFriendship: (contactId: string) =>
-            apiClient.post<ReadFriendshipDto>('/contact/acceptFriendship', {contactId}),
+        acceptFriendship: (friendshipId: string) =>
+            apiClient.post<ReadFriendshipDto>('/friendship/acceptFriendship', {friendshipId}),
 
         getFriendRequests: (query: string, pageSize: number, lastCreatedAt?: string) => {
             return apiClient.get<ReadFriendshipDto[]>(
-                `/contact/getFriendRequests`,
+                `/friendship/getFriendRequests`,
                 {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
 
-        // Get existing friends (active contacts)
-        getContacts: (pageSize: number = 20, lastCreatedAt?: string) => {
+        // Get existing friends (active friendships)
+        getFriendships: (pageSize: number = 20, lastCreatedAt?: string) => {
             return apiClient.get<ReadFriendshipDto[]>(
-                `/contact/getContacts`,
+                `/friendship/getFriendships`,
                 {params: {pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
 
-        // Search through existing friends
-        searchContacts: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
-            return apiClient.get<ReadFriendshipDto[]>(
-                `/contact/searchContacts`,
-                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
-            );
-        },
-
-        // Get contact relationship by contact user ID
-        getContact: (contactId: string) => {
-            return apiClient.get<ReadFriendshipDto>(`/contact/getContact/${contactId}`);
+        // Get friendship relationship by friendship ID
+        getFriendship: (friendshipId: string) => {
+            return apiClient.get<ReadFriendshipDto>(`/friendship/getFriendship/${friendshipId}`);
         },
     }
 }
