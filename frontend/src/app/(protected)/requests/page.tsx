@@ -61,7 +61,7 @@ export default function RequestsPage() {
                                 onClick={async () => {
                                     try {
                                         setLoading(true);
-                                        // For now, we'll just remove from the list. You might want to add a reject endpoint later
+                                        await api.friendship.rejectFriendRequest(c.id);
                                         setItems(prev => prev.filter(x => x.id !== c.id));
                                     } catch (e) {
                                         const err = e as { response?: { data?: string } };

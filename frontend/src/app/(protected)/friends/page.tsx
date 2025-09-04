@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
 import { api } from "@/app/api";
 
@@ -14,7 +14,7 @@ export default function FriendsPage() {
     const [hasMore, setHasMore] = useState(false);
     const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>();
 
-    async function fetchFriends(append = false, query = "") {
+    const fetchFriends = useCallback(async (append = false, query = "") => {
         setIsLoading(true);
         setError(null);
 
@@ -47,11 +47,11 @@ export default function FriendsPage() {
         } finally {
             setIsLoading(false);
         }
-    }
+    }, [lastCreatedAt]);
 
     useEffect(() => {
         fetchFriends(false, searchQuery);
-    }, [searchQuery]);
+    }, [searchQuery, fetchFriends]);
 
     return (
         <div className="p-6 max-w-2xl mx-auto space-y-4">

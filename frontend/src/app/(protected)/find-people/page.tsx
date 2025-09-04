@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ReadUserDto } from "@/lib/dto/ReadUserDto";
 import { searchUsersUseCase } from "@/lib/usecases/user/searchUsersUseCase";
 import { api } from "@/app/api";
@@ -26,8 +26,10 @@ export default function FindPeoplePage() {
 
     async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
         try {
-            const [requests, friends] = await Promise.all([
+            const [requests, sentRequests, friends] = await Promise.all([
                 api.friendship.getFriendRequests("", PAGE_SIZE)
+                    .then(res => res.data),
+                api.friendship.getSentRequests("", PAGE_SIZE)
                     .then(res => res.data),
                 api.friendship.getFriendships(PAGE_SIZE)
                     .then(res => res.data),
@@ -40,6 +42,9 @@ export default function FindPeoplePage() {
                 if (requests.some(r => r.username === user.username))
                     return { user, status: "pending_received" };
 
+                if (sentRequests.some(r => r.username === user.username))
+                    return { user, status: "pending_sent" };
+
                 return { user, status: "none" };
             });
         } catch {
@@ -47,7 +52,7 @@ export default function FindPeoplePage() {
         }
     }
 
-    async function fetchUsers(append = false) {
+    const fetchUsers = useCallback(async (append = false) => {
         if (!query.trim()) {
             setResults([]);
             setHasMore(false);
@@ -69,7 +74,7 @@ export default function FindPeoplePage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, [query, lastCreatedAt]);
 
     async function sendRequest(username: string) {
         setSending(username);
@@ -89,7 +94,7 @@ export default function FindPeoplePage() {
 
     useEffect(() => {
         fetchUsers();
-    }, [query]);
+    }, [query, fetchUsers]);
 
     function StatusButton({ u }: { u: UserWithStatus }) {
         switch (u.status) {
@@ -116,12 +121,20 @@ export default function FindPeoplePage() {
         <div className="p-6 max-w-2xl mx-auto space-y-4">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold">Find People</h1>
-                <a
-                    href="/friends"
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                >
-                    My Friends
-                </a>
+                <div className="flex space-x-2">
+                    <a
+                        href="/sent-requests"
+                        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
+                    >
+                        Sent Requests
+                    </a>
+                    <a
+                        href="/friends"
+                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    >
+                        My Friends
+                    </a>
+                </div>
             </div>
 
             <input
