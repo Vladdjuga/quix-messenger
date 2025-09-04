@@ -1,6 +1,6 @@
 using Application.Common;
 using Application.DTOs.Friendship;
-using AutoMapper;
+using Application.Mappings;
 using Domain.Repositories;
 using MediatR;
 
@@ -10,12 +10,10 @@ public class GetUsersFriendshipsHandler:
     IRequestHandler<GetUsersFriendshipsQuery,Result<IEnumerable<ReadFriendshipDto>>>
 {
     private readonly IFriendshipRepository _friendshipRepository;
-    private readonly IMapper _mapper;
 
-    public GetUsersFriendshipsHandler(IFriendshipRepository friendshipRepository, IMapper mapper)
+    public GetUsersFriendshipsHandler(IFriendshipRepository friendshipRepository)
     {
         _friendshipRepository = friendshipRepository;
-        _mapper = mapper;
     }
     public async Task<Result<IEnumerable<ReadFriendshipDto>>> Handle(GetUsersFriendshipsQuery request, CancellationToken cancellationToken)
     {
@@ -28,11 +26,11 @@ public class GetUsersFriendshipsHandler:
         if (!friendships.Any())
             return Result<IEnumerable<ReadFriendshipDto>>.Success([]);
 
-        // Pass current user id so mapper can choose the opposite side
-        var mapped = _mapper.Map<IEnumerable<ReadFriendshipDto>>(friendships, opts =>
-        {
-            opts.Items["CurrentUserId"] = request.UserId;
-        });
+        // Map manually - return the other user's information for each friendship
+        var mapped = friendships
+            .Select(friendship => friendship.MapToDto(request.UserId))
+            .Where(dto => dto is not null)
+            .Cast<ReadFriendshipDto>();
         return Result<IEnumerable<ReadFriendshipDto>>.Success(mapped);
     }
 }

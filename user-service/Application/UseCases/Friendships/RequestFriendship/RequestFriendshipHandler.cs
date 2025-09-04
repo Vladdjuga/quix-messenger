@@ -1,6 +1,6 @@
 using Application.Common;
 using Application.DTOs.Friendship;
-using AutoMapper;
+using Application.Mappings;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
@@ -14,16 +14,13 @@ public class RequestFriendshipHandler
 {
     private readonly IUserRepository _userRepository;
     private readonly IFriendshipRepository _friendshipRepository;
-    private readonly IMapper _mapper;
 
     public RequestFriendshipHandler(
         IUserRepository userRepository,
-        IFriendshipRepository friendshipRepository,
-        IMapper mapper)
+        IFriendshipRepository friendshipRepository)
     {
         _userRepository = userRepository;
         _friendshipRepository = friendshipRepository;
-        _mapper = mapper;
     }
 
     public async Task<Result<ReadFriendshipDto>> Handle(RequestFriendshipCommand request,
@@ -58,9 +55,12 @@ public class RequestFriendshipHandler
         var loadedFriendship = await _friendshipRepository.GetByIdAsync(
             pending.Id,
             cancellationToken,
-            include => include.Include(x => x.Friend));
+            include => include.Include(x => x.Friend).Include(x => x.User));
 
-        var dto = _mapper.Map<ReadFriendshipDto>(loadedFriendship);
+        if(loadedFriendship.Friend is null)
+            return Result<ReadFriendshipDto>.Failure("Failed to load created friendship");
+        // Map manually - return the friend's information
+        var dto = loadedFriendship.MapToDto(loadedFriendship.Friend);
         return Result<ReadFriendshipDto>.Success(dto);
     }
 }
