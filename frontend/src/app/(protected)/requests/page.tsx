@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "@/app/api";
-import { ReadContactDto } from "@/lib/dto/ReadContactDto";
+import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
 
 const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
 
 export default function RequestsPage() {
-    const [items, setItems] = useState<ReadContactDto[]>([]);
+    const [items, setItems] = useState<ReadFriendshipDto[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -16,7 +16,7 @@ export default function RequestsPage() {
             setLoading(true);
             try {
                 const { data } = await api.contact.getFriendRequests("", PAGE_SIZE);
-                const list: ReadContactDto[] = Array.isArray(data) ? (data as ReadContactDto[]) : [];
+                const list: ReadFriendshipDto[] = Array.isArray(data) ? (data as ReadFriendshipDto[]) : [];
                 setItems(list);
             } catch (e) {
                 const err = e as { response?: { data?: string } };

@@ -6,6 +6,7 @@ export class ReadUserDto{
     firstName: string;
     lastName: string;
     dateOfBirth: Date;
+    createdAt: Date;
 
     constructor(
         id: string,
@@ -13,7 +14,8 @@ export class ReadUserDto{
         email: string,
         firstName: string,
         lastName: string,
-        dateOfBirth: Date
+        dateOfBirth: Date,
+        createdAt: Date
     ) {
         this.id = id;
         this.username = username;
@@ -21,5 +23,6 @@ export class ReadUserDto{
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
+        this.createdAt = createdAt;
     }
 }

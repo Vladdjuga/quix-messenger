@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common;
 using Application.DTOs.User;
-using Application.Interfaces.DTOs;
 using Application.UseCases.Users.Data;
 using Application.UseCases.Users.Data.GetUser;
 using Application.UseCases.Users.Data.UpdateUser;
@@ -48,14 +47,12 @@ public class UserController : Controller
     /// </summary>
     /// <param name="username">The username string that will be passed by the client.</param>
     /// <returns>
-    /// IReadUserDto or Bad Request if the exception was thrown or user was not found.
-    /// The IReadUserDto instance can be either ReadUserDto or ReadUserPublicDto.
-    /// If the JWT authorizing token is user`s then it will return ReadUserDto if not ReadUserPublicDto.
+    /// ReadUserDto or Bad Request if the exception was thrown or user was not found.
     /// </returns>
     [Authorize]
     [GetUserGuid]
     [HttpGet("getUserInfo/{username}")]
-    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetUserInfo(
+    public async Task<Results<Ok<ReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetUserInfo(
         string username)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -106,7 +103,7 @@ public class UserController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("getMeInfo")]
-    public async Task<Results<Ok<IReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetMeInfo()
+    public async Task<Results<Ok<ReadUserDto>, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetMeInfo()
     {
         var userGuid = HttpContext.GetUserGuid();
 

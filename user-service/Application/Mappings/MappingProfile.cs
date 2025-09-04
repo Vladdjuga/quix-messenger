@@ -14,7 +14,6 @@ public class MappingProfile:Profile
             .ForMember(dest=>dest.PasswordHash,opt=>opt.MapFrom(src=>src.Password));
         //
         CreateMap<UserEntity, ReadUserDto>();
-        CreateMap<UserEntity, ReadUserPublicDto>();
         //
         CreateMap<UpdateUserDto, UserEntity>()
             .ForAllMembers(opts => opts.Condition((_, _, srcMember) => srcMember != null));
