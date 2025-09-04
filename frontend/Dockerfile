@@ -11,6 +11,9 @@ RUN npm install
 # Копируем остальные файлы
 COPY . .
 
+# Remove .env.local to ensure we use .env for Docker environment
+RUN rm -f .env.local
+
 # Собираем проект
 RUN npm run build
 
