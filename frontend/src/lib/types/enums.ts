@@ -10,7 +10,7 @@ export enum ChatRole {
     User = "User"
 }
 
-export enum ContactStatus {
+export enum FriendshipStatus {
     Pending = "Pending",
     Active = "Active",
     Blocked = "Blocked",

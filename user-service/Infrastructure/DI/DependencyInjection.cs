@@ -45,7 +45,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IChatRepository,ChatRepository>();
         services.AddScoped<IUserSessionRepository,UserSessionRepository>();
-        services.AddScoped<IUserContactRepository,UserContactRepository>();
+        services.AddScoped<IFriendshipRepository,FriendshipRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();

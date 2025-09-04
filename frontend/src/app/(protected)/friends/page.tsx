@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ReadContactDto } from "@/lib/dto/ReadContactDto";
+import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
 import { api } from "@/app/api";
 
 const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
 
 export default function FriendsPage() {
-    const [friends, setFriends] = useState<ReadContactDto[]>([]);
+    const [friends, setFriends] = useState<ReadFriendshipDto[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);

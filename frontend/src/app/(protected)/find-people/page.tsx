@@ -1,13 +1,13 @@
 "use client";
 
-import {useEffect, useState} from "react";
-import {ReadUserDto} from "@/lib/dto/ReadUserDto";
-import {searchUsersUseCase} from "@/lib/usecases/user/searchUsersUseCase";
-import {api} from "@/app/api";
+import { useEffect, useState } from "react";
+import { ReadUserDto } from "@/lib/dto/ReadUserDto";
+import { searchUsersUseCase } from "@/lib/usecases/user/searchUsersUseCase";
+import { api } from "@/app/api";
 
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
+const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
 
-type UserRelationshipStatus = 'none' | 'pending_sent' | 'pending_received' | 'friends';
+type UserRelationshipStatus = "none" | "pending_sent" | "pending_received" | "friends";
 
 interface UserWithStatus {
     user: ReadUserDto;
@@ -18,41 +18,30 @@ interface UserWithStatus {
 export default function FindPeoplePage() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<UserWithStatus[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [sending, setSending] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
-    const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>();
-    const [sendingRequests, setSendingRequests] = useState<Set<string>>(new Set());
-    const [requestErrors, setRequestErrors] = useState<Record<string, string>>({});
+    const [lastCreatedAt, setLastCreatedAt] = useState<string>();
 
-    async function checkUserRelationshipStatus(users: ReadUserDto[]): Promise<UserWithStatus[]> {
-        // Get all existing contacts to check relationship status
+    async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
         try {
-            const [friendRequests, friends] = await Promise.all([
-                api.contact.getFriendRequests("", 1000).then(res => res.data), // Get all pending requests
-                api.contact.getContacts(1000).then(res => res.data) // Get all friends
+            const [requests, friends] = await Promise.all([
+                api.contact.getFriendRequests("", PAGE_SIZE).then(res => res.data),
+                api.contact.getContacts(PAGE_SIZE).then(res => res.data),
             ]);
 
             return users.map(user => {
-                // Check if this user is already a friend (ReadContactDto.username matches)
-                const existingFriend = friends.find(f => f.username === user.username);
-                if (existingFriend) {
-                    return { user, status: 'friends' as UserRelationshipStatus, contactId: existingFriend.id };
-                }
+                if (friends.some(f => f.username === user.username))
+                    return { user, status: "friends" };
 
-                // Check if there's a pending request from this user
-                const pendingRequest = friendRequests.find(req => req.username === user.username);
-                if (pendingRequest) {
-                    return { user, status: 'pending_received' as UserRelationshipStatus, contactId: pendingRequest.id };
-                }
+                if (requests.some(r => r.username === user.username))
+                    return { user, status: "pending_received" };
 
-                // For sent requests, we'll track them locally (since we don't have an endpoint for outgoing requests)
-                return { user, status: 'none' as UserRelationshipStatus };
+                return { user, status: "none" };
             });
-        } catch (error) {
-            console.error("Failed to check relationship status:", error);
-            // Fallback: return users with 'none' status
-            return users.map(user => ({ user, status: 'none' as UserRelationshipStatus }));
+        } catch {
+            return users.map(user => ({ user, status: "none" }));
         }
     }
 
@@ -60,215 +49,117 @@ export default function FindPeoplePage() {
         if (!query.trim()) {
             setResults([]);
             setHasMore(false);
-            setLastCreatedAt(undefined);
-            setSendingRequests(new Set());
-            setRequestErrors({});
             return;
         }
 
-        setIsLoading(true);
+        setLoading(true);
         setError(null);
 
         try {
-            const userData = await searchUsersUseCase(
-                query, 
-                PAGE_SIZE,
-                append ? lastCreatedAt : undefined
-            );
+            const users = await searchUsersUseCase(query, PAGE_SIZE, append ? lastCreatedAt : undefined);
+            const withStatuses = await getStatuses(users);
 
-            const usersWithStatus = await checkUserRelationshipStatus(userData);
-
-            if (append) {
-                setResults(prev => [...prev, ...usersWithStatus]);
-            } else {
-                setResults(usersWithStatus);
-                setSendingRequests(new Set());
-                setRequestErrors({});
-            }
-
-            setHasMore(userData.length === PAGE_SIZE);
-            setLastCreatedAt(undefined);
+            setResults(prev => (append ? [...prev, ...withStatuses] : withStatuses));
+            setHasMore(users.length === PAGE_SIZE);
+            setLastCreatedAt(users.at(-1)?.createdAt.toString());
         } catch (e) {
-            const err = e as Error;
-            setError(err.message || "Failed to search users");
+            setError((e as Error).message ?? "Search failed");
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     }
 
-    async function sendFriendRequest(username: string) {
-        setSendingRequests(prev => new Set([...prev, username]));
+    // Отправка заявки
+    async function sendRequest(username: string) {
+        setSending(username);
         try {
-            setRequestErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[username];
-                return newErrors;
-            });
-            
             await api.contact.requestFriendship(username);
-            
-            // Update the user's status to show request was sent
-            setResults(prev => prev.map(item => 
-                item.user.username === username 
-                    ? { ...item, status: 'pending_sent' as UserRelationshipStatus }
-                    : item
-            ));
-        } catch (error: unknown) {
-            interface ErrorResponse {
-                response?: {
-                    data?: {
-                        message?: string;
-                    };
-                };
-                message?: string;
-            }
-            
-            const err = error as ErrorResponse;
-            const errorMessage = err?.response?.data?.message || 
-                                err?.message || 
-                                "Failed to send friend request";
-            
-            // Check if it's a duplicate request error
-            if (errorMessage.includes("already exists")) {
-                setResults(prev => prev.map(item => 
-                    item.user.username === username 
-                        ? { ...item, status: 'pending_sent' as UserRelationshipStatus }
-                        : item
-                ));
-                setRequestErrors(prev => ({ ...prev, [username]: "Request already sent" }));
-            } else {
-                setRequestErrors(prev => ({ ...prev, [username]: errorMessage }));
-            }
+            setResults(prev =>
+                prev.map(u =>
+                    u.user.username === username ? { ...u, status: "pending_sent" } : u
+                )
+            );
+        } catch (e) {
+            setError((e as Error).message ?? "Failed to send request");
         } finally {
-            setSendingRequests(prev => {
-                const newSet = new Set(prev);
-                newSet.delete(username);
-                return newSet;
-            });
+            setSending(null);
         }
     }
 
-    function getStatusDisplay(userWithStatus: UserWithStatus) {
-        const { status } = userWithStatus;
-        
-        switch (status) {
-            case 'friends':
-                return <span className="text-sm text-green-600 font-medium">✓ Friends</span>;
-            case 'pending_sent':
-                return <span className="text-sm text-blue-600">Request sent</span>;
-            case 'pending_received':
-                return <span className="text-sm text-yellow-600">Request received</span>;
-            case 'none':
+    // Автопоиск при изменении query
+    useEffect(() => {
+        fetchUsers();
+    }, [query]);
+
+    function StatusButton({ u }: { u: UserWithStatus }) {
+        switch (u.status) {
+            case "friends":
+                return <span className="text-green-600 text-sm font-medium">✓ Friends</span>;
+            case "pending_sent":
+                return <span className="text-blue-600 text-sm">Request sent</span>;
+            case "pending_received":
+                return <span className="text-yellow-600 text-sm">Request received</span>;
             default:
                 return (
                     <button
-                        className="border rounded px-3 py-1 text-sm bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-400"
-                        onClick={() => sendFriendRequest(userWithStatus.user.username)}
-                        disabled={isLoading || sendingRequests.has(userWithStatus.user.username)}
+                        disabled={sending === u.user.username}
+                        onClick={() => sendRequest(u.user.username)}
+                        className="bg-blue-500 text-white text-sm px-3 py-1 rounded hover:bg-blue-600 disabled:bg-gray-400"
                     >
-                        {sendingRequests.has(userWithStatus.user.username) ? 'Sending...' : 'Add Friend'}
+                        {sending === u.user.username ? "Sending..." : "Add Friend"}
                     </button>
                 );
         }
     }
-
-    useEffect(() => {
-        const searchUsers = async () => {
-            if (!query.trim()) {
-                setResults([]);
-                setHasMore(false);
-                setLastCreatedAt(undefined);
-                setSendingRequests(new Set());
-                setRequestErrors({});
-                return;
-            }
-
-            setIsLoading(true);
-            setError(null);
-            setSendingRequests(new Set());
-            setRequestErrors({});
-
-            try {
-                const userData = await searchUsersUseCase(
-                    query, 
-                    PAGE_SIZE,
-                    undefined
-                );
-
-                const usersWithStatus = await checkUserRelationshipStatus(userData);
-                setResults(usersWithStatus);
-                setHasMore(userData.length === PAGE_SIZE);
-                setLastCreatedAt(undefined);
-            } catch (e) {
-                const err = e as Error;
-                setError(err.message || "Failed to search users");
-                console.error("Error fetching users:", err);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        searchUsers();
-    }, [query]);
 
     return (
         <div className="p-6 max-w-2xl mx-auto space-y-4">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold">Find People</h1>
-                <a 
-                    href="/friends" 
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+                <a
+                    href="/friends"
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                 >
                     My Friends
                 </a>
             </div>
-            
+
             <input
-                className="w-full border rounded px-3 py-2"
-                placeholder="Search by username..."
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search by username..."
+                className="w-full border rounded px-3 py-2"
             />
-            
-            {isLoading && <p>Loading...</p>}
+
+            {loading && <p>Loading...</p>}
             {error && <p className="text-red-600">{error}</p>}
-            
+
             <ul className="divide-y">
-                {results.map(userWithStatus => (
-                    <li key={userWithStatus.user.id} className="py-3 flex items-center justify-between">
+                {results.map(u => (
+                    <li key={u.user.id} className="py-3 flex items-center justify-between">
                         <div>
-                            <p className="font-medium">{userWithStatus.user.username}</p>
+                            <p className="font-medium">{u.user.username}</p>
                             <p className="text-sm text-gray-500">
-                                {userWithStatus.user.firstName} {userWithStatus.user.lastName}
+                                {u.user.firstName} {u.user.lastName}
                             </p>
-                            <p className="text-xs text-gray-400">{userWithStatus.user.email}</p>
-                            {requestErrors[userWithStatus.user.username] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                    {requestErrors[userWithStatus.user.username]}
-                                </p>
-                            )}
+                            <p className="text-xs text-gray-400">{u.user.email}</p>
                         </div>
-                        <div className="flex items-center">
-                            {getStatusDisplay(userWithStatus)}
-                        </div>
+                        <StatusButton u={u} />
                     </li>
                 ))}
             </ul>
-            
-            {results.length === 0 && query && !isLoading && (
+
+            {!loading && results.length === 0 && query && (
                 <p className="text-gray-500 text-center py-8">No users found for &ldquo;{query}&rdquo;</p>
             )}
-            
-            {hasMore && !isLoading && (
-                <div className="pt-3">
-                    <button 
-                        className="border rounded px-3 py-2" 
-                        onClick={() => fetchUsers(true)}
-                        disabled={isLoading}
-                    >
-                        Load more
-                    </button>
-                </div>
+
+            {hasMore && !loading && (
+                <button
+                    onClick={() => fetchUsers(true)}
+                    className="border rounded px-3 py-2"
+                >
+                    Load more
+                </button>
             )}
         </div>
     );
