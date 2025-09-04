@@ -99,6 +99,14 @@ export default function Header() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link
+                                        href="/sent-requests"
+                                        className="transition-colors hover:text-black duration-300"
+                                    >
+                                        Sent Requests
+                                    </Link>
+                                </li>
+                                <li>
                                     <button
                                         onClick={handleLogout}
                                         className="transition-colors hover:text-black duration-300"

@@ -1,101 +1,82 @@
-// lib/api/axios.ts
 import axios from "axios";
-import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
-// Small helper to normalize tokens coming from various sources
-const cleanToken = (raw?: string | null): string | null => {
-    if (!raw) return null;
-    let t = raw.trim();
-    // Remove surrounding quotes if present
-    if (t.startsWith('"') && t.endsWith('"')) {
-        t = t.slice(1, -1);
-    }
-    // Remove accidental Bearer prefix stored in value
-    if (t.toLowerCase().startsWith('bearer ')) {
-        t = t.slice(7).trim();
-    }
-    return t;
-};
-
+// For client-side requests, we should use Next.js API routes, not direct backend URLs
 const apiClient = axios.create({
-    baseURL: "/api",
+    baseURL: '/api', // This will use Next.js API routes
     headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     },
-    withCredentials: true,
 });
 
 let isRefreshing = false;
 let refreshAttempts = 0;
 const MAX_REFRESH_ATTEMPTS = 3;
-let failedQueue: Array<{
-    resolve: (token: string) => void;
-    reject: (error: unknown) => void;
-}> = [];
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (error: Error) => void; }> = [];
 
-const processQueue = (error: unknown, token: string | null = null) => {
+const getToken = (): string | null => {
+    const token = localStorage.getItem("jwt");
+    if (!token) return null;
+    
+    // Clean token - remove quotes, whitespace, and Bearer prefix
+    const cleaned = token.replace(/["'\s\r\n]/g, '')
+        .replace(/^bearer\s*/i, '');
+    
+    // Validate JWT format (should have 3 parts)
+    if (cleaned.split('.').length !== 3) {
+        localStorage.removeItem("jwt");
+        return null;
+    }
+    
+    return cleaned;
+};
+
+const processQueue = (error: Error | null, token: string | null) => {
     failedQueue.forEach(({ resolve, reject }) => {
         if (error) {
             reject(error);
         } else if (token) {
             resolve(token);
-        } else {
-            reject(new Error("No token provided"));
         }
     });
     failedQueue = [];
 };
 
-// Request interceptor - add token to requests
-apiClient.interceptors.request.use(
-    (config) => {
-        const raw = localStorage.getItem("jwt");
-        const token = cleanToken(raw);
-        if (token && config.headers) {
-            // Validate JWT format before using it
-            const tokenParts = token.split('.')
-            if (tokenParts.length !== 3) {
-                console.error('Invalid JWT format in localStorage - expected 3 parts, got:', tokenParts.length);
-                console.error('Token:', JSON.stringify(token));
-                // Remove the malformed token
-                localStorage.removeItem("jwt");
-                return config;
-            }
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+const redirectToLogin = () => {
+    localStorage.removeItem("jwt");
+    if (typeof window !== "undefined") {
+        window.location.href = "/login";
+    }
+};
 
-// Response interceptor - handle token refresh on 401
+// Add token to requests
+apiClient.interceptors.request.use((config) => {
+    const token = getToken();
+    if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+// Handle token refresh on 401
 apiClient.interceptors.response.use(
     (response) => {
-        // Reset refresh attempts on successful response
-        refreshAttempts = 0;
+        refreshAttempts = 0; // Reset on success
         return response;
     },
     async (error) => {
         const originalRequest = error.config;
 
-        // Only handle 401 errors and avoid infinite loops
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
-            // Check if we've exceeded maximum refresh attempts
             if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-                console.error("Maximum refresh attempts exceeded, redirecting to login");
-                localStorage.removeItem("jwt");
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
+                redirectToLogin();
                 return Promise.reject(error);
             }
 
             if (isRefreshing) {
-                // If already refreshing, queue this request
                 return new Promise((resolve, reject) => {
-                    failedQueue.push({ 
+                    failedQueue.push({
                         resolve: (token: string) => {
                             originalRequest.headers.Authorization = `Bearer ${token}`;
                             resolve(apiClient(originalRequest));
@@ -109,53 +90,25 @@ apiClient.interceptors.response.use(
             refreshAttempts++;
 
             try {
-                console.log(`Attempting to refresh token... (attempt ${refreshAttempts}/${MAX_REFRESH_ATTEMPTS})`);
-                const response = await axios.post("/api/auth/refresh", {}, { 
-                    withCredentials: true 
-                });
-                
-                // The refresh endpoint returns { accessToken: "..." }
-                let newToken: string = response.data.accessToken;
-                
-                if (!newToken) {
-                    throw new Error("No access token received from refresh endpoint");
-                }
+                const response = await axios
+                    .post("/api/auth/refresh", {}, { withCredentials: true });
+                const newToken = response.data.accessToken;
 
-                // Validate JWT format before using it
-                newToken = cleanToken(newToken) ?? "";
-                const tokenParts = newToken.split('.');
-                if (tokenParts.length !== 3) {
-                    console.error('Invalid JWT format received from refresh endpoint - expected 3 parts, got:', tokenParts.length);
-                    console.error('Token:', JSON.stringify(newToken));
-                    throw new Error("Invalid JWT format received from refresh endpoint");
+                if (!newToken || newToken.split('.').length !== 3) {
+                    throw new Error("Invalid token received");
                 }
-
-                // Log token details for debugging (remove in production)
-                console.log('New token length:', newToken.length);
-                console.log('New token preview:', newToken.substring(0, 50) + '...');
-                console.log('Token starts with Bearer?', newToken.startsWith('Bearer '));
-                console.log('Token parts lengths:', tokenParts.map((part: string) => part.length));
 
                 localStorage.setItem("jwt", newToken);
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 
                 processQueue(null, newToken);
-                console.log("Token refreshed successfully");
-                
-                // Reset refresh attempts on successful refresh
                 refreshAttempts = 0;
 
                 return apiClient(originalRequest);
             } catch (refreshError) {
-                console.error("Token refresh failed:", refreshError);
-                processQueue(refreshError, null);
-                localStorage.removeItem("jwt");
-                
-                // Redirect to login if refresh fails
-                if (typeof window !== "undefined") {
-                    window.location.href = "/login";
-                }
-                
+                const error = refreshError instanceof Error ? refreshError : new Error('Token refresh failed');
+                processQueue(error, null);
+                redirectToLogin();
                 throw refreshError;
             } finally {
                 isRefreshing = false;
@@ -166,7 +119,6 @@ apiClient.interceptors.response.use(
     }
 );
 
-// Reset refresh attempts (useful after successful login)
 export const resetRefreshAttempts = () => {
     refreshAttempts = 0;
 };

@@ -36,9 +36,22 @@ export const api = {
         acceptFriendship: (friendshipId: string) =>
             apiClient.post<ReadFriendshipDto>('/friendship/acceptFriendship', {friendshipId}),
 
+        cancelFriendRequest: (friendshipId: string) =>
+            apiClient.delete(`/friendship/cancelFriendRequest/${friendshipId}`),
+
+        rejectFriendRequest: (friendshipId: string) =>
+            apiClient.delete(`/friendship/rejectFriendRequest/${friendshipId}`),
+
         getFriendRequests: (query: string, pageSize: number, lastCreatedAt?: string) => {
             return apiClient.get<ReadFriendshipDto[]>(
                 `/friendship/getFriendRequests`,
+                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
+            );
+        },
+
+        getSentRequests: (query: string, pageSize: number, lastCreatedAt?: string) => {
+            return apiClient.get<ReadFriendshipDto[]>(
+                `/friendship/getSentRequests`,
                 {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
