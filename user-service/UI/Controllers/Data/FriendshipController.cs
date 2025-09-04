@@ -9,6 +9,8 @@ using Application.UseCases.Friendships.CreateFriendshipByUsername;
 using Application.UseCases.Friendships.GetFriendship;
 using Application.UseCases.Friendships.GetUsersFriendships;
 using Application.UseCases.Friendships.SearchIncomingFriendRequests;
+using Application.UseCases.Friendships.SearchOutgoingFriendRequests;
+using Application.UseCases.Friendships.ChangeFriendshipStatusById;
 using Application.UseCases.Friendships.SearchUsersFriendships;
 using Application.Utilities;
 using AutoMapper;
@@ -182,6 +184,34 @@ public class FriendshipController:Controller
 
     [Authorize]
     [GetUserGuid]
+    [HttpGet("getSentRequests")]
+    public async Task<Results<Ok<IEnumerable<ReadFriendshipDto>>, 
+        BadRequest<ErrorResponse>,UnauthorizedHttpResult>> GetUsersSentRequests(
+        [FromQuery] string query,
+        [FromQuery] int pageSize,
+        [FromQuery] DateTime? lastCreatedAt)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        var q = new SearchOutgoingFriendRequestsQuery(
+            userGuid,
+            query,
+            lastCreatedAt,
+            pageSize);
+        _logger.LogInformation("Searching outgoing friend requests for {UserId}", userGuid);
+        var result = await _mediator.Send(q);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error searching outgoing friend requests for {UserId}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        _logger.LogInformation("Retrieved outgoing friend requests for {UserId}", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
+
+    [Authorize]
+    [GetUserGuid]
     [HttpPatch("changeFriendshipStatus/{friendshipId:guid}/{status}")]
     public async Task<Results<Ok, BadRequest<ErrorResponse>,
         UnauthorizedHttpResult>> ChangeFriendshipStatus(Guid friendshipId,
@@ -205,6 +235,56 @@ public class FriendshipController:Controller
         _logger.LogInformation("Successfully changed friendship status to {TargetStatus}", status);
         return TypedResults.Ok();
     }
+    [Authorize]
+    [GetUserGuid]
+    [HttpDelete("cancelFriendRequest/{friendshipId:guid}")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>,
+        UnauthorizedHttpResult>> CancelFriendRequest(Guid friendshipId)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+        
+        var command = new ChangeFriendshipStatusByIdCommand(
+            userGuid,
+            friendshipId,
+            FriendshipStatus.Cancelled
+        );
+        _logger.LogInformation("Cancelling friend request {FriendshipId}", friendshipId);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error cancelling friend request : {FriendshipId}", friendshipId);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        _logger.LogInformation("Successfully cancelled friend request {FriendshipId}", friendshipId);
+        return TypedResults.Ok();
+    }
+
+    [Authorize]
+    [GetUserGuid]
+    [HttpDelete("rejectFriendRequest/{friendshipId:guid}")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>,
+        UnauthorizedHttpResult>> RejectFriendRequest(Guid friendshipId)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+        
+        var command = new ChangeFriendshipStatusByIdCommand(
+            userGuid,
+            friendshipId,
+            FriendshipStatus.Rejected
+        );
+        _logger.LogInformation("Rejecting friend request {FriendshipId}", friendshipId);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error rejecting friend request : {FriendshipId}", friendshipId);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        _logger.LogInformation("Successfully rejected friend request {FriendshipId}", friendshipId);
+        return TypedResults.Ok();
+    }
+
     [Authorize]
     [GetUserGuid]
     [HttpPost("requestFriendship/{username}")]

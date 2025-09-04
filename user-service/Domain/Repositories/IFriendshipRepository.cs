@@ -23,6 +23,7 @@ public interface IFriendshipRepository
         CancellationToken cancellationToken);
     Task<FriendshipEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken,
         Func<IQueryable<FriendshipEntity>, IQueryable<FriendshipEntity>>? include = null);
+    Task<FriendshipEntity> GetByIdWithNavigationAsync(Guid id, CancellationToken cancellationToken);
     Task<FriendshipEntity?> GetFriendshipByUsernameAsync(Guid userId,
         string friendUsername, CancellationToken cancellationToken);
     Task<IEnumerable<FriendshipEntity>> SearchFriendshipsByUsernameAsync(
@@ -34,6 +35,14 @@ public interface IFriendshipRepository
         CancellationToken cancellationToken);
     
     Task<IEnumerable<FriendshipEntity>> SearchIncomingFriendshipRequestsAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        FriendshipStatus targetStatus,
+        CancellationToken cancellationToken);
+    
+    Task<IEnumerable<FriendshipEntity>> SearchOutgoingFriendshipRequestsAsync(
         Guid userId,
         string query,
         DateTime? lastCreatedAt,

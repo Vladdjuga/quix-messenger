@@ -111,6 +111,16 @@ public class FriendshipRepository:IFriendshipRepository
                           throw new ApplicationException("Entity not found");
         return friendship;
     }
+    
+    public async Task<FriendshipEntity> GetByIdWithNavigationAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var friendship = await _dbSet
+            .Include(x => x.User)
+            .Include(x => x.Friend)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
+                          throw new ApplicationException("Entity not found");
+        return friendship;
+    }
 
     public async Task<FriendshipEntity?> GetFriendshipByUsernameAsync(Guid userId, string friendUsername, CancellationToken cancellationToken)
     {
@@ -163,6 +173,7 @@ public class FriendshipRepository:IFriendshipRepository
         var q = _dbSet
             .Where(el => el.FriendId == userId && el.Status == targetStatus)
             .Include(el => el.User)
+            .Include(el=>el.Friend)
             .AsQueryable();
 
         if (lastCreatedAt is not null)
@@ -173,6 +184,38 @@ public class FriendshipRepository:IFriendshipRepository
             var lowered = query.ToLower();
             q = q.Where(el => el.User != null && 
                               EF.Functions.Like(el.User.Username.ToLower(),
+                                  $"%{query}%"));
+        }
+
+        var friendships = await q
+            .OrderByDescending(el => el.CreatedAt)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return friendships;
+    }
+
+    public async Task<IEnumerable<FriendshipEntity>> SearchOutgoingFriendshipRequestsAsync(
+        Guid userId,
+        string query,
+        DateTime? lastCreatedAt,
+        int pageSize,
+        FriendshipStatus targetStatus,
+        CancellationToken cancellationToken)
+    {
+        var q = _dbSet
+            .Where(el => el.UserId == userId && el.Status == targetStatus)
+            .Include(el => el.User)
+            .Include(el => el.Friend)
+            .AsQueryable();
+
+        if (lastCreatedAt is not null)
+            q = q.Where(el => el.CreatedAt < lastCreatedAt);
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var lowered = query.ToLower();
+            q = q.Where(el => el.Friend != null && 
+                              EF.Functions.Like(el.Friend.Username.ToLower(),
                                   $"%{query}%"));
         }
 
