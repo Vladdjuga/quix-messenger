@@ -27,8 +27,10 @@ export default function FindPeoplePage() {
     async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
         try {
             const [requests, friends] = await Promise.all([
-                api.contact.getFriendRequests("", PAGE_SIZE).then(res => res.data),
-                api.contact.getContacts(PAGE_SIZE).then(res => res.data),
+                api.contact.getFriendRequests("", PAGE_SIZE)
+                    .then(res => res.data),
+                api.contact.getContacts(PAGE_SIZE)
+                    .then(res => res.data),
             ]);
 
             return users.map(user => {
@@ -69,7 +71,6 @@ export default function FindPeoplePage() {
         }
     }
 
-    // Отправка заявки
     async function sendRequest(username: string) {
         setSending(username);
         try {
@@ -86,7 +87,6 @@ export default function FindPeoplePage() {
         }
     }
 
-    // Автопоиск при изменении query
     useEffect(() => {
         fetchUsers();
     }, [query]);

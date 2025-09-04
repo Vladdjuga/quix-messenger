@@ -53,11 +53,6 @@ export default function FriendsPage() {
         fetchFriends(false, searchQuery);
     }, [searchQuery]);
 
-    useEffect(() => {
-        // Load friends on component mount
-        fetchFriends();
-    }, []);
-
     return (
         <div className="p-6 max-w-2xl mx-auto space-y-4">
             <div className="flex justify-between items-center">
