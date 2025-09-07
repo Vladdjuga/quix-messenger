@@ -3,18 +3,21 @@
 💬 Microservice-based messenger backend with MongoDB, PostgreSQL, gRPC and WebSocket.
 
 ## 📦 Services
-- **user-service**: Handles auth, profile and contacts (PostgreSQL)
-- **message-service**: Message storage and querying (MongoDB)
-- **real-time-service**: Real-time messaging ([gorilla/websocket](https://github.com/gorilla/websocket))
+- **user-service**: Handles auth, profile and friendships (PostgreSQL, ASP.NET Core)
+- **message-service**: Message storage and querying (MongoDB, ASP.NET Core)
+- **realtime-service-ts**: Real-time messaging via WebSocket (TypeScript/Express)
+- **frontend**: Next.js web application (TypeScript, Tailwind CSS)
 
 ## ⚙️ Stack
 - ASP.NET Core 9
-- [Gin](https://github.com/gin-gonic/gin)
+- Node.js/Express (TypeScript)
+- Next.js 15
 - EF Core
-- MongoDB / MSSQL
+- MongoDB / PostgreSQL
 - Domain driven design
 - gRPC
 - WebSocket
+- React/TypeScript
 
 ## 🔧 Setup
 
@@ -31,18 +34,19 @@
   make down # this command will stop all services
   ```
 
-## 🧠 Architechture
+## 🧠 Architecture
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d7510037-0e1a-4b47-9570-60c7ea91e057" width="400"/>
 </p>
 
 ## ✅ Planned Features
 - [x] Authorization & Authentication
+- [x] Friendship management system
 - [x] Logging
 - [x] Containerization
 - [x] gRPC microservice communication
-- [x] Websocket
-- [ ] Frontend
+- [x] WebSocket real-time messaging
+- [x] Frontend (Next.js)
 - [ ] File/image uploading
 - [ ] Video/voice calls
 - [ ] Caching
