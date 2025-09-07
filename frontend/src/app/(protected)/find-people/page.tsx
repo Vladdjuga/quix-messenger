@@ -1,179 +1,107 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { ReadUserDto } from "@/lib/dto/ReadUserDto";
-import { searchUsersUseCase } from "@/lib/usecases/user/searchUsersUseCase";
-import { api } from "@/app/api";
-
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
-
-type UserRelationshipStatus = "none" | "pending_sent" | "pending_received" | "friends";
-
-interface UserWithStatus {
-    user: ReadUserDto;
-    status: UserRelationshipStatus;
-    contactId?: string;
-}
+import { useUserSearch } from "@/lib/hooks/data/user/useUserSearch";
+import UserCard from "@/components/user/UserCard";
 
 export default function FindPeoplePage() {
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState<UserWithStatus[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [sending, setSending] = useState<string | null>(null);
-    const [hasMore, setHasMore] = useState(false);
-    const [lastCreatedAt, setLastCreatedAt] = useState<string>();
+  const {
+    query,
+    setQuery,
+    results,
+    loading,
+    error,
+    hasMore,
+    fetchMore,
+    updateUserStatus,
+    removeUser
+  } = useUserSearch();
 
-    async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
-        try {
-            const [requests, sentRequests, friends] = await Promise.all([
-                api.friendship.getFriendRequests("", PAGE_SIZE)
-                    .then(res => res.data),
-                api.friendship.getSentRequests("", PAGE_SIZE)
-                    .then(res => res.data),
-                api.friendship.getFriendships(PAGE_SIZE)
-                    .then(res => res.data),
-            ]);
-
-            return users.map(user => {
-                if (friends.some(f => f.username === user.username))
-                    return { user, status: "friends" };
-
-                if (requests.some(r => r.username === user.username))
-                    return { user, status: "pending_received" };
-
-                if (sentRequests.some(r => r.username === user.username))
-                    return { user, status: "pending_sent" };
-
-                return { user, status: "none" };
-            });
-        } catch {
-            return users.map(user => ({ user, status: "none" }));
-        }
-    }
-
-    const fetchUsers = useCallback(async (append = false) => {
-        if (!query.trim()) {
-            setResults([]);
-            setHasMore(false);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const users = await searchUsersUseCase(query, PAGE_SIZE, append ? lastCreatedAt : undefined);
-            const withStatuses = await getStatuses(users);
-
-            setResults(prev => (append ? [...prev, ...withStatuses] : withStatuses));
-            setHasMore(users.length === PAGE_SIZE);
-            setLastCreatedAt(users.at(-1)?.createdAt.toString());
-        } catch (e) {
-            setError((e as Error).message ?? "Search failed");
-        } finally {
-            setLoading(false);
-        }
-    }, [query, lastCreatedAt]);
-
-    async function sendRequest(username: string) {
-        setSending(username);
-        try {
-            await api.friendship.requestFriendship(username);
-            setResults(prev =>
-                prev.map(u =>
-                    u.user.username === username ? { ...u, status: "pending_sent" } : u
-                )
-            );
-        } catch (e) {
-            setError((e as Error).message ?? "Failed to send request");
-        } finally {
-            setSending(null);
-        }
-    }
-
-    useEffect(() => {
-        fetchUsers();
-    }, [query, fetchUsers]);
-
-    function StatusButton({ u }: { u: UserWithStatus }) {
-        switch (u.status) {
-            case "friends":
-                return <span className="text-green-600 text-sm font-medium">✓ Friends</span>;
-            case "pending_sent":
-                return <span className="text-blue-600 text-sm">Request sent</span>;
-            case "pending_received":
-                return <span className="text-yellow-600 text-sm">Request received</span>;
-            default:
-                return (
-                    <button
-                        disabled={sending === u.user.username}
-                        onClick={() => sendRequest(u.user.username)}
-                        className="bg-blue-500 text-white text-sm px-3 py-1 rounded hover:bg-blue-600 disabled:bg-gray-400"
-                    >
-                        {sending === u.user.username ? "Sending..." : "Add Friend"}
-                    </button>
-                );
-        }
-    }
-
-    return (
-        <div className="p-6 max-w-2xl mx-auto space-y-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold">Find People</h1>
-                <div className="flex space-x-2">
-                    <a
-                        href="/sent-requests"
-                        className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600"
-                    >
-                        Sent Requests
-                    </a>
-                    <a
-                        href="/friends"
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    >
-                        My Friends
-                    </a>
-                </div>
-            </div>
-
-            <input
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Search by username..."
-                className="w-full border rounded px-3 py-2"
-            />
-
-            {loading && <p>Loading...</p>}
-            {error && <p className="text-red-600">{error}</p>}
-
-            <ul className="divide-y">
-                {results.map(u => (
-                    <li key={u.user.id} className="py-3 flex items-center justify-between">
-                        <div>
-                            <p className="font-medium">{u.user.username}</p>
-                            <p className="text-sm text-gray-500">
-                                {u.user.firstName} {u.user.lastName}
-                            </p>
-                            <p className="text-xs text-gray-400">{u.user.email}</p>
-                        </div>
-                        <StatusButton u={u} />
-                    </li>
-                ))}
-            </ul>
-
-            {!loading && results.length === 0 && query && (
-                <p className="text-gray-500 text-center py-8">No users found for &ldquo;{query}&rdquo;</p>
-            )}
-
-            {hasMore && !loading && (
-                <button
-                    onClick={() => fetchUsers(true)}
-                    className="border rounded px-3 py-2"
-                >
-                    Load more
-                </button>
-            )}
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+          <h1 className="text-2xl font-semibold text-primary mb-4 md:mb-0">Find People</h1>
+          <div className="flex space-x-2">
+            <a
+              href="/sent-requests"
+              className="btn-secondary text-sm"
+            >
+              Sent Requests
+            </a>
+            <a
+              href="/friends"
+              className="btn-primary text-sm"
+            >
+              My Friends
+            </a>
+          </div>
         </div>
-    );
+
+        {/* Search Input */}
+        <div className="mb-6">
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search by username..."
+            className="input-search w-full"
+          />
+        </div>
+
+        {/* Loading State */}
+        {loading && results.length === 0 && (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+            <p className="text-muted">Searching...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-lg mb-4">
+            {error}
+          </div>
+        )}
+
+        {/* Results */}
+        <div className="space-y-3">
+          {results.map(userWithStatus => (
+            <UserCard
+              key={userWithStatus.user.id}
+              userWithStatus={userWithStatus}
+              onStatusUpdate={updateUserStatus}
+              onUserRemove={removeUser}
+            />
+          ))}
+        </div>
+
+        {/* No Results */}
+        {!loading && results.length === 0 && query && (
+          <div className="text-center py-8">
+            <p className="text-muted">No users found for &quot;{query}&quot;</p>
+          </div>
+        )}
+
+        {/* Load More */}
+        {hasMore && !loading && (
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={fetchMore}
+              className="btn-secondary"
+            >
+              Load more
+            </button>
+          </div>
+        )}
+
+        {/* Loading More */}
+        {loading && results.length > 0 && (
+          <div className="flex items-center justify-center py-4">
+            <div className="w-4 h-4 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+            <p className="text-muted text-sm">Loading more...</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

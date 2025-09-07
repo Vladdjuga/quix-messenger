@@ -18,8 +18,8 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChatId, onChatSelect
   return (
     <div className="chat-sidebar">
       {/* Header */}
-      <div className="chat-header">
-        <h2 className="text-base font-medium text-gray-700 mb-3">Chats</h2>
+      <div className="p-4 border-b border-default bg-surface">
+        <h2 className="text-lg font-semibold text-primary mb-3">Chats</h2>
         
         {/* Search */}
         <div className="relative">
@@ -28,10 +28,10 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChatId, onChatSelect
             placeholder="Search chats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-primary pl-10"
+            className="input-search"
           />
           <svg
-            className="absolute left-3 top-2.5 h-4 w-4 text-gray-400"
+            className="absolute left-3 top-2.5 h-4 w-4 text-muted"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChatId, onChatSelect
       </div>
 
       {/* Chat List */}
-      <div className="chat-list">
+      <div className="flex-1 overflow-y-auto">
         {filteredChats.length > 0 ? (
           filteredChats.map((chat) => (
             <ChatListItem
@@ -57,13 +57,6 @@ const ChatList: React.FC<ChatListProps> = ({ chats, selectedChatId, onChatSelect
             {searchTerm ? 'No chats found' : 'No chats yet'}
           </div>
         )}
-      </div>
-
-      {/* New Chat Button */}
-      <div className="message-input-container">
-        <button className="btn-primary w-full">
-          + New Chat
-        </button>
       </div>
     </div>
   );

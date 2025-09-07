@@ -44,11 +44,11 @@ const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="bg-white border-t border-gray-200 p-4">
+    <div className="message-input-container">
       <div className="flex items-end space-x-2">
         {/* Attachment Button */}
         <button
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+          className="btn-icon"
           disabled={disabled}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            className="input-primary resize-none"
             style={{ minHeight: '40px' }}
           />
         </div>
@@ -77,8 +77,8 @@ const MessageInput: React.FC<MessageInputProps> = ({
           disabled={!message.trim() || disabled}
           className={`p-2 rounded ${
             message.trim() && !disabled
-              ? 'bg-blue-500 text-white hover:bg-blue-600'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? 'btn-primary'
+              : 'bg-surface text-muted cursor-not-allowed border border-default'
           }`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

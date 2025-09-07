@@ -16,5 +16,12 @@ export enum FriendshipStatus {
     Blocked = "Blocked",
     Archived = "Archived"
 }
-
-
+// Used for user status like Online, Offline, Busy, Away
+export enum UserStatus{
+    PendingSent = "pending_sent",
+    PendingReceived = "pending_received",
+    Friends = "friends",
+    Blocked = "blocked",
+    NotFriends = "none",
+    Self = "self"
+}

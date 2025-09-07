@@ -1,45 +1,51 @@
 "use client";
 
-import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
+import { useSearchParams } from "next/navigation";
+import { useProfile } from "@/lib/hooks/data/profile/useProfile";
+import ProfileHeader from "@/components/profile/ProfileHeader";
+import ProfileInformation from "@/components/profile/ProfileInformation";
+import ProfileSidebar from "@/components/profile/ProfileSidebar";
+import LoadingSpinner from "@/components/profile/LoadingSpinner";
+import ErrorDisplay from "@/components/profile/ErrorDisplay";
 
 export default function ProfilePage() {
-    const { user, loading } = useCurrentUser();
+  const searchParams = useSearchParams();
+  const username = searchParams.get("username");
+  
+  const { profile, loading, error, refetch, setProfile } = useProfile(username);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <h1 className="text-2xl text-gray-700">Loading...</h1>
-            </div>
-        );
-    }
-    if (!user) {
-        window.location.href = "/login";
-        return null;
-    }
+  if (loading) {
+    return <LoadingSpinner message="Loading profile..." />;
+  }
 
-    return (
-        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h1 className="text-3xl font-bold mb-6">Profile</h1>
-            <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">Username:</label>
-                <p className="text-gray-900">{user.username}</p>
-            </div>
-            <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">Email:</label>
-                <p className="text-gray-900">{user.email}</p>
-            </div>
-            <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">First Name:</label>
-                <p className="text-gray-900">{user.firstName}</p>
-            </div>
-            <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">Last Name:</label>
-                <p className="text-gray-900">{user.lastName}</p>
-            </div>
-            <div className="mb-4">
-                <label className="block text-gray-700 font-semibold mb-2">Date of Birth:</label>
-                <p className="text-gray-900">{new Date(user.dateOfBirth).toLocaleDateString()}</p>
-            </div>
+  if (error) {
+    return <ErrorDisplay error={error} onRetry={refetch} />;
+  }
+
+  if (!profile) {
+    return <ErrorDisplay error="Profile not found" />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Profile Header */}
+      <ProfileHeader
+        profile={profile}
+        onProfileUpdate={setProfile}
+      />
+
+      {/* Profile Content */}
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Main Info */}
+          <div className="md:col-span-2 space-y-6">
+            <ProfileInformation profile={profile} />
+          </div>
+
+          {/* Sidebar */}
+          <ProfileSidebar profile={profile} />
         </div>
-    );
+      </div>
+    </div>
+  );
 }

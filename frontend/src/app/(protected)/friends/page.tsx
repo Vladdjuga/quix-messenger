@@ -1,134 +1,114 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
-import { api } from "@/app/api";
-
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? '20');
+import { useFriends } from "@/lib/hooks/data/friendship/useFriendshipLists";
+import FriendshipCard from "@/components/user/FriendshipCard";
+import LoadingSpinner from "@/components/profile/LoadingSpinner";
+import ErrorDisplay from "@/components/profile/ErrorDisplay";
+import { useState, useMemo } from "react";
+import { UserStatus } from "@/lib/types/enums";
 
 export default function FriendsPage() {
-    const [friends, setFriends] = useState<ReadFriendshipDto[]>([]);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [hasMore, setHasMore] = useState(false);
-    const [lastCreatedAt, setLastCreatedAt] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { friends, loading, error, refetch, removeFriend } = useFriends();
 
-    const fetchFriends = useCallback(async (append = false, query = "") => {
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const data = query.trim() 
-                ? await api.friendship.searchFriendships(
-                    query, 
-                    PAGE_SIZE,
-                    append ? lastCreatedAt : undefined
-                ).then(res => res.data)
-                : await api.friendship.getFriendships(
-                    PAGE_SIZE,
-                    append ? lastCreatedAt : undefined
-                ).then(res => res.data);
-
-            if (append) {
-                setFriends(prev => [...prev, ...data]);
-            } else {
-                setFriends(data);
-            }
-
-            setHasMore(data.length === PAGE_SIZE);
-            // Set lastCreatedAt for pagination if data exists
-            if (data.length > 0) {
-                setLastCreatedAt(data[data.length - 1].createdAt.toString());
-            }
-        } catch (e) {
-            const err = e as Error;
-            setError(err.message || "Failed to load friends");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [lastCreatedAt]);
-
-    useEffect(() => {
-        fetchFriends(false, searchQuery);
-    }, [searchQuery, fetchFriends]);
-
-    return (
-        <div className="p-6 max-w-2xl mx-auto space-y-4">
-            <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold">My Friends</h1>
-                <a 
-                    href="/find-people" 
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                >
-                    Find People
-                </a>
-            </div>
-            
-            <input
-                className="w-full border rounded px-3 py-2"
-                placeholder="Search your friends..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            
-            {isLoading && <p>Loading...</p>}
-            {error && <p className="text-red-600">{error}</p>}
-            
-            <ul className="divide-y">
-                {friends.map(friend => (
-                    <li key={friend.id} className="py-3 flex items-center justify-between">
-                        <div>
-                            <p className="font-medium">{friend.username}</p>
-                            <p className="text-xs text-gray-400">{friend.email}</p>
-                            <p className="text-xs text-green-600">
-                                Friends since {new Date(friend.createdAt).toLocaleDateString()}
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <button
-                                className="border rounded px-3 py-1 text-sm bg-green-500 text-white hover:bg-green-600"
-                                onClick={() => {
-                                    // TODO: Navigate to chat with this friend
-                                    console.log("Open chat with", friend.username);
-                                }}
-                            >
-                                Message
-                            </button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
-            
-            {friends.length === 0 && !isLoading && searchQuery && (
-                <p className="text-gray-500 text-center py-8">
-                    No friends found matching &ldquo;{searchQuery}&rdquo;
-                </p>
-            )}
-            
-            {friends.length === 0 && !isLoading && !searchQuery && (
-                <div className="text-gray-500 text-center py-8">
-                    <p>You don&apos;t have any friends yet.</p>
-                    <a 
-                        href="/find-people" 
-                        className="text-blue-500 hover:text-blue-600 underline"
-                    >
-                        Find people to connect with
-                    </a>
-                </div>
-            )}
-            
-            {hasMore && !isLoading && (
-                <div className="pt-3">
-                    <button 
-                        className="border rounded px-3 py-2" 
-                        onClick={() => fetchFriends(true, searchQuery)}
-                        disabled={isLoading}
-                    >
-                        Load more
-                    </button>
-                </div>
-            )}
-        </div>
+  // Filter friends based on search query
+  const filteredFriends = useMemo(() => {
+    if (!searchQuery.trim()) return friends;
+    
+    const query = searchQuery.toLowerCase();
+    return friends.filter(friend => 
+      friend.username.toLowerCase().includes(query) ||
+      friend.email.toLowerCase().includes(query)
     );
+  }, [friends, searchQuery]);
+
+  if (loading && friends.length === 0) {
+    return <LoadingSpinner message="Loading friends..." />;
+  }
+
+  if (error && friends.length === 0) {
+    return <ErrorDisplay error={error} onRetry={refetch} />;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+          <h1 className="text-2xl font-semibold text-primary mb-4 md:mb-0">My Friends</h1>
+          <div className="flex space-x-2">
+            <a href="/find-people" className="btn-secondary text-sm">
+              Find People
+            </a>
+            <a href="/sent-requests" className="btn-primary text-sm">
+              Sent Requests
+            </a>
+          </div>
+        </div>
+
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative">
+            <svg 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search your friends..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-surface-elevated border border-border rounded-lg text-primary placeholder-muted focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent"
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        {error && friends.length > 0 && (
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-destructive text-sm">{error}</p>
+          </div>
+        )}
+
+        {filteredFriends.length === 0 && !loading ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-surface-elevated rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            {searchQuery ? (
+              <>
+                <h3 className="text-lg font-medium text-primary mb-2">No friends found</h3>
+                <p className="text-muted mb-4">No friends match your search for &quot;{searchQuery}&quot;</p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-medium text-primary mb-2">No Friends Yet</h3>
+                <p className="text-muted mb-4">You haven&apos;t added any friends yet.</p>
+              </>
+            )}
+            <a href="/find-people" className="btn-primary">
+              Find People
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredFriends.map(friend => (
+              <FriendshipCard
+                key={friend.id}
+                friendship={friend}
+                type={UserStatus.Friends}
+                onRemove={removeFriend}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

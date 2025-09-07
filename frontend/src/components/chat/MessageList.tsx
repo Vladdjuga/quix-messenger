@@ -71,7 +71,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId, isLo
     return (
       <div className="flex-center flex-1">
         <div className="text-center text-muted p-8">
-          <div className="w-12 h-12 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 mx-auto mb-4 bg-surface-elevated rounded-full flex items-center justify-center border border-default">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -89,7 +89,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUserId, isLo
         <div key={dateString}>
           {/* Date Header */}
           <div className="flex-center mb-4">
-            <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded">
+            <span className="bg-surface-elevated text-muted text-xs px-3 py-1 rounded border border-default">
               {formatDateHeader(dateString)}
             </span>
           </div>

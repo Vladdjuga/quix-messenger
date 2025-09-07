@@ -20,9 +20,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({
 }) => {
   if (!selectedChat) {
     return (
-      <div className="flex-center flex-1 bg-gray-50">
+      <div className="flex-center flex-1 bg-surface">
         <div className="text-center text-muted p-8">
-          <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-surface-elevated rounded-full flex items-center justify-center border border-default">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
@@ -35,25 +35,27 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-white">
+    <div className="flex flex-col flex-1 bg-surface">
       {/* Chat Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+      <div className="flex items-center justify-between p-4 border-b border-default chat-header">
         <div className="flex-center">
           {/* Avatar */}
-          <div className="relative w-10 h-10 mr-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 font-medium">
+          <div className="w-10 h-10 mr-3">
+            <div className="w-10 h-10 bg-surface-elevated rounded-full flex items-center justify-center border border-default">
+              <span className="text-secondary font-medium">
                 {selectedChat.title.charAt(0).toUpperCase()}
               </span>
             </div>
-            {selectedChat.isOnline && (
-              <div className="status-online"></div>
-            )}
           </div>
 
           {/* Chat Info */}
           <div>
-            <h2 className="font-medium text-gray-900 truncate">{selectedChat.title}</h2>
+            <div className="flex items-center space-x-2">
+              <h2 className="font-medium text-primary truncate">{selectedChat.title}</h2>
+              {selectedChat.isOnline && (
+                <div className="status-online"></div>
+              )}
+            </div>
             <p className="text-muted">
               {selectedChat.isOnline ? 'Online' : 'Last seen recently'}
             </p>
