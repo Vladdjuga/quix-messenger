@@ -37,7 +37,8 @@ public class AcceptFriendshipHandler
 
         // Find the FriendshipEntity by FriendshipId (which is actually the FriendshipEntity.Id)
         // This represents the friendship request sent to the current user
-        var existing = await _friendshipRepository.GetByIdWithNavigationAsync(request.FriendshipId, cancellationToken);
+        var existing = await _friendshipRepository
+            .GetByIdWithNavigationAsync(request.FriendshipId, cancellationToken);
         
         if (existing is null || existing.Status != FriendshipStatus.Pending)
             return Result<ReadFriendshipDto>.Failure("Friendship request not found");

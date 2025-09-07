@@ -112,13 +112,12 @@ public class FriendshipRepository:IFriendshipRepository
         return friendship;
     }
     
-    public async Task<FriendshipEntity> GetByIdWithNavigationAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<FriendshipEntity?> GetByIdWithNavigationAsync(Guid id, CancellationToken cancellationToken)
     {
         var friendship = await _dbSet
             .Include(x => x.User)
             .Include(x => x.Friend)
-            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken) ??
-                          throw new ApplicationException("Entity not found");
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         return friendship;
     }
 
