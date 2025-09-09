@@ -1,36 +1,86 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { ReadUserDto } from "@/lib/dto/ReadUserDto";
+import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
-import { useAsyncState } from "@/lib/hooks/useAsyncState";
-import { getProfileWithStatus, ProfileData } from "@/lib/services/profileService";
+import { UserStatus } from "@/lib/types/enums";
 
-export type { ProfileData };
+type UserRelationshipStatus = UserStatus | UserStatus.Self;
+
+export interface ProfileData extends ReadUserDto {
+  status: UserRelationshipStatus;
+  friendshipId?: string;
+  isOnline?: boolean;
+  lastSeen?: Date;
+}
 
 export function useProfile(username?: string | null) {
   const { user: currentUser, loading: currentUserLoading } = useCurrentUser();
-  const {
-    data: profile,
-    loading,
-    error,
-    setData: setProfile,
-    setLoading,
-    setError,
-    reset
-  } = useAsyncState<ProfileData | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string }> {
+    try {
+      const [requests, sentRequests, friends] = await Promise.all([
+        api.friendship.getFriendRequests("", 50).then(res => res.data),
+        api.friendship.getSentRequests("", 50).then(res => res.data),
+        api.friendship.getFriendships(50).then(res => res.data),
+      ]);
+
+      const friend = friends.find(f => f.username === username);
+      if (friend) return { status: UserStatus.Friends, friendshipId: friend.id };
+      
+      const request = requests.find(r => r.username === username);
+      if (request) return { status: UserStatus.PendingReceived, friendshipId: request.id };
+      
+      const sentRequest = sentRequests.find(r => r.username === username);
+      if (sentRequest) return { status: UserStatus.PendingSent, friendshipId: sentRequest.id };
+      
+      return { status: UserStatus.NotFriends };
+    } catch {
+      return { status: UserStatus.NotFriends };
+    }
+  }
 
   async function loadProfile() {
-    if (!currentUser || !username) {
-      reset();
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
+    if (!currentUser) return;
 
     try {
-      const profileData = await getProfileWithStatus(username, currentUser);
-      setProfile(profileData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load profile");
+      setLoading(true);
+      setError(null);
+
+      // If no username provided or it's current user's username, show current user profile
+      if (!username || username === currentUser.username) {
+        const profileData: ProfileData = {
+          ...currentUser,
+          status: UserStatus.Self
+        };
+        setProfile(profileData);
+        return;
+      }
+
+      // Search for the user by username
+      const userResponse = await api.user.searchUsers(username, 1);
+      const users = userResponse.data;
+      const userData = users.find(u => u.username === username);
+
+      if (!userData) {
+        setError("User not found");
+        return;
+      }
+
+      // Get friendship status
+      const friendshipInfo = await getFriendshipStatus(userData.username);
+
+      setProfile({
+        ...userData,
+        status: friendshipInfo.status,
+        friendshipId: friendshipInfo.friendshipId,
+        isOnline: Math.random() > 0.5, // Mock online status
+        lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000) // Mock last seen
+      });
+    } catch (e) {
+      setError((e as Error).message ?? "Failed to load profile");
     } finally {
       setLoading(false);
     }
@@ -38,6 +88,7 @@ export function useProfile(username?: string | null) {
 
   useEffect(() => {
     if (currentUserLoading) return;
+    if (!currentUser) return;
     loadProfile();
   }, [currentUser, username, currentUserLoading]);
 
@@ -45,7 +96,7 @@ export function useProfile(username?: string | null) {
     profile,
     loading: loading || currentUserLoading,
     error,
-    refresh: loadProfile,
+    refetch: loadProfile,
     setProfile
   };
 }

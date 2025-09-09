@@ -11,7 +11,7 @@ export default function FindPeoplePage() {
     loading,
     error,
     hasMore,
-    loadMore,
+    fetchMore,
     updateUserStatus,
     removeUser
   } = useUserSearch();
@@ -86,7 +86,7 @@ export default function FindPeoplePage() {
         {hasMore && !loading && (
           <div className="flex justify-center mt-6">
             <button
-              onClick={loadMore}
+              onClick={fetchMore}
               className="btn-secondary"
             >
               Load more
