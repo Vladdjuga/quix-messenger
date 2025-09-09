@@ -73,6 +73,21 @@ services:
       - user-service
       - message-service
       - realtime-service-ts
+  frontend-clean:
+    image: frontend-clean
+    ports:
+      - "3001:3000"
+    environment:
+      - USER_SERVICE_URL=http://user-service:7000
+      - MESSAGE_SERVICE_URL=http://message-service:7000
+      - NEXT_PUBLIC_SOCKET_URL=http://localhost:8081
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    networks:
+      - app-network
+    depends_on:
+      - user-service
+      - message-service
+      - realtime-service-ts
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
