@@ -12,14 +12,14 @@ export default function ProfilePage() {
   const searchParams = useSearchParams();
   const username = searchParams.get("username");
   
-  const { profile, loading, error, refetch, setProfile } = useProfile(username);
+  const { profile, loading, error, refresh, setProfile } = useProfile(username);
 
   if (loading) {
     return <LoadingSpinner message="Loading profile..." />;
   }
 
   if (error) {
-    return <ErrorDisplay error={error} onRetry={refetch} />;
+    return <ErrorDisplay error={error} onRetry={refresh} />;
   }
 
   if (!profile) {

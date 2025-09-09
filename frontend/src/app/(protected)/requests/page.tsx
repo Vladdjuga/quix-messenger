@@ -7,14 +7,14 @@ import ErrorDisplay from "@/components/profile/ErrorDisplay";
 import { UserStatus } from "@/lib/types/enums";
 
 export default function RequestsPage() {
-  const { requests, loading, error, refetch, removeRequest } = useFriendRequests();
+  const { requests, loading, error, refresh, removeRequest } = useFriendRequests();
 
   if (loading) {
     return <LoadingSpinner message="Loading friend requests..." />;
   }
 
   if (error) {
-    return <ErrorDisplay error={error} onRetry={refetch} />;
+    return <ErrorDisplay error={error} onRetry={refresh} />;
   }
 
   return (

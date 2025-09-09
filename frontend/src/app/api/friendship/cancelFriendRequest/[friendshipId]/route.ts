@@ -1,13 +1,14 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {RequestUtils} from "@/lib/request-utils";
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function DELETE(req: Request, context: { params: Promise<{ friendshipId: string }> }) {
     const { friendshipId } = await context.params;
     
     if (!friendshipId) {
-        return BackendApiClient.validationError('Friendship ID is required');
+        return RequestUtils.validationError('Friendship ID is required');
     }
 
-    return BackendApiClient.request(req, `/Friendship/cancelFriendRequest/${friendshipId}`, { 
+    return StandardApiUseCase.execute(req, `/Friendship/cancelFriendRequest/${friendshipId}`, {
         method: 'DELETE' 
     });
 }

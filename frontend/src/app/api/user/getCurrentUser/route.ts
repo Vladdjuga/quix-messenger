@@ -1,5 +1,5 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function GET(req: Request) {
-    return BackendApiClient.request(req, '/User/getMeInfo');
+    return StandardApiUseCase.execute(req, '/User/getMeInfo');
 } 

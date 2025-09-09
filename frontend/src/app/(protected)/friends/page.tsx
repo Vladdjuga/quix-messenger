@@ -9,7 +9,7 @@ import { UserStatus } from "@/lib/types/enums";
 
 export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { friends, loading, error, refetch, removeFriend } = useFriends();
+  const { friends, loading, error, refresh, removeFriend } = useFriends();
 
   // Filter friends based on search query
   const filteredFriends = useMemo(() => {
@@ -27,7 +27,7 @@ export default function FriendsPage() {
   }
 
   if (error && friends.length === 0) {
-    return <ErrorDisplay error={error} onRetry={refetch} />;
+    return <ErrorDisplay error={error} onRetry={refresh} />;
   }
 
   return (

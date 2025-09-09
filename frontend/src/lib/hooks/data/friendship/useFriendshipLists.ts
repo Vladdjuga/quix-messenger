@@ -1,22 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
-import { api } from "@/app/api";
-
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
+import { useAsyncState } from "@/lib/hooks/useAsyncState";
+import { 
+  fetchFriendRequests, 
+  fetchSentRequests, 
+  fetchFriendships 
+} from "@/lib/services/friendshipService";
 
 export function useFriendRequests() {
-  const [requests, setRequests] = useState<ReadFriendshipDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: requests,
+    loading,
+    error,
+    setData: setRequests,
+    setLoading,
+    setError
+  } = useAsyncState<ReadFriendshipDto[]>([]);
 
-  async function fetchRequests() {
+  async function loadRequests() {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
-      const response = await api.friendship.getFriendRequests("", PAGE_SIZE);
-      setRequests(response.data);
-    } catch (e) {
-      setError((e as Error).message ?? "Failed to load friend requests");
+      const data = await fetchFriendRequests();
+      setRequests(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load requests");
     } finally {
       setLoading(false);
     }
@@ -27,31 +36,37 @@ export function useFriendRequests() {
   }
 
   useEffect(() => {
-    fetchRequests();
+    loadRequests();
   }, []);
 
   return {
     requests,
     loading,
     error,
-    refetch: fetchRequests,
+    refresh: loadRequests,
     removeRequest
   };
 }
 
 export function useSentRequests() {
-  const [sentRequests, setSentRequests] = useState<ReadFriendshipDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: sentRequests,
+    loading,
+    error,
+    setData: setSentRequests,
+    setLoading,
+    setError
+  } = useAsyncState<ReadFriendshipDto[]>([]);
 
-  async function fetchSentRequests() {
+  async function loadSentRequests() {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
-      const response = await api.friendship.getSentRequests("", PAGE_SIZE);
-      setSentRequests(response.data);
-    } catch (e) {
-      setError((e as Error).message ?? "Failed to load sent requests");
+      const data = await fetchSentRequests();
+      setSentRequests(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load sent requests");
     } finally {
       setLoading(false);
     }
@@ -62,31 +77,37 @@ export function useSentRequests() {
   }
 
   useEffect(() => {
-    fetchSentRequests();
+    loadSentRequests();
   }, []);
 
   return {
     sentRequests,
     loading,
     error,
-    refetch: fetchSentRequests,
+    refresh: loadSentRequests,
     removeRequest
   };
 }
 
 export function useFriends() {
-  const [friends, setFriends] = useState<ReadFriendshipDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: friends,
+    loading,
+    error,
+    setData: setFriends,
+    setLoading,
+    setError
+  } = useAsyncState<ReadFriendshipDto[]>([]);
 
-  async function fetchFriends() {
+  async function loadFriends() {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setLoading(true);
-      setError(null);
-      const response = await api.friendship.getFriendships(PAGE_SIZE);
-      setFriends(response.data);
-    } catch (e) {
-      setError((e as Error).message ?? "Failed to load friends");
+      const data = await fetchFriendships();
+      setFriends(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load friends");
     } finally {
       setLoading(false);
     }
@@ -97,14 +118,14 @@ export function useFriends() {
   }
 
   useEffect(() => {
-    fetchFriends();
+    loadFriends();
   }, []);
 
   return {
     friends,
     loading,
     error,
-    refetch: fetchFriends,
+    refresh: loadFriends,
     removeFriend
   };
 }

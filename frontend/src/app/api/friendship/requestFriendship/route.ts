@@ -1,17 +1,18 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {RequestUtils} from "@/lib/request-utils";
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function POST(req: Request) {
-    const bodyResult = await BackendApiClient.extractBody(req);
+    const bodyResult = await RequestUtils.extractBody(req);
     if (!bodyResult.success) return bodyResult.response;
     
-    const validation = BackendApiClient.validateRequiredFields(bodyResult.data, ['username']);
+    const validation = RequestUtils.validateRequiredFields(bodyResult.data, ['username']);
     if (!validation.isValid) {
-        return BackendApiClient.validationError(`Missing required fields: ${validation.missingFields.join(', ')}`);
+        return RequestUtils.validationError(`Missing required fields: ${validation.missingFields.join(', ')}`);
     }
 
     const { username } = bodyResult.data as { username: string };
     
-    return BackendApiClient.request(
+    return StandardApiUseCase.execute(
         req,
         `/Friendship/requestFriendship/${encodeURIComponent(username)}`,
         { method: 'POST' }

@@ -1,7 +1,8 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {RequestUtils} from "@/lib/request-utils";
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function GET(req: Request) {
-    const searchParams = BackendApiClient.extractQueryParams(req);
+    const searchParams = RequestUtils.extractQueryParams(req);
     
     const queryParams: Record<string, string | number | undefined> = {
         query: searchParams.get('query') ?? '',
@@ -9,5 +10,5 @@ export async function GET(req: Request) {
         lastCreatedAt: searchParams.get('lastCreatedAt') || undefined
     };
 
-    return BackendApiClient.request(req, '/Friendship/searchFriendships', { queryParams });
+    return StandardApiUseCase.execute(req, '/Friendship/searchFriendships', { queryParams });
 }

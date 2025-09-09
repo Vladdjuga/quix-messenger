@@ -1,11 +1,12 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {RequestUtils} from "@/lib/request-utils";
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function GET(req: Request) {
-    const searchParams = BackendApiClient.extractQueryParams(req);
-    const paginationValidation = BackendApiClient.validatePaginationParams(searchParams);
+    const searchParams = RequestUtils.extractQueryParams(req);
+    const paginationValidation = RequestUtils.validatePaginationParams(searchParams);
     
     if (!paginationValidation.isValid) {
-        return BackendApiClient.validationError(paginationValidation.error!);
+        return RequestUtils.validationError(paginationValidation.error!);
     }
 
     const queryParams: Record<string, string | number> = {
@@ -17,5 +18,5 @@ export async function GET(req: Request) {
         queryParams.lastCreatedAt = paginationValidation.lastCreatedAt;
     }
 
-    return BackendApiClient.request(req, '/Friendship/getSentRequests', { queryParams });
+    return StandardApiUseCase.execute(req, '/Friendship/getSentRequests', { queryParams });
 }

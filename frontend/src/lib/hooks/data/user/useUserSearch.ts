@@ -1,57 +1,30 @@
-import { useState, useEffect, useCallback } from 'react';
-import { ReadUserDto } from "@/lib/dto/ReadUserDto";
-import { api } from "@/app/api";
+import { useState, useEffect } from 'react';
 import { UserStatus } from "@/lib/types/enums";
+import { useAsyncState } from "@/lib/hooks/useAsyncState";
+import { useDebounce } from "@/lib/hooks/useDebounce";
+import { searchUsers, UserWithStatus } from "@/lib/services/userSearchService";
 
-type UserRelationshipStatus = UserStatus;
-
-export interface UserWithStatus {
-  user: ReadUserDto;
-  status: UserRelationshipStatus;
-  friendshipId?: string;
-}
-
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
+export type { UserWithStatus };
 
 export function useUserSearch() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<UserWithStatus[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const debouncedQuery = useDebounce(query, 300);
   const [hasMore, setHasMore] = useState(false);
   const [lastCreatedAt, setLastCreatedAt] = useState<string>();
+  
+  const {
+    data: results,
+    loading,
+    error,
+    setData: setResults,
+    setLoading,
+    setError,
+    reset
+  } = useAsyncState<UserWithStatus[]>([]);
 
-  async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
-    try {
-      const [requests, sentRequests, friends] = await Promise.all([
-        api.friendship.getFriendRequests("", PAGE_SIZE)
-          .then(res => res.data),
-        api.friendship.getSentRequests("", PAGE_SIZE)
-          .then(res => res.data),
-        api.friendship.getFriendships(PAGE_SIZE)
-          .then(res => res.data),
-      ]);
-
-      return users.map(user => {
-        const friend = friends.find(f => f.username === user.username);
-        if (friend) return { user, status: UserStatus.Friends, friendshipId: friend.id };
-
-        const request = requests.find(r => r.username === user.username);
-        if (request) return { user, status: UserStatus.PendingReceived, friendshipId: request.id };
-
-        const sentRequest = sentRequests.find(r => r.username === user.username);
-        if (sentRequest) return { user, status: UserStatus.PendingSent, friendshipId: sentRequest.id };
-
-        return { user, status: UserStatus.NotFriends };
-      });
-    } catch {
-      return users.map(user => ({ user, status: UserStatus.NotFriends }));
-    }
-  }
-
-  const fetchUsers = useCallback(async (append = false) => {
-    if (!query.trim()) {
-      setResults([]);
+  async function performSearch(append = false) {
+    if (!debouncedQuery.trim()) {
+      reset();
       setHasMore(false);
       return;
     }
@@ -60,41 +33,43 @@ export function useUserSearch() {
     setError(null);
 
     try {
-      const users = await api.user.searchUsers(query, PAGE_SIZE, append ? lastCreatedAt : undefined)
-        .then(res => res.data);
-      const withStatuses = await getStatuses(users);
-
-      setResults(prev => (append ? [...prev, ...withStatuses] : withStatuses));
-      setHasMore(users.length === PAGE_SIZE);
-      setLastCreatedAt(users.at(-1)?.createdAt.toString());
-    } catch (e) {
-      setError((e as Error).message ?? "Search failed");
+      const users = await searchUsers(debouncedQuery, append ? lastCreatedAt : undefined);
+      
+      if (append) {
+        setResults(prev => [...prev, ...users]);
+      } else {
+        setResults(users);
+      }
+      
+      setHasMore(users.length === 20); // PAGE_SIZE
+      if (users.length > 0) {
+        setLastCreatedAt(users[users.length - 1].user.createdAt.toString());
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed");
     } finally {
       setLoading(false);
     }
-  }, [query, lastCreatedAt]);
+  }
 
   function updateUserStatus(username: string, newStatus: UserStatus, friendshipId?: string) {
     setResults(prev =>
-      prev.map(u =>
-        u.user.username === username 
-          ? { ...u, status: newStatus, friendshipId } 
-          : u
+      prev.map(item =>
+        item.user.username === username 
+          ? { ...item, status: newStatus, friendshipId } 
+          : item
       )
     );
   }
 
   function removeUser(username: string) {
-    setResults(prev => prev.filter(u => u.user.username !== username));
+    setResults(prev => prev.filter(item => item.user.username !== username));
   }
 
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      fetchUsers();
-    }, 300);
-
-    return () => clearTimeout(debounceTimer);
-  }, [query, fetchUsers]);
+    performSearch();
+    setLastCreatedAt(undefined); // Reset pagination when query changes
+  }, [debouncedQuery]);
 
   return {
     query,
@@ -103,9 +78,9 @@ export function useUserSearch() {
     loading,
     error,
     hasMore,
-    fetchMore: () => fetchUsers(true),
+    loadMore: () => performSearch(true),
     updateUserStatus,
     removeUser,
-    refetch: () => fetchUsers(false)
+    refresh: () => performSearch(false)
   };
 }

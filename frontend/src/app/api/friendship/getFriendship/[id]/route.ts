@@ -1,4 +1,5 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import {RequestUtils} from "@/lib/request-utils";
+import {StandardApiUseCase} from "@/lib/usecases";
 
 export async function GET(
     req: Request, 
@@ -9,14 +10,14 @@ export async function GET(
         const { id } = resolvedParams;
         
         if (!id) {
-            return BackendApiClient.validationError('Friendship ID is required');
+            return RequestUtils.validationError('Friendship ID is required');
         }
 
-        return BackendApiClient.request(
+        return StandardApiUseCase.execute(
             req,
             `/Friendship/getFriendship/${encodeURIComponent(id)}`
         );
     } catch {
-        return BackendApiClient.validationError('Invalid request parameters');
+        return RequestUtils.validationError('Invalid request parameters');
     }
 }

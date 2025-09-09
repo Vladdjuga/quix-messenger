@@ -7,14 +7,14 @@ import ErrorDisplay from "@/components/profile/ErrorDisplay";
 import { UserStatus } from "@/lib/types/enums";
 
 export default function SentRequestsPage() {
-  const { sentRequests, loading, error, refetch, removeRequest } = useSentRequests();
+  const { sentRequests, loading, error, refresh, removeRequest } = useSentRequests();
 
   if (loading) {
     return <LoadingSpinner message="Loading sent requests..." />;
   }
 
   if (error) {
-    return <ErrorDisplay error={error} onRetry={refetch} />;
+    return <ErrorDisplay error={error} onRetry={refresh} />;
   }
 
   return (
