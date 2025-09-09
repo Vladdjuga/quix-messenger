@@ -30,7 +30,7 @@ public static class FriendshipMapper
     {
         return new ReadFriendshipDto
         {
-            Id = targetUser?.Id ?? Guid.Empty,
+            Id = friendship.Id,
             Username = targetUser?.Username ?? "",
             Email = targetUser?.Email ?? "",
             DateOfBirth = targetUser?.DateOfBirth ?? DateTime.MinValue,

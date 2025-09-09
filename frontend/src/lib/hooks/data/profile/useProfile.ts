@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ReadUserDto } from "@/lib/dto/ReadUserDto";
 import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
@@ -42,7 +42,7 @@ export function useProfile(username?: string | null) {
     }
   }
 
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     if (!currentUser) return;
 
     try {
@@ -84,13 +84,13 @@ export function useProfile(username?: string | null) {
     } finally {
       setLoading(false);
     }
-  }
+  }, [currentUser, username]);
 
   useEffect(() => {
     if (currentUserLoading) return;
     if (!currentUser) return;
     loadProfile();
-  }, [currentUser, username, currentUserLoading]);
+  }, [currentUser, username, currentUserLoading, loadProfile]);
 
   return {
     profile,

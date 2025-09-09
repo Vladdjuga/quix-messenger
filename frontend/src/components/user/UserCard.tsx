@@ -62,18 +62,31 @@ const UserCard: React.FC<UserCardProps> = ({
     }
   }
 
+  async function viewProfile(){
+    const username = user.username;
+    window.location.href = `/profile?username=${username}`;
+  }
+
   function renderStatusButton() {
     if (!showActions) return null;
 
     switch (status) {
       case UserStatus.Friends:
         return (
-          <span className="text-green-500 text-sm font-medium bg-green-500/10 px-3 py-2 rounded-lg flex items-center">
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            Friends
-          </span>
+          <div className="flex space-x-2">
+            <span className="text-green-500 text-sm font-medium bg-green-500/10 px-3 py-2 rounded-lg flex items-center">
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              Friends
+            </span>
+            <button
+              className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors"
+              onClick={viewProfile}
+            >
+              View Profile
+            </button>
+          </div>
         );
       
       case UserStatus.PendingSent:
@@ -91,6 +104,12 @@ const UserCard: React.FC<UserCardProps> = ({
               className="text-red-500 text-sm px-3 py-2 rounded-lg hover:bg-red-500/10 transition-colors"
             >
               {sending ? "Canceling..." : "Cancel"}
+            </button>
+            <button
+              className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors"
+              onClick={viewProfile}
+            >
+              View Profile
             </button>
           </div>
         );
@@ -112,18 +131,32 @@ const UserCard: React.FC<UserCardProps> = ({
             >
               {sending ? "Rejecting..." : "Reject"}
             </button>
+            <button
+              className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors"
+              onClick={viewProfile}
+            >
+              View Profile
+            </button>
           </div>
         );
       
       default:
         return (
-          <button
-            disabled={sending}
-            onClick={handleSendRequest}
-            className="btn-primary text-sm"
-          >
-            {sending ? "Sending..." : "Add Friend"}
-          </button>
+          <div className="flex space-x-2">
+            <button
+              disabled={sending}
+              onClick={handleSendRequest}
+              className="btn-primary text-sm"
+            >
+              {sending ? "Sending..." : "Add Friend"}
+            </button>
+            <button
+              className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors"
+              onClick={viewProfile}
+            >
+              View Profile
+            </button>
+          </div>
         );
     }
   }

@@ -49,6 +49,11 @@ const FriendshipCard: React.FC<FriendshipCardProps> = ({
     }
   }
 
+  async function viewProfile(){
+    const username = friendship.username;
+    window.location.href = `/profile?username=${username}`;
+  }
+
   function formatDate(dateString: Date) {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -99,7 +104,10 @@ const FriendshipCard: React.FC<FriendshipCardProps> = ({
               </svg>
               Message
             </button>
-            <button className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors">
+            <button
+                className="text-muted text-sm px-3 py-2 rounded-lg hover:bg-surface-elevated transition-colors"
+                onClick={viewProfile}
+            >
               View Profile
             </button>
           </div>

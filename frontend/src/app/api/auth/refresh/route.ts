@@ -1,14 +1,12 @@
-import { NextResponse } from 'next/server'
-import { safeParseJSON } from '@/lib/utils'
-
-const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
     try {
         // Get cookies from the incoming request
         const cookieHeader = req.headers.get('cookie');
         
-        const response = await fetch(`${BASE_URL}/Auth/refresh`, {
+        const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
+        const response = await fetch(`${USER_SERVICE_URL}/Auth/refresh`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -18,13 +16,20 @@ export async function POST(req: Request) {
         });
 
         if (!response.ok) {
-            const errorData = await safeParseJSON(response);
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { message: errorText || 'Token refresh failed' };
+            }
             return NextResponse.json(errorData, { status: response.status });
         }
 
         // Backend returns the access token as a raw string
         const rawToken = await response.text();
         let accessToken = rawToken.trim();
+        
         // Remove surrounding quotes if any and accidental Bearer prefix
         if (accessToken.startsWith('"') && accessToken.endsWith('"')) {
             accessToken = accessToken.slice(1, -1);
@@ -37,27 +42,21 @@ export async function POST(req: Request) {
         const tokenParts = accessToken.split('.');
         if (tokenParts.length !== 3) {
             console.error('Invalid JWT format - expected 3 parts, got:', tokenParts.length);
-            console.error('Raw token:', JSON.stringify(rawToken));
-            console.error('Trimmed token:', JSON.stringify(accessToken));
             return NextResponse.json({ message: 'Invalid token format received from server' }, { status: 500 });
         }
         
-        // Log for debugging (remove in production)
-        console.log('Received access token length:', accessToken.length);
-        console.log('Received access token preview:', accessToken.substring(0, 50) + '...');
-        console.log('Token parts lengths:', tokenParts.map(part => part.length));
-        
-        // Wrap it in an object for consistent frontend API
+        // Create response with the new access token
         const nextResponse = NextResponse.json({ accessToken });
+        
+        // Forward any set-cookie headers from the backend
         const setCookieHeader = response.headers.get('set-cookie');
         if (setCookieHeader) {
             nextResponse.headers.set('set-cookie', setCookieHeader);
         }
 
         return nextResponse;
-
-    } catch (err) {
-        console.error('Refresh token error:', err);
+    } catch (error) {
+        console.error('Refresh token error:', error);
         return NextResponse.json({ message: 'Server error' }, { status: 500 });
     }
 }

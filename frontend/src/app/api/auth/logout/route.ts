@@ -1,35 +1,38 @@
-import { NextResponse } from 'next/server'
-import { safeParseJSON } from '@/lib/utils'
-
-const BASE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
     try {
+        // Check for authorization header
         const authorizationHeader = req.headers.get('authorization');
         if (!authorizationHeader) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
-        const response = await fetch(`${BASE_URL}/Auth/logout`, {
+        // Make request to backend logout endpoint
+        const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
+        const response = await fetch(`${USER_SERVICE_URL}/Auth/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': authorizationHeader, // Include the JWT token in the Authorization header
+                'Authorization': authorizationHeader,
             },
-            // credentials: 'include', // Uncomment if you need to send cookies with the request. For now, It doesn't send cookies for authorization.
             body: JSON.stringify({}),
         });
 
         if (!response.ok) {
-            const errorData = await safeParseJSON(response);
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { message: errorText || 'Logout failed' };
+            }
             return NextResponse.json(errorData, { status: response.status });
         }
-        // Optionally clear client-side JWT storage
-        // localStorage.removeItem('jwt'); // Uncomment if using localStorage
 
         return NextResponse.json({ message: 'Logout successful' });
-    } catch (err) {
-        console.error(err);
-        return NextResponse.json({ message: 'Server error', status: 500 });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return NextResponse.json({ message: 'Server error' }, { status: 500 });
     }
 } 

@@ -1,5 +1,15 @@
 import axios from "axios";
 
+// Define types for better type safety
+interface AuthResponse {
+    accessToken: string;
+}
+
+interface QueueItem {
+    resolve: (token: string) => void;
+    reject: (error: Error) => void;
+}
+
 // For client-side requests, we should use Next.js API routes, not direct backend URLs
 const apiClient = axios.create({
     baseURL: '/api', // This will use Next.js API routes
@@ -11,7 +21,7 @@ const apiClient = axios.create({
 let isRefreshing = false;
 let refreshAttempts = 0;
 const MAX_REFRESH_ATTEMPTS = 3;
-let failedQueue: Array<{ resolve: (token: string) => void; reject: (error: Error) => void; }> = [];
+let failedQueue: QueueItem[] = [];
 
 const getToken = (): string | null => {
     const token = localStorage.getItem("jwt");
@@ -91,7 +101,7 @@ apiClient.interceptors.response.use(
 
             try {
                 const response = await axios
-                    .post("/api/auth/refresh", {}, { withCredentials: true });
+                    .post<AuthResponse>("/api/auth/refresh", {}, { withCredentials: true });
                 const newToken = response.data.accessToken;
 
                 if (!newToken || newToken.split('.').length !== 3) {

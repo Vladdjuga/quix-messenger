@@ -6,7 +6,7 @@ type AxiosErrorLike = { response?: { data?: { message?: string } }; message?: st
 export async function loginUseCase(dto:LoginUserDto): Promise<string> {
     try {
         const response = await api.auth.login(dto.identity, dto.password);
-    const data = response.data;
+        const data = response.data as { accessToken?: string };
 
         if (!data.accessToken) {
             throw new Error("Login failed: No token received");

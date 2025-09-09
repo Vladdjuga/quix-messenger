@@ -55,6 +55,7 @@ export default function SentRequestsPage() {
                 friendship={request}
                 type={UserStatus.PendingSent}
                 onRemove={removeRequest}
+                onAccept={removeRequest}
               />
             ))}
           </div>
