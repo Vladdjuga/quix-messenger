@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using UI.Common;
 using Application.Common;
+using UI.Utilities;
+using UI.gRPCClients;
 
 namespace UI.Endpoints;
 
@@ -21,8 +23,9 @@ public class MessageEndpoints:ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("api/Messages");
-        group.MapGet("", GetMessages).RequireAuthorization();
+        // Messages should only be accessed through realtime service for security
         group.MapPost("add", AddMessage).RequireAuthorization();
+        group.MapGet("paginated", GetMessagesPaginated).RequireAuthorization();
     }
     /// <summary>
     /// This method will add a message to the database.
@@ -85,7 +88,7 @@ public class MessageEndpoints:ICarterModule
             var result = await mediator.Send(query);
             if (result.IsFailure)
             {
-                logger.LogError(result.Error,"Failed to query messages.");
+                logger.LogError("Failed to query messages. Error : {}",result.Error);
                 return ErrorResult.Create(result.Error);
             }
             logger.LogInformation("Queried {Count} were returned to {UserId}.",request.Count, request.UserId);
@@ -94,6 +97,64 @@ public class MessageEndpoints:ICarterModule
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to get messages. Error : {ErrorMessage}", ex.Message);
+            return ErrorResult.Create("Failed to get messages");
+        }
+    }
+    private static async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> GetMessagesPaginated(
+        [AsParameters] GetMessagesPaginatedRequest request,
+        IMediator mediator,
+        ILogger<MessageEndpoints> logger,
+        HttpContext httpContext,
+        ChatServiceClient chatServiceClient)
+    {
+        try
+        {
+            // Get authenticated user ID from JWT context
+            var authenticatedUserId = httpContext.GetAuthenticatedUserIdOrThrow();
+            var bearerToken = httpContext.GetBearerTokenOrThrow();
+
+            // Verify user is member of the chat before returning messages
+            logger.LogInformation("Verifying membership of user {UserId} in chat {ChatId}", authenticatedUserId, request.ChatId);
+            var isUserInChat = await chatServiceClient.IsUserInChatAsync(
+                authenticatedUserId.ToString(),
+                request.ChatId.ToString()!,
+                bearerToken);
+            logger.LogInformation("Membership verification completed. IsUserInChat: {IsUserInChat}", isUserInChat);
+            
+            if (!isUserInChat)
+            {
+                logger.LogError("User {UserId} is not a member of chat {ChatId}", authenticatedUserId, request.ChatId);
+                return TypedResults.Unauthorized();
+            }
+
+            var query = new GetMessagesPaginatedQuery(
+                ChatId: request.ChatId,
+                UserId:authenticatedUserId,
+                LastCreatedAt: request.LastCreatedAt,
+                PageSize: request.PageSize
+            );
+            
+            logger.LogInformation("Starting to query {PageSize} messages from chat {ChatId} for user {UserId} with last created at {LastCreatedAt}",
+                request.PageSize, request.ChatId, authenticatedUserId, request.LastCreatedAt);
+            
+            var result = await mediator.Send(query);
+            if (result.IsFailure)
+            {
+                logger.LogError("Failed to query messages. Error: {Error}", result.Error);
+                return ErrorResult.Create(result.Error);
+            }
+            
+            logger.LogInformation("Queried {Count} messages were returned to user {UserId}.", result.Value.Count(), authenticatedUserId);
+            return TypedResults.Ok(result.Value);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger.LogError(ex, "Unauthorized access to messages");
+            return TypedResults.Unauthorized();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to get messages. Error: {ErrorMessage}", ex.Message);
             return ErrorResult.Create("Failed to get messages");
         }
     }

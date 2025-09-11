@@ -1,6 +1,8 @@
+using Application.Common;
+using Application.DTOs;
+using MediatR;
+
 namespace Application.UseCases.Messages.Queries;
 
-public class GetMessagesPaginatedQuery
-{
-    
-}
+public record GetMessagesPaginatedQuery(Guid ChatId,Guid UserId,
+    DateTime LastCreatedAt, int PageSize): IRequest<Result<IEnumerable<ReadMessageDto>>>;    

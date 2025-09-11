@@ -50,4 +50,22 @@ public class MessageRepository:IMessageRepository
             .ToListAsync(cancellationToken);
         return messages;
     }
+
+    public async Task<IEnumerable<MessageEntity>> GetMessagesPaginatedAsync(Guid? userId, Guid? chatId, 
+        DateTime lastCreatedAt,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var filter = Builders<MessageEntity>.Filter.Empty;
+        if(userId.HasValue)
+            filter &= Builders<MessageEntity>.Filter.Eq(m => m.UserId, userId.Value);
+        if(chatId.HasValue)
+            filter &= Builders<MessageEntity>.Filter.Eq(m => m.ChatId, chatId.Value);
+        filter &= Builders<MessageEntity>.Filter.Lt(m => m.SentAt, lastCreatedAt);
+        var messages=await _dbContext.Messages.Find(filter)
+            .Sort(Builders<MessageEntity>.Sort.Descending(m => m.SentAt))
+            .Limit(pageSize)
+            .ToListAsync(cancellationToken);
+        return messages;
+    }
 }
