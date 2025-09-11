@@ -1,3 +1,3 @@
 namespace Application.DTOs.Chat;
 
-public record ChatMembershipResponse();
+public record ChatMembershipResponse(bool IsUserInChat);

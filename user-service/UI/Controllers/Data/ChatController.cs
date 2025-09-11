@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Common;
 using Application.DTOs.Chat;
 using Application.UseCases.Chats.AddUserToChat;
+using Application.UseCases.Chats.AnyChatById;
 using Application.UseCases.Chats.CreateChat;
 using Application.UseCases.Chats.GetChats;
 using Application.Utilities;
@@ -96,6 +97,29 @@ public class ChatController:Controller
         _logger.LogInformation("Added user {UserId} to chat {ChatId}",
             addUserToChatDto.UserId, addUserToChatDto.ChatId);
         return TypedResults.Ok();
-    } 
+    }
+
+    [Authorize]
+    [HttpGet("isUserInChat")]
+    public async Task<Results<Ok<ChatMembershipResponse>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> IsUserInChat(
+        [FromQuery] Guid userId, 
+        [FromQuery] Guid chatId)
+    {
+        var query = new AnyChatByIdQuery(userId, chatId);
+        _logger.LogInformation("Checking if user {UserId} is in chat {ChatId}", userId, chatId);
+        
+        var result = await _mediator.Send(query);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error checking if user {UserId} is in chat {ChatId}: {Error}", 
+                userId, chatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        
+        _logger.LogInformation("User {UserId} membership in chat {ChatId}: {IsInChat}", 
+            userId, chatId, result.Value);
+        
+        return TypedResults.Ok(new ChatMembershipResponse(result.Value));
+    }
     
 }
