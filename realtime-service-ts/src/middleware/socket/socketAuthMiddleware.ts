@@ -15,13 +15,14 @@ export const socketAuthMiddleware = (
     socket: Socket,
     next:(err?: ExtendedError) => void
 ) => {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake.auth.token as string | undefined;
     if (!token) {
         next(new Error('Unauthorized: Missing token'));
         return;
     } 
     try {
-        socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+    socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+    socket.data.token = token; // persist token for outbound service calls
         next();
     } catch (error) {
         logger.error(`Socket authentication error: ${error}`);

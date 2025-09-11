@@ -1,19 +1,27 @@
 import {Socket} from "socket.io";
 import logger from "../../../config/logger.js";
-import {chatClient} from "../../../clients/index.js";
+import {userServiceClient} from "../../../clients/index.js";
+import type {User} from "../../../types/user.js";
 
 export async function onJoinChat(this: Socket, chat: string): Promise<void> {
     const socket = this;
 
     logger.info(`Client ${socket.id} joining chat: ${chat}`);
     // Check if the chat exists for the user
-    const userId = socket.data.userId; // Assuming userId is stored in socket data
-    const isInChat = await chatClient.userChatExists({
-        userId,
-        chatId: chat
-    })
+    const authenticatedUser = socket.data.user as User;
+    if (!authenticatedUser || !authenticatedUser.id) {
+        logger.error(`User not authenticated for socket ${socket.id}`);
+        socket.emit('error', {message: 'Authentication required'});
+        return;
+    }
+    const token = socket.data.token as string | undefined;
+    const isInChat = token ? await userServiceClient.isUserInChat({
+        userId: authenticatedUser.id,
+        chatId: chat,
+        token
+    }) : false;
     if (!isInChat) {
-        logger.warn(`User ${userId} is not in chat ${chat}. Cannot join.`);
+        logger.warn(`User ${authenticatedUser.id} is not in chat ${chat}. Cannot join.`);
         socket.emit('error', {message: `You are not part of chat ${chat}.`});
         return;
     }
@@ -24,13 +32,20 @@ export async function onLeaveChat(this: Socket, chat: string): Promise<void> {
     const socket = this;
     logger.info(`Client ${socket.id} leaving chat: ${chat}`);
     // Check if the chat exists for the user
-    const userId = socket.data.userId; // Assuming userId is stored in socket data
-    const isInChat = await chatClient.userChatExists({
-        userId,
-        chatId: chat
-    })
+    const authenticatedUser = socket.data.user as User;
+    if (!authenticatedUser || !authenticatedUser.id) {
+        logger.error(`User not authenticated for socket ${socket.id}`);
+        socket.emit('error', {message: 'Authentication required'});
+        return;
+    }
+    const token = socket.data.token as string | undefined;
+    const isInChat = token ? await userServiceClient.isUserInChat({
+        userId: authenticatedUser.id,
+        chatId: chat,
+        token
+    }) : false;
     if (!isInChat) {
-        logger.warn(`User ${userId} is not in chat ${chat}. Cannot leave.`);
+        logger.warn(`User ${authenticatedUser.id} is not in chat ${chat}. Cannot leave.`);
         socket.emit('error', {message: `You are not part of chat ${chat}.`});
         return;
     }

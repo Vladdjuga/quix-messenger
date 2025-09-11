@@ -1,14 +1,4 @@
-﻿syntax = "proto3";
+﻿// Deprecated: user-service gRPC definitions removed. This file is intentionally left blank.
 package chat;
 
-message UserChatExistsRequest {
-  string userId = 1;
-  string chatId = 2;
-}
-message UserChatExistsResponse {
-  bool exists = 1;
-}
-service ChatService {
-  rpc UserChatExists(UserChatExistsRequest) returns (UserChatExistsResponse);
-}
 

@@ -3,21 +3,18 @@ import * as protoLoader from '@grpc/proto-loader';
 import path from 'path';
 import {promisify} from 'util';
 import type {
-    GetMessageRequest,
-    GetMessageResponse,
-    MessageResponse,
     SendMessageRequest,
     SendMessageResponse
 } from '../types/grpcTypes.js';
 import logger from "../config/logger.js";
 
-const GRPC_SERVER_CHAT = process.env.GRPC_SERVER_CHAT || 'localhost:50052';
+// Prefer GRPC_SERVER_MESSENGER, fallback to legacy GRPC_SERVER_CHAT, then default to message-service:7000
+const GRPC_SERVER_CHAT = process.env.GRPC_SERVER_MESSENGER || process.env.GRPC_SERVER_CHAT || 'message-service:7000';
 const PROTO_PATH = path.resolve(process.cwd(), 'protos/messenger.proto');
 
 export class MessengerClient {
     private readonly client: any;
     private readonly sendMessageAsync: (request: any) => Promise<SendMessageResponse>;
-    private readonly getMessageAsync: (request: GetMessageRequest) => Promise<GetMessageResponse>;
 
     constructor(serverAddress: string = GRPC_SERVER_CHAT) {
         const packageDefinition = protoLoader.loadSync(
@@ -61,7 +58,6 @@ export class MessengerClient {
         });
 
         this.sendMessageAsync = promisify(this.client.SendMessage.bind(this.client));
-        this.getMessageAsync = promisify(this.client.GetMessage.bind(this.client));
     }
 
     async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
@@ -72,7 +68,6 @@ export class MessengerClient {
                     nanos: (request.sentAt.getTime() % 1000) * 1000000,
                 },
                 text: request.text,
-                userId: request.userId,
                 chatId: request.chatId,
             };
 
@@ -82,30 +77,6 @@ export class MessengerClient {
             throw error;
         }
     }
-
-    // possibly won't be used
-    async getMessage(request: GetMessageRequest): Promise<GetMessageResponse> {
-        try {
-            const response = await this.getMessageAsync(request);
-
-            const messages: MessageResponse[] = response.messages.map((msg: any) => ({
-                id: msg.id,
-                sentAt: new Date(msg.sentAt.seconds * 1000 + msg.sentAt.nanos / 1000000),
-                receivedAt: new Date(msg.receivedAt.seconds * 1000 + msg.receivedAt.nanos / 1000000),
-                text: msg.text,
-                userId: msg.userId,
-                chatId: msg.chatId,
-                status: msg.status,
-            }));
-
-            return { messages };
-        } catch (error) {
-            console.error('MessengerClient.getMessage error:', error);
-            throw error;
-        }
-    }
-
-
 
     close(): void {
         this.client.close();
