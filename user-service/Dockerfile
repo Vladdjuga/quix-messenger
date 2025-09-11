@@ -1,7 +1,7 @@
 # Базовый рантайм
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
-EXPOSE 5001
+# Expose only REST port (mapped to 7001 in Kestrel)
 EXPOSE 6001
 
 # SDK для сборки
@@ -13,7 +13,7 @@ WORKDIR /src
 COPY user-service.sln ./
 COPY UI/UI.csproj ./UI/
 COPY Infrastructure/Infrastructure.csproj ./Infrastructure/
-COPY Grpc/Grpc.csproj ./Grpc/
+## Removed Grpc project
 
 # Восстанавливаем зависимости
 RUN dotnet restore "./UI/UI.csproj"

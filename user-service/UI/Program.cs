@@ -1,6 +1,6 @@
 using System.Text;
 using UI.Swagger;
-using Chat;
+// using Chat; // removed: gRPC no longer used
 using Infrastructure.DI;
 using Infrastructure.Middleware;
 using Infrastructure.Persistence.Contexts;
@@ -17,7 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using UI.gRPCClients;
+// using UI.gRPCClients; // removed: gRPC no longer used
 
 var builder = WebApplication.CreateBuilder(args);
 var config=builder.Configuration;
@@ -69,7 +69,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
-builder.Services.AddGrpc();
+// builder.Services.AddGrpc(); // removed: gRPC no longer used
 builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
@@ -103,6 +103,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGrpcService<UI.gRPCClients.ChatService>();
+// app.MapGrpcService<UI.gRPCClients.ChatService>(); // removed: gRPC no longer used
 
 app.Run();

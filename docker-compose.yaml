@@ -31,7 +31,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
     ports:
-      - "5001:7000"
       - "6001:7001"
     networks:
       - app-network
