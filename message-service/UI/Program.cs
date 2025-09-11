@@ -63,6 +63,14 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 builder.Services.ConfigureServices();
 
+// Register HttpClient and ChatServiceClient for communicating with user-service
+builder.Services.AddHttpClient<ChatServiceClient>((_, client) =>
+{
+    var url = config.GetConnectionString("UserService") 
+              ?? throw new InvalidOperationException("UserService connection string not found");
+    client.BaseAddress = new Uri(url);
+});
+
 builder.Services.AddCarter();
 builder.Services.AddGrpc();
 
