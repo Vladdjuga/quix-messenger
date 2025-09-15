@@ -46,12 +46,13 @@ public class MessagesController : Controller
 
     // GET api/messages?chatId=&userId=&count=
     [Authorize]
+    [GetUserGuid]
     [HttpGet]
     public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Get(
         [FromQuery] Guid? chatId,
-        [FromQuery] Guid? userId,
         [FromQuery] int count = 50)
     {
+        var userId = HttpContext.GetUserGuid();
         var query = new GetMessagesQuery(chatId, userId, count);
         _logger.LogInformation("Fetching messages chatId={ChatId} userId={UserId} count={Count}", chatId, userId, count);
         var result = await _mediator.Send(query);
@@ -65,13 +66,14 @@ public class MessagesController : Controller
 
     // GET api/messages/paginated?chatId=&userId=&lastCreatedAt=&pageSize=
     [Authorize]
+    [GetUserGuid]
     [HttpGet("paginated")]
     public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> GetPaginated(
         [FromQuery] Guid chatId,
-        [FromQuery] Guid userId,
         [FromQuery] DateTime lastCreatedAt,
         [FromQuery] int pageSize = 50)
     {
+        var userId = HttpContext.GetUserGuid();
         var query = new GetMessagesPaginatedQuery(chatId, userId, lastCreatedAt, pageSize);
         _logger.LogInformation("Fetching paginated messages chatId={ChatId} userId={UserId} lastCreatedAt={LastCreatedAt} pageSize={PageSize}", chatId, userId, lastCreatedAt, pageSize);
         var result = await _mediator.Send(query);
