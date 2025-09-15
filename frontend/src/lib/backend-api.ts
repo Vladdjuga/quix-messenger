@@ -2,18 +2,16 @@ import { NextResponse } from 'next/server';
 import { safeParseJSON } from '@/lib/utils';
 
 const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
-const MESSAGE_SERVICE_URL = process.env.NEXT_PUBLIC_MESSAGE_SERVICE_URL;
 
 export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: unknown;
   queryParams?: Record<string, string | number | undefined | null>;
-  service?: 'user' | 'message';
 }
 
 export class BackendApiClient {
   static async request(req: Request, endpoint: string, options: ApiOptions = {}): Promise<NextResponse> {
-    const { method = 'GET', body, queryParams, service = 'user' } = options;
+    const { method = 'GET', body, queryParams } = options;
     
     const authHeader = req.headers.get('authorization');
     if (!authHeader) {
@@ -21,8 +19,8 @@ export class BackendApiClient {
     }
 
     try {
-      const baseUrl = service === 'user' ? USER_SERVICE_URL : MESSAGE_SERVICE_URL;
-      let url = `${baseUrl}${endpoint}`;
+  const baseUrl = USER_SERVICE_URL;
+  let url = `${baseUrl}${endpoint}`;
       
       if (queryParams) {
         const params = new URLSearchParams();

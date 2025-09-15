@@ -14,6 +14,5 @@ export async function GET(req: Request) {
   return BackendApiClient.request(req, '/Messages/paginated', {
     method: 'GET',
     queryParams: { chatId, lastCreatedAt: lastCreatedAt ?? undefined, pageSize },
-    service: 'user',
   });
 }

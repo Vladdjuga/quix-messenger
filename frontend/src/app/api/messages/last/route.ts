@@ -9,6 +9,5 @@ export async function GET(req: Request) {
   return BackendApiClient.request(req, '/Messages/last', {
     method: 'GET',
     queryParams: { chatId, count },
-    service: 'user',
   });
 }

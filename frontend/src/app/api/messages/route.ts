@@ -17,6 +17,5 @@ export async function POST(req: Request) {
       chatId: body.chatId,
       sentAt: body.sentAt ?? new Date().toISOString(),
     },
-    service: 'user',
   });
 }
