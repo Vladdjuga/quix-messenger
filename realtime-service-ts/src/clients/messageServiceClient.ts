@@ -1,6 +1,7 @@
 import logger from "../config/logger.js";
 
-const DEFAULT_BASE_URL = process.env.MESSAGE_SERVICE_URL || "http://message-service:7001";
+// Prefer USER_SERVICE_URL; fallback to MESSAGE_SERVICE_URL for backward compatibility
+const DEFAULT_BASE_URL = process.env.USER_SERVICE_URL || process.env.MESSAGE_SERVICE_URL || "http://user-service:7001";
 
 export class MessageServiceClient {
   private readonly baseUrl: string;
@@ -10,12 +11,12 @@ export class MessageServiceClient {
   }
 
   /**
-   * Calls message-service REST endpoint to add a message.
-   * POST /api/Messages/add
+   * Calls user-service REST endpoint to add a message.
+   * POST /api/Messages
    */
   async addMessage(params: { text: string; chatId: string; userId: string; token: string }): Promise<{ id: string } | null> {
-    const { text, chatId, userId, token } = params;
-    const url = `${this.baseUrl}/api/Messages/add`;
+    const { text, chatId, token } = params; // userId is derived from JWT on server
+    const url = `${this.baseUrl}/api/Messages`;
 
     try {
       const res = await fetch(url, {
@@ -25,11 +26,11 @@ export class MessageServiceClient {
           "Accept": "application/json",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ text, chatId, userId })
+        body: JSON.stringify({ text, chatId })
       });
 
       if (!res.ok) {
-        logger.warn(`message-service addMessage non-2xx: ${res.status} ${res.statusText}`);
+        logger.warn(`user-service addMessage non-2xx: ${res.status} ${res.statusText}`);
         return null;
       }
 
@@ -37,7 +38,7 @@ export class MessageServiceClient {
       if (!id) return null;
       return { id };
     } catch (err) {
-      logger.error(`message-service addMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+      logger.error(`user-service addMessage failed: ${err instanceof Error ? err.message : String(err)}`);
       return null;
     }
   }

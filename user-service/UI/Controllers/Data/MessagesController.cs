@@ -4,6 +4,7 @@ using Application.UseCases.Messages.Commands;
 using Application.UseCases.Messages.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,8 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost]
-    public async Task<Results<Ok<Guid>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Create([FromBody] CreateMessageDto dto)
+    public async Task<Results<Ok<Guid>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Create(
+        [FromBody] CreateMessageDto dto)
     {
         var userId = HttpContext.GetUserGuid();
         var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId, dto.SentAt);
@@ -86,9 +88,3 @@ public class MessagesController : Controller
     }
 }
 
-public class CreateMessageDto
-{
-    public required string Text { get; set; }
-    public required Guid ChatId { get; set; }
-    public DateTime SentAt { get; set; } = DateTime.UtcNow;
-}
