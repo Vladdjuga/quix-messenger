@@ -1,6 +1,6 @@
 import type {Socket} from "socket.io";
 import {Message} from "../../../types/message.js";
-import {messageClient} from "../../../clients/index.js";
+import {messageServiceClient} from "../../../clients/index.js";
 import logger from "../../../config/logger.js"
 import {validate} from "class-validator";
 import {plainToInstance} from "class-transformer";
@@ -32,13 +32,22 @@ export async function onMessageSent(
         // Log the incoming message data
         logger.info(`Received message from authenticated user ${authenticatedUser.id}:`, data);
         
-        // Send the message to the server using authenticated user ID
-        const response = await messageClient.sendMessage({
+        // Use bearer token captured during socket auth
+        const token = socket.data.token as string | undefined;
+        if (!token) {
+            logger.error(`Missing bearer token for user ${authenticatedUser.id}`);
+            socket.emit('error', {message: 'Authentication required'});
+            return;
+        }
+
+        // Call message-service REST API to add a message
+        const result = await messageServiceClient.addMessage({
             chatId: data.chatId,
             text: data.text,
-            sentAt: data.sentAt
+            userId: authenticatedUser.id,
+            token
         });
-        if (!response || !response.success) {
+        if (!result || !result.id) {
             logger.error(`Failed to send message to server for user ${authenticatedUser.id}`);
             socket.emit('error', {message: 'Failed to send message'});
             return;

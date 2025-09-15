@@ -15,8 +15,7 @@
         </None>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Carter" Version="8.0.0" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.71.0-pre1" />
+    <PackageReference Include="Carter" Version="8.0.0" />
 
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7"/>
@@ -28,9 +27,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Application\Application.csproj" />
-      <ProjectReference Include="..\Grpc\Grpc.csproj" />
-      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

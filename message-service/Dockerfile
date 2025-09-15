@@ -13,7 +13,7 @@ WORKDIR /src
 COPY message-service.sln ./
 COPY UI/UI.csproj ./UI/
 COPY Infrastructure/Infrastructure.csproj ./Infrastructure/
-COPY Grpc/Grpc.csproj ./Grpc/
+# gRPC project removed
 
 # Восстанавливаем зависимости
 RUN dotnet restore "./UI/UI.csproj"

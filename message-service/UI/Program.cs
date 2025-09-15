@@ -72,7 +72,7 @@ builder.Services.AddHttpClient<ChatServiceClient>((_, client) =>
 });
 
 builder.Services.AddCarter();
-builder.Services.AddGrpc();
+// gRPC has been removed; REST endpoints via Carter are used
 
 var app = builder.Build();
 
@@ -91,6 +91,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapCarter();
-app.MapGrpcService<MessengerService>();
+// gRPC service removed
 
 app.Run();
