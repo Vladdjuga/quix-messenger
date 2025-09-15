@@ -13,18 +13,6 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
-  mongodb:
-    image: mongo:7.0
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: secret
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodata:/data/db
-    networks:
-      - app-network
   user-service:
     image: user-service
     environment:
@@ -36,19 +24,6 @@ services:
       - app-network
     depends_on:
       - postgres
-  message-service:
-    image: message-service
-    ports:
-      - "5000:7000"
-      - "6000:7001"
-    networks:
-      - app-network
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__MongoDb=mongodb://root:secret@mongodb:27017
-      - ConnectionStrings__MongoDbName=MessageMongoDb
-    depends_on:
-      - mongodb
   realtime-service-ts:
     image: realtime-service-ts
     ports:
@@ -59,7 +34,6 @@ services:
       - app-network
     depends_on:
       - user-service
-      - message-service
   frontend:
     image: frontend
     ports:
@@ -70,7 +44,6 @@ services:
       - app-network
     depends_on:
       - user-service
-      - message-service
       - realtime-service-ts
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -89,8 +62,6 @@ services:
       - postgres
 volumes:
   pgdata:
-    driver: local
-  mongodata:
     driver: local
   pgadmin_data:
     driver: local
