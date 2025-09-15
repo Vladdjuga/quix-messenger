@@ -1,13 +1,13 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace UI.gRPCClients;
-
+namespace UI.HttpClients;
 
 public class ChatMembershipResponse
 {
     public bool IsUserInChat { get; init; }
 }
+
 public class ChatServiceClient
 {
     private readonly HttpClient _httpClient;

@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using UI.Common;
 using Application.Common;
 using UI.Utilities;
-using UI.gRPCClients;
+using UI.HttpClients;
 
 namespace UI.Endpoints;
 

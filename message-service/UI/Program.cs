@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using UI.Endpoints;
-using UI.gRPCClients;
+using UI.HttpClients;
 using UI.Swagger;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
