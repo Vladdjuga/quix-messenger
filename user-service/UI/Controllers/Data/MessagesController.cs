@@ -86,5 +86,25 @@ public class MessagesController : Controller
         }
         return TypedResults.Ok(result.Value);
     }
+
+    // GET api/messages/last?chatId=&count=
+    [Authorize]
+    [GetUserGuid]
+    [HttpGet("last")]
+    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> GetLast(
+        [FromQuery] Guid chatId,
+        [FromQuery] int count = 50)
+    {
+        var userId = HttpContext.GetUserGuid();
+        var query = new GetMessagesQuery(chatId, userId, count);
+        _logger.LogInformation("Fetching last messages chatId={ChatId} userId={UserId} count={Count}", chatId, userId, count);
+        var result = await _mediator.Send(query);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to fetch last messages: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        return TypedResults.Ok(result.Value);
+    }
 }
 
