@@ -1,7 +1,9 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Message, MessageStatus } from "@/lib/types";
-import { getMessages, sendMessage } from "@/lib/api/messagesApi";
+import { getMessages } from "@/lib/api/messagesApi";
+import { SocketContext } from "@/lib/contexts/SocketContext";
+import { joinChat, leaveChat, onNewMessage, sendChatMessage } from "@/lib/realtime/chatSocketUseCases";
 
 interface ChatWindowProps {
   username: string;
@@ -16,6 +18,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ username, chatId }) => {
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const effectiveChatId = chatId ?? username; // fallback until real chatId is guaranteed
+  const socket = useContext(SocketContext);
 
   useEffect(() => {
     let mounted = true;
@@ -27,6 +30,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ username, chatId }) => {
     })();
     return () => { mounted = false; };
   }, [username]);
+
+  // Join/leave chat room and handle incoming messages
+  useEffect(() => {
+    if (!socket || !effectiveChatId) return;
+    joinChat(socket, effectiveChatId);
+    const offNewMessage = onNewMessage(socket, (msg) => {
+      if (msg.chatId !== effectiveChatId) return;
+      setMessages(prev => [...prev, msg]);
+    });
+    return () => {
+      leaveChat(socket, effectiveChatId);
+      offNewMessage?.();
+    };
+  }, [socket, effectiveChatId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,12 +65,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ username, chatId }) => {
     setMessages(prev => [...prev, temp]);
     setText("");
     try {
-  const created = await sendMessage(username, temp.chatId, value);
-      setMessages(prev => prev.map(m => m.id === temp.id ? created : m));
+      // Emit to realtime-service via usecases
+      sendChatMessage(socket, temp.chatId, value);
+      // Keep optimistic message as-is; in future, replace when ack/newMessage arrives
     } catch (e) {
       // revert optimistic message on failure
       setMessages(prev => prev.filter(m => m.id !== temp.id));
-      // optionally surface error UI later
       console.error(e);
     }
   };
