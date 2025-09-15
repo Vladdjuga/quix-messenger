@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Chat;
 using Application.DTOs.Friendship;
 using Application.DTOs.User;
+using Application.DTOs.Message;
 using AutoMapper;
 using Domain.Entities;
 
@@ -30,5 +31,8 @@ public class MappingProfile:Profile
         
         // Note: FriendshipEntity -> ReadFriendshipDto mapping has been removed
         // All friendship mappings are now done manually for better control and clarity
+
+        // Messages
+        CreateMap<MessageEntity, ReadMessageDto>();
     }
 }
