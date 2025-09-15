@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<IUserSessionRepository,UserSessionRepository>();
         services.AddScoped<IFriendshipRepository,FriendshipRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
+    services.AddScoped<IMessageRepository,MessageRepository>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();
