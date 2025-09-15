@@ -10,6 +10,14 @@ export enum ChatRole {
     User = "User"
 }
 
+// Message delivery / state flags (bitwise-friendly if backend uses flags)
+export enum MessageStatus {
+    Read = 1,
+    Sent = 2,
+    Delivered = 4,
+    Modified = 8
+}
+
 export enum FriendshipStatus {
     Pending = "Pending",
     Active = "Active",

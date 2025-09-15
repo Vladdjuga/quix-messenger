@@ -1,22 +1,5 @@
-// Enums matching backend
-export enum MessageStatus {
-  Read = 1,
-  Sent = 2,
-  Delivered = 4,
-  Modified = 8
-}
-
-export enum ChatType {
-  Direct = 'Direct',
-  Group = 'Group',
-  Channel = 'Channel'
-}
-
-export enum ChatRole {
-  Admin = 'Admin',
-  Moderator = 'Moderator',
-  User = 'User'
-}
+import { ChatType, ChatRole, MessageStatus } from './enums';
+export { ChatType, ChatRole, MessageStatus } from './enums';
 
 // Message types matching backend
 export interface Message {
@@ -29,11 +12,8 @@ export interface Message {
   status: MessageStatus;
 }
 
-export interface CreateMessageRequest {
-  text: string;
-  userId: string;
-  chatId: string;
-}
+// Prefer DTOs in dto folder; keep legacy CreateMessageRequest for backward compatibility if still imported.
+export interface CreateMessageRequest { text: string; userId: string; chatId: string; }
 
 // Chat types matching backend
 export interface Chat {

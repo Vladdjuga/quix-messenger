@@ -22,9 +22,10 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, Result<IEnum
     {
         if (request.Count <= 0)
             return Result<IEnumerable<ReadMessageDto>>.Failure("Request is empty");
-        if (request.ChatId.HasValue && request.UserId.HasValue)
+        if (request is { ChatId: not null, UserId: not null })
         {
-            var membership = await _userChatRepository.GetByUserAndChatAsync(request.UserId.Value, request.ChatId.Value, cancellationToken);
+            var membership = await _userChatRepository.GetByUserAndChatAsync(request.UserId.Value,
+                request.ChatId.Value, cancellationToken);
             if (membership is null)
                 return Result<IEnumerable<ReadMessageDto>>.Failure("User is not a member of the chat");
         }
