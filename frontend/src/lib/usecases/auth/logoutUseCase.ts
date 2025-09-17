@@ -1,4 +1,5 @@
 import {api} from "@/app/api";
+import apiClient from "@/app/api/http";
 
 export async function logoutUseCase(): Promise<void> {
     try {
@@ -11,6 +12,7 @@ export async function logoutUseCase(): Promise<void> {
     } finally {
         // Always clear client-side data
         localStorage.removeItem("jwt");
+    delete apiClient.defaults.headers.common["Authorization"];
         
         // Redirect to login page
         if (typeof window !== "undefined") {

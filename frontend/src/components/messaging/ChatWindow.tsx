@@ -66,7 +66,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ username, chatId }) => {
     setText("");
     try {
       // Emit to realtime-service via usecases
-      sendChatMessage(socket, temp.chatId, value);
+      await sendChatMessage(socket, temp.chatId, value);
       // Keep optimistic message as-is; in future, replace when ack/newMessage arrives
     } catch (e) {
       // revert optimistic message on failure

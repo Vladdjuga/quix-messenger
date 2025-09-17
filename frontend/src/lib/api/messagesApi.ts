@@ -1,5 +1,4 @@
-import apiClient, { getTyped } from '@/app/api/axios';
-import { ReadMessageDto } from '@/lib/dto/ReadMessageDto';
+import { api } from '@/app/api';
 import { Message } from '@/lib/types';
 import { mapReadMessageDtos } from '@/lib/mappers/messageMapper';
 
@@ -7,12 +6,11 @@ import { mapReadMessageDtos } from '@/lib/mappers/messageMapper';
 // username identifies a direct chat; adjust if backend uses chatId
 
 export async function getMessages(username: string): Promise<Message[]> {
-  return getTyped<Message[]>(`/chats/${encodeURIComponent(username)}/messages`, {
-    parse: (data: unknown) => mapReadMessageDtos(data as ReadMessageDto[])
-  });
+  const resp = await api.messages.list(username);
+  return mapReadMessageDtos(resp.data);
 }
 
 // Optionally expose raw DTO methods if needed later
 export const rawMessagesApi = {
-  list: (username: string) => apiClient.get<ReadMessageDto[]>(`/chats/${encodeURIComponent(username)}/messages`)
+  list: (username: string) => api.messages.list(username)
 };

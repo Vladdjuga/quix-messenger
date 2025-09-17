@@ -30,9 +30,11 @@ export async function sendChatMessage(socket: Socket | null, chatId: string, tex
 
 export function onNewMessage(socket: Socket | null, handler: (msg: Message) => void) {
   if (!socket) return () => {};
-  const listener = (payload: NewMessagePayload) => {
-    const { senderId, message } = payload || {} as any;
-    if (!message) return;
+  const listener = (payload: unknown) => {
+    const obj = (payload ?? {}) as Partial<NewMessagePayload>;
+    const senderId = typeof obj.senderId === 'string' ? obj.senderId : undefined;
+    const message = obj.message as Partial<NewMessagePayload["message"]> | undefined;
+  if (!message || typeof message.chatId !== 'string' || typeof message.text !== 'string') return;
     const msg: Message = {
       id: message.id ?? `srv-${Date.now()}`,
       chatId: message.chatId,
@@ -48,7 +50,7 @@ export function onNewMessage(socket: Socket | null, handler: (msg: Message) => v
   return () => socket.off('newMessage', listener);
 }
 
-export function onSocketError(socket: Socket | null, handler: (err: any) => void) {
+export function onSocketError(socket: Socket | null, handler: (err: unknown) => void) {
   if (!socket) return () => {};
   socket.on('error', handler);
   return () => socket.off('error', handler);

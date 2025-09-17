@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
-    "@types/axios": "^0.9.36",
     "axios": "^1.11.0",
     "framer-motion": "^12.18.1",
     "next": "^15.3.4",

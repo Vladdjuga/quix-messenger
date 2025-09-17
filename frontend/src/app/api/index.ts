@@ -1,7 +1,9 @@
-import apiClient from "@/app/api/axios";
+import apiClient from "@/app/api/http";
 import {ReadUserDto} from "@/lib/dto/ReadUserDto";
 import {ReadFriendshipDto} from "@/lib/dto/ReadFriendshipDto";
 import {RegisterUserDto} from "@/lib/dto/RegisterUserDto";
+import { ReadMessageDto } from "@/lib/dto/ReadMessageDto";
+import { ReadChatWithLastMessageDto } from "@/lib/dto/ReadChatWithLastMessageDto";
 
 export const api = {
     auth: {
@@ -68,5 +70,11 @@ export const api = {
         getFriendship: (friendshipId: string) => {
             return apiClient.get<ReadFriendshipDto>(`/friendship/getFriendship/${friendshipId}`);
         },
-    }
+    },
+    chats: {
+        list: () => apiClient.get<ReadChatWithLastMessageDto[]>(`/chats`),
+    },
+    messages: {
+        list: (username: string) => apiClient.get<ReadMessageDto[]>(`/chats/${encodeURIComponent(username)}/messages`),
+    },
 }
