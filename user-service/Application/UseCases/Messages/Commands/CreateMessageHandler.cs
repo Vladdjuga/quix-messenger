@@ -34,7 +34,7 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
             ChatId = request.ChatId,
             Text = request.Text,
             UserId = request.UserId,
-            ReceivedAt = DateTime.Now,
+            ReceivedAt = DateTime.UtcNow,
             SentAt = request.SentAt,
             Status = MessageStatus.Sent
         };
