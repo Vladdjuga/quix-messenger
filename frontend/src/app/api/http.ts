@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { getToken, setToken, clearToken } from "@/app/api/token";
 import { toApiError } from "@/app/api/errors";
+import { refreshSocketAuth } from "@/lib/socket/socket";
 
 type AuthResponse = { accessToken: string } | string;
 
@@ -60,6 +61,7 @@ apiClient.interceptors.response.use(
         if (!newToken || newToken.split(".").length !== 3) throw new Error("Invalid token received");
 
         setToken(newToken);
+        refreshSocketAuth(newToken);
         apiClient.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
         processQueue(null);
 

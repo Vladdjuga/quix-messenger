@@ -16,13 +16,15 @@ export const socketAuthMiddleware = (
     next:(err?: ExtendedError) => void
 ) => {
     const token = socket.handshake.auth.token as string | undefined;
+    logger.debug(`[${socket.id}] socket handler payload: ${token}`);
     if (!token) {
         next(new Error('Unauthorized: Missing token'));
         return;
     } 
     try {
-    socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
-    socket.data.token = token; // persist token for outbound service calls
+        socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+        logger.debug(`[${socket.id}] socket handler payload: ${JSON.stringify(socket.data.user, null, 2)}`);
+        socket.data.token = token; // persist token for outbound service calls
         next();
     } catch (error) {
         logger.error(`Socket authentication error: ${error}`);
@@ -31,5 +33,4 @@ export const socketAuthMiddleware = (
         next(new Error('Forbidden: Invalid or expired token'));
         return;
     }
-    next();
 }

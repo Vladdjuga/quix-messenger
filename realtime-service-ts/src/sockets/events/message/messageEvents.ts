@@ -5,6 +5,7 @@ import logger from "../../../config/logger.js"
 import {validate} from "class-validator";
 import {plainToInstance} from "class-transformer";
 import type {User} from "../../../types/user.js";
+import { NewMessageDto } from "../../../types/dto/NewMessageDto.js";
 
 export async function onMessageSent(
     this: Socket,
@@ -20,8 +21,9 @@ export async function onMessageSent(
         return;
     }
 
-    const message = plainToInstance(Message, data);
-    const errors = await validate(message);
+    // Validate only the required fields for creating a message
+    const createDto = plainToInstance(NewMessageDto, data);
+    const errors = await validate(createDto);
 
     if (errors.length > 0) {
         logger.error(`Validation errors: ${errors}`);
@@ -42,8 +44,8 @@ export async function onMessageSent(
 
         // Call message-service REST API to add a message
         const result = await messageServiceClient.addMessage({
-            chatId: data.chatId,
-            text: data.text,
+            chatId: createDto.chatId,
+            text: createDto.text,
             userId: authenticatedUser.id,
             token
         });
@@ -52,10 +54,17 @@ export async function onMessageSent(
             socket.emit('error', {message: 'Failed to send message'});
             return;
         }
-        // Emit the message to the recipient
-        socket.to(data.chatId).emit('newMessage', {
-            senderId: authenticatedUser.id, // Use authenticated user ID
-            message: data,
+        // Emit the message to the room with enriched payload (includes id and server timestamp)
+        socket.to(createDto.chatId).emit('newMessage', {
+            senderId: authenticatedUser.id,
+            message: {
+                id: result.id,
+                chatId: createDto.chatId,
+                text: createDto.text,
+                userId: authenticatedUser.id,
+                sentAt: new Date().toISOString(),
+                status: 2 // Delivered
+            }
         });
     } catch (error) {
         logger.error(`Error sending message for user ${authenticatedUser.id}:`, error);

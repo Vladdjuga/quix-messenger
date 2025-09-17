@@ -72,9 +72,15 @@ export const api = {
         },
     },
     chats: {
+        // Next API routes proxy to user-service. This returns chats for the current user.
         list: () => apiClient.get<ReadChatWithLastMessageDto[]>(`/chats`),
     },
     messages: {
-        list: (username: string) => apiClient.get<ReadMessageDto[]>(`/chats/${encodeURIComponent(username)}/messages`),
+        // Get last N messages by chat id
+        last: (chatId: string, count: number = 50) =>
+            apiClient.get<ReadMessageDto[]>(`/messages/last`, { params: { chatId, count } }),
+        // Get paginated messages by chat id using lastCreatedAt cursor
+        paginated: (chatId: string, lastCreatedAt: string, pageSize: number = 50) =>
+            apiClient.get<ReadMessageDto[]>(`/messages/paginated`, { params: { chatId, lastCreatedAt, pageSize } }),
     },
 }

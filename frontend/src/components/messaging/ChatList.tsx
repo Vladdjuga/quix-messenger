@@ -5,30 +5,40 @@ import { ChatWithLastMessage } from "@/lib/types";
 
 interface Props {
   chats: ChatWithLastMessage[];
-  activeUsername?: string;
+  activeChatId?: string;
 }
 
-export const ChatList: React.FC<Props> = ({ chats, activeUsername }) => {
+export const ChatList: React.FC<Props> = ({ chats, activeChatId }) => {
   return (
     <div className="space-y-1">
       {chats.map(chat => {
-        const username = chat.title; // assuming direct chat title is username for now
-        const active = activeUsername === username;
+        const active = activeChatId === chat.id;
         return (
           <Link
             key={chat.id}
-            href={`/chats/${encodeURIComponent(username)}`}
-            className={`block px-3 py-2 rounded text-sm border border-transparent hover:bg-gray-50 truncate ${active ? 'bg-gray-200 font-medium' : ''}`}
+            href={{
+              pathname: '/chats',
+              query: { chatId: chat.id }
+            }}
+            className={`block px-3 py-2 rounded text-sm border ${active ? 'border-default bg-muted/10 font-medium' : 'border-transparent hover:bg-muted/10'} truncate`}
           >
-            <div className="truncate">{chat.title}</div>
+            <div className="truncate flex items-center gap-2">
+              {chat.isOnline && <span className="inline-block w-2 h-2 rounded-full bg-green-500" aria-hidden />}
+              <span className="truncate">{chat.title}</span>
+              {chat.unreadCount > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white">
+                  {chat.unreadCount}
+                </span>
+              )}
+            </div>
             {chat.lastMessage && (
-              <div className="text-xs text-gray-500 truncate">{chat.lastMessage.text}</div>
+              <div className="text-xs text-muted truncate">{chat.lastMessage.text}</div>
             )}
           </Link>
         );
       })}
       {chats.length === 0 && (
-        <div className="text-xs text-gray-500 px-2 py-4 text-center">No chats</div>
+        <div className="text-xs text-muted px-2 py-4 text-center">No chats</div>
       )}
     </div>
   );

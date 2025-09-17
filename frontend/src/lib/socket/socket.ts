@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
+import { getToken } from "@/app/api/token";
 
 let socket: Socket | null = null;
 
@@ -7,7 +7,7 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 export const initSocket = () => {
     if (!socket) {
-        const token = localStorage.getItem("jwt");
+        const token = getToken();
         socket = io(SOCKET_URL, {
             auth: { token },
             transports: ["websocket"],
@@ -23,4 +23,18 @@ export const initSocket = () => {
 export const getSocket = () => {
     if (!socket) throw new Error("Socket not initialized yet");
     return socket;
+};
+
+// Update socket auth with a new token and reconnect to apply it
+export const refreshSocketAuth = (newToken: string | null) => {
+    if (!socket) return;
+    // Update auth payload for next handshake
+    socket.auth = { token: newToken };
+    try {
+        if (socket.connected) {
+            socket.disconnect();
+        }
+    } catch {}
+    // Reconnect will use the updated auth token
+    socket.connect();
 };
