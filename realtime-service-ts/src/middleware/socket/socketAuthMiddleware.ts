@@ -1,4 +1,4 @@
-import type {User} from "../../types/user.js";
+import {User} from "../../types/user.js";
 import type {ExtendedError, Socket} from "socket.io";
 import jwt from "jsonwebtoken";
 import logger from "../../config/logger.js";
@@ -18,11 +18,12 @@ export const socketAuthMiddleware = (
     const token = socket.handshake.auth.token as string | undefined;
     logger.debug(`[${socket.id}] socket handler payload: ${token}`);
     if (!token) {
+        socket.emit('unauthorized', new Error('Unauthorized'));
         next(new Error('Unauthorized: Missing token'));
         return;
     } 
     try {
-        socket.data.user = jwt.verify(token, JWT_SECRET) as User; // Cast the verified token to User type
+        socket.data.user = User.fromJson(jwt.verify(token, JWT_SECRET)); // Cast the verified token to User type
         logger.debug(`[${socket.id}] socket handler payload: ${JSON.stringify(socket.data.user, null, 2)}`);
         socket.data.token = token; // persist token for outbound service calls
         next();
@@ -30,6 +31,7 @@ export const socketAuthMiddleware = (
         logger.error(`Socket authentication error: ${error}`);
         logger.error(error instanceof Error ? error.stack : 'No stack trace available');
         logger.error(`Socket JWT verification failed for token: ${token}`);
+        socket.emit('unauthorized', error);
         next(new Error('Forbidden: Invalid or expired token'));
         return;
     }

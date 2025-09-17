@@ -17,8 +17,7 @@ export const ChatList: React.FC<Props> = ({ chats, activeChatId }) => {
           <Link
             key={chat.id}
             href={{
-              pathname: '/chats',
-              query: { chatId: chat.id }
+              pathname: `/chats/${chat.id}`,
             }}
             className={`block px-3 py-2 rounded text-sm border ${active ? 'border-default bg-muted/10 font-medium' : 'border-transparent hover:bg-muted/10'} truncate`}
           >

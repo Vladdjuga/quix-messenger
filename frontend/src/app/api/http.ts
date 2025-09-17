@@ -1,28 +1,13 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { getToken, setToken, clearToken } from "@/app/api/token";
+import { getToken, clearToken } from "@/app/api/token";
 import { toApiError } from "@/app/api/errors";
-import { refreshSocketAuth } from "@/lib/socket/socket";
-
-type AuthResponse = { accessToken: string } | string;
-
-type QueueItem = { resolve: () => void; reject: (error: Error) => void };
+import { refreshAuthTokenUseCase } from "@/lib/usecases/auth/refreshTokenUseCase";
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: "/api",
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 });
-
-let isRefreshing = false;
-let failedQueue: QueueItem[] = [];
-
-const processQueue = (error: Error | null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve();
-  });
-  failedQueue = [];
-};
 
 const redirectToLogin = () => {
   if (typeof window !== "undefined") {
@@ -45,34 +30,13 @@ apiClient.interceptors.response.use(
 
     if (errObj.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
-
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve: () => resolve(apiClient.request(originalRequest)), reject });
-        });
-      }
-
-      isRefreshing = true;
-
       try {
-        const response = await axios.post<AuthResponse>("/api/auth/refresh", {}, { withCredentials: true });
-        const raw = response.data;
-        const newToken = typeof raw === "string" ? raw : raw.accessToken;
-        if (!newToken || newToken.split(".").length !== 3) throw new Error("Invalid token received");
-
-        setToken(newToken);
-        refreshSocketAuth(newToken);
+        const newToken = await refreshAuthTokenUseCase();
         apiClient.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
-        processQueue(null);
-
         return apiClient.request(originalRequest);
       } catch (refreshError) {
-        const errRefresh = refreshError instanceof Error ? refreshError : new Error("Token refresh failed");
-        processQueue(errRefresh);
         redirectToLogin();
         throw refreshError;
-      } finally {
-        isRefreshing = false;
       }
     }
 

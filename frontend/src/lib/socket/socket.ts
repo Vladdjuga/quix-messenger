@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { getToken } from "@/app/api/token";
+import {refreshAuthTokenUseCase} from "@/lib/usecases/auth/refreshTokenUseCase";
 
 let socket: Socket | null = null;
 
@@ -17,6 +18,13 @@ export const initSocket = () => {
         socket.on("connect", () => console.log("Socket connected:", socket!.id));
         socket.on("disconnect", () => console.log("Socket disconnected"));
         socket.on("connect_error", (err) => console.error("Socket connection error:", err));
+        socket.on("error", (err) => console.error("Socket connection error:", err));
+        socket.on("unauthorized", async (err) =>{
+            console.error("Socket connection error:", err);
+            // Try refreshing the token
+            const token = await refreshAuthTokenUseCase();
+            refreshSocketAuth(token);
+        });
     }
     return socket;
 };
