@@ -34,7 +34,7 @@ export async function onMessageSent(
     try {
         // Log the incoming message data
         logger.info(`Received message from authenticated user ${authenticatedUser.id}:`, data);
-        
+
         // Use bearer token captured during socket auth
         const token = socket.data.token as string | undefined;
         if (!token) {
@@ -65,7 +65,8 @@ export async function onMessageSent(
                 text: result.text,
                 userId: result.userId,
                 createdAt: result.createdAt,
-                status: result.status
+                status: result.status,
+                localId: createDto.localId // Echo back localId for client-side correlation
             }
         });
     } catch (error) {

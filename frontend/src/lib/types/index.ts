@@ -11,6 +11,11 @@ export interface Message {
   status: MessageStatus;
 }
 
+// Extended message type with optional localId for optimistic UI updates
+export interface MessageWithLocalId extends Message {
+    localId?: string; // Optional local ID for optimistic UI updates
+}
+
 // Prefer DTOs in dto folder; keep legacy CreateMessageRequest for backward compatibility if still imported.
 export interface CreateMessageRequest { text: string; userId: string; chatId: string; }
 

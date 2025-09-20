@@ -30,7 +30,7 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost]
-    public async Task<Results<Ok<ReadMessageDto>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Create(
+    public async Task<Results<Ok<ReadMessageDto>, BadRequest<ErrorResponse>>> Create(
         [FromBody] CreateMessageDto dto)
     {
         var userId = HttpContext.GetUserGuid();
@@ -50,8 +50,8 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet]
-    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Get(
-        [FromQuery] Guid? chatId,
+    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>>> Get(
+        [FromQuery] Guid chatId,
         [FromQuery] int count = 50)
     {
         var userId = HttpContext.GetUserGuid();
@@ -70,7 +70,7 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("paginated")]
-    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> GetPaginated(
+    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>>> GetPaginated(
         [FromQuery] Guid chatId,
         [FromQuery] DateTime lastCreatedAt,
         [FromQuery] int pageSize = 50)
@@ -91,7 +91,7 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpGet("last")]
-    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> GetLast(
+    public async Task<Results<Ok<IEnumerable<ReadMessageDto>>, BadRequest<ErrorResponse>>> GetLast(
         [FromQuery] Guid chatId,
         [FromQuery] int count = 50)
     {

@@ -28,7 +28,7 @@ public class GetMessagesPaginatedHandler : IRequestHandler<GetMessagesPaginatedQ
         if (membership is null)
             return Result<IEnumerable<ReadMessageDto>>.Failure("User is not a member of the chat");
         var messages = await _repository
-            .GetMessagesPaginatedAsync(request.UserId, request.ChatId,
+            .GetMessagesPaginatedAsync(request.ChatId,
                 request.LastCreatedAt, request.PageSize, cancellationToken);
         return Result<IEnumerable<ReadMessageDto>>
             .Success(_mapper.Map<IEnumerable<ReadMessageDto>>(messages));

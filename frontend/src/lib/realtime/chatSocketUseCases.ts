@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client';
-import { Message, MessageStatus } from '@/lib/types';
+import {MessageStatus, MessageWithLocalId} from '@/lib/types';
 
 export type NewMessagePayload = {
   senderId: string;
@@ -10,6 +10,7 @@ export type NewMessagePayload = {
     createdAt?: string | Date;
     userId?: string;
     status?: number;
+    localId?: string;
   }
 };
 
@@ -23,12 +24,12 @@ export async function leaveChat(socket: Socket | null, chatId: string): Promise<
   socket.emit('leaveChat', chatId);
 }
 
-export async function sendChatMessage(socket: Socket | null, chatId: string, text: string): Promise<void> {
+export async function sendChatMessage(socket: Socket | null, chatId: string, text: string,localId:string): Promise<void> {
   if (!socket) throw new Error('Socket not connected');
-  socket.emit('message', { chatId, text });
+  socket.emit('message', { chatId, text, localId});
 }
 
-export function onNewMessage(socket: Socket | null, handler: (msg: Message) => void) {
+export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLocalId) => void) {
   if (!socket) return () => {};
 
   const listener = (payload: unknown) => {
@@ -38,13 +39,14 @@ export function onNewMessage(socket: Socket | null, handler: (msg: Message) => v
 
       const msgPayload = obj.message;
 
-      const msg: Message = {
+      const msg: MessageWithLocalId = {
         id: msgPayload.id,
         chatId: msgPayload.chatId,
         text: msgPayload.text,
         userId: msgPayload.userId ?? 'unknown',
         createdAt: msgPayload.createdAt ? new Date(msgPayload.createdAt) : new Date(),
         status: (msgPayload.status as MessageStatus) ?? MessageStatus.Delivered,
+        localId: msgPayload.localId,
       };
 
       handler(msg);

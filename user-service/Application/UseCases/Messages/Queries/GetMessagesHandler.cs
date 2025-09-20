@@ -18,19 +18,18 @@ public class GetMessagesHandler : IRequestHandler<GetMessagesQuery, Result<IEnum
         _mapper = mapper;
         _userChatRepository = userChatRepository;
     }
-    public async Task<Result<IEnumerable<ReadMessageDto>>> Handle(GetMessagesQuery request, CancellationToken cancellationToken)
+
+    public async Task<Result<IEnumerable<ReadMessageDto>>> Handle(GetMessagesQuery request,
+        CancellationToken cancellationToken)
     {
         if (request.Count <= 0)
             return Result<IEnumerable<ReadMessageDto>>.Failure("Request is empty");
-        if (request is { ChatId: not null, UserId: not null })
-        {
-            var membership = await _userChatRepository.GetByUserAndChatAsync(request.UserId.Value,
-                request.ChatId.Value, cancellationToken);
-            if (membership is null)
-                return Result<IEnumerable<ReadMessageDto>>.Failure("User is not a member of the chat");
-        }
+        var membership = await _userChatRepository.GetByUserAndChatAsync(request.UserId,
+            request.ChatId, cancellationToken);
+        if (membership is null)
+            return Result<IEnumerable<ReadMessageDto>>.Failure("User is not a member of the chat");
         var messages = await _repository
-            .GetMessagesAsync(request.UserId, request.ChatId, request.Count, cancellationToken);
+            .GetMessagesAsync(request.ChatId, request.Count, cancellationToken);
         return Result<IEnumerable<ReadMessageDto>>
             .Success(_mapper.Map<IEnumerable<ReadMessageDto>>(messages));
     }

@@ -43,33 +43,22 @@ public class MessageRepository : IMessageRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<MessageEntity>> GetMessagesAsync(Guid? userId, Guid? chatId, int count, CancellationToken cancellationToken)
+    public async Task<IEnumerable<MessageEntity>> GetMessagesAsync(Guid chatId, int count, CancellationToken cancellationToken)
     {
-        IQueryable<MessageEntity> query = _dbSet.AsNoTracking();
-        if (userId.HasValue)
-            query = query.Where(m => m.UserId == userId.Value);
-        if (chatId.HasValue)
-            query = query.Where(m => m.ChatId == chatId.Value);
-
-        return await query
+        var query = await _dbSet.Where(m => m.ChatId == chatId)
             .OrderByDescending(m => m.CreatedAt)
             .Take(count)
             .ToListAsync(cancellationToken);
+        return query;
     }
 
-    public async Task<IEnumerable<MessageEntity>> GetMessagesPaginatedAsync(Guid? userId, Guid? chatId, DateTime lastCreatedAt, int pageSize, CancellationToken cancellationToken)
+    public async Task<IEnumerable<MessageEntity>> GetMessagesPaginatedAsync(Guid chatId, DateTime lastCreatedAt, int pageSize, CancellationToken cancellationToken)
     {
-        IQueryable<MessageEntity> query = _dbSet.AsNoTracking();
-        if (userId.HasValue)
-            query = query.Where(m => m.UserId == userId.Value);
-        if (chatId.HasValue)
-            query = query.Where(m => m.ChatId == chatId.Value);
-
-        // Keyset pagination by CreatedAt
-        query = query.Where(m => m.CreatedAt < lastCreatedAt)
+        var query = await _dbSet.Where(m => m.ChatId == chatId)
+            .Where(m => m.CreatedAt < lastCreatedAt)
             .OrderByDescending(m => m.CreatedAt)
-            .Take(pageSize);
-
-        return await query.ToListAsync(cancellationToken);
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+        return query;
     }
 }

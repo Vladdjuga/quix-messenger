@@ -9,4 +9,8 @@ export class NewMessageDto {
   @IsString()
   @MinLength(1)
   text!: string;
+
+  @IsDefined()
+  @IsString()
+  localId!: string;
 }

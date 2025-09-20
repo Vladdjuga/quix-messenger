@@ -1,6 +1,6 @@
 "use client";
 import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
-import {Message, MessageStatus} from "@/lib/types";
+import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
 import {getLastMessagesByChatId} from "@/lib/api/messagesApi";
 import {SocketContext} from "@/lib/contexts/SocketContext";
 import {joinChat, leaveChat, onNewMessage, sendChatMessage} from "@/lib/realtime/chatSocketUseCases";
@@ -22,11 +22,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
   function scrollToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
-  const addMessage = useCallback((msg: Message) => {
+  const addMessage = useCallback((msg: MessageWithLocalId) => {
     setMessages(prev => {
-      const tmp = prev.find(m => m.id === msg.id);
-      if (!tmp) return [...prev, msg];
-      return prev.map(m => m.id === msg.id ? { ...m, ...msg } : m);
+      let exists = false;
+
+      const newMessages = prev.map(m => {
+        if ((msg.localId && m.id === msg.localId) || m.id === msg.id) {
+          exists = true;
+          return { ...m, ...msg };
+        }
+        return m;
+      });
+
+      if (!exists) {
+        return [...prev, msg];
+      }
+      return newMessages;
     });
   }, [setMessages]);
 
@@ -71,7 +82,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     if (!value || !chatId) return;
     setText("");
     try {
-      await sendChatMessage(socket, chatId, value);
       const msg : Message = {
         id: `local-${Date.now()}`,
         chatId:chatId,
@@ -80,6 +90,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
         createdAt: new Date(),
         status: MessageStatus.Sent,
       }
+      await sendChatMessage(socket, chatId, value,msg.id);
       addMessage(msg);
     } catch (e) {
       console.error(e);
