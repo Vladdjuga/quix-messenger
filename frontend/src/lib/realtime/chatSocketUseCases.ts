@@ -41,7 +41,6 @@ export function onNewMessage(socket: Socket | null, handler: (msg: Message) => v
       text: message.text,
       userId: senderId ?? message.userId ?? 'unknown',
       sentAt: message.sentAt ? new Date(message.sentAt) : new Date(),
-      receivedAt: new Date(),
       status: (message.status as MessageStatus) ?? MessageStatus.Delivered
     };
     handler(msg);

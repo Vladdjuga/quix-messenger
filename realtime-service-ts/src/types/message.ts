@@ -12,10 +12,6 @@ export class Message{
     sentAt: Date;
 
     @IsDefined()
-    @IsDate()
-    receivedAt: Date;
-
-    @IsDefined()
     @IsString()
     text: string;
 
@@ -34,7 +30,6 @@ export class Message{
     constructor(
         id: UUID,
         sentAt: Date,
-        receivedAt: Date,
         text: string,
         userId: UUID,
         chatId: UUID,
@@ -42,7 +37,6 @@ export class Message{
     ) {
         this.id = id;
         this.sentAt = sentAt;
-        this.receivedAt = receivedAt;
         this.text = text;
         this.userId = userId;
         this.chatId = chatId;

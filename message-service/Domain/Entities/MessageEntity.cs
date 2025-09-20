@@ -9,7 +9,6 @@ public class MessageEntity
     [BsonRepresentation(BsonType.String)]
     public Guid Id { get; set; }
     public DateTime SentAt { get; set; }
-    public DateTime ReceivedAt { get; set; }
     public required string Text { get; set; }
     [BsonRepresentation(BsonType.String)]
     public required Guid UserId { get; set; }

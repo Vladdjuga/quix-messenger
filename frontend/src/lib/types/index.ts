@@ -5,7 +5,6 @@ export { ChatType, ChatRole, MessageStatus } from './enums';
 export interface Message {
   id: string;
   sentAt: Date;
-  receivedAt: Date;
   text: string;
   userId: string;
   chatId: string;

@@ -8,5 +8,4 @@ export interface ReadMessageDto {
   chatId: string;
   status: MessageStatus | number; // allow numeric flag if backend sends int
   sentAt: string; // ISO
-  receivedAt: string; // ISO
 }

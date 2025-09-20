@@ -20,10 +20,6 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-        builder.Property(x => x.ReceivedAt)
-            .HasColumnType("timestamp with time zone")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
         builder.Property(x => x.Status)
             .IsRequired()
             .HasConversion<int>();

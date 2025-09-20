@@ -13,6 +13,5 @@ public class MessageEntity
 
     public required string Text { get; set; }
     public required DateTime SentAt { get; init; }
-    public DateTime? ReceivedAt { get; set; }
     public required MessageStatus Status { get; set; }
 }
