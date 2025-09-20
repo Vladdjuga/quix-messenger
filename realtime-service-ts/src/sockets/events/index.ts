@@ -3,10 +3,21 @@ import logger from "../../config/logger.js";
 import {wrapSocketHandler} from "../utils/handlerWrapper.js";
 import {onJoinChat, onLeaveChat} from "./chat/chatEvents.js";
 import {onMessageEdited, onMessageSent} from "./message/messageEvents.js";
+import RedisSingleton from "../../redis.js";
 
 export function registerEvents(io: Server) {
     io.on('connection', async (socket: Socket) => {
         logger.info(`New client connected: ${socket.id}`);
+
+        const user = socket.handshake.auth.user;
+        if (!user || !user.id) {
+            logger.warn(`Unauthorized connection attempt: ${socket.id}`);
+            socket.emit('error', {message: 'Unauthorized: No user information provided'});
+            socket.disconnect();
+            return;
+        }
+        const redis = RedisSingleton.getInstance();
+        await redis.sAdd('online_users_set', `user:${user.id}`);
 
         // Logging socket events
         socket.onAny((event, ...args) => {
@@ -19,8 +30,9 @@ export function registerEvents(io: Server) {
             logger.info(`Event: ${event}, Args: ${JSON.stringify(args)}`);
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
             logger.info(`Client disconnected: ${socket.id}`);
+            await redis.sRem('online_users_set', `user:${user.id}`);
         })
 
         // Wrap socket event handlers
