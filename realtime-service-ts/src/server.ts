@@ -1,15 +1,15 @@
 import {setupMiddleware} from "./middleware/index.js";
 import {setupRoutes} from "./routes/index.js";
-import {Server} from "socket.io";
 import {setupSocket} from "./sockets/index.js";
 import express from "express";
 import * as http from "node:http";
+import {initIO} from "./io.js";
 
 export function startServer(port:number|string){
     const app = express();
     const server = http.createServer(app);
 
-    const io = new Server(server);
+    const io = initIO(server);
 
     // Middleware
     setupMiddleware(app);

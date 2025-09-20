@@ -1,4 +1,5 @@
 import logger from "../config/logger.js";
+import type {Message} from "../types/message.js";
 
 // Prefer USER_SERVICE_URL; fallback to MESSAGE_SERVICE_URL for backward compatibility
 const DEFAULT_BASE_URL = process.env.USER_SERVICE_URL || process.env.MESSAGE_SERVICE_URL || "http://user-service:7001";
@@ -14,7 +15,7 @@ export class MessageServiceClient {
    * Calls user-service REST endpoint to add a message.
    * POST /api/Messages
    */
-  async addMessage(params: { text: string; chatId: string; userId: string; token: string }): Promise<{ id: string } | null> {
+  async addMessage(params: { text: string; chatId: string; userId: string; token: string }): Promise<Message | null> {
     const { text, chatId, token } = params; // userId is derived from JWT on server
     const url = `${this.baseUrl}/api/Messages`;
 
@@ -34,9 +35,9 @@ export class MessageServiceClient {
         return null;
       }
 
-      const id = (await res.json()) as string | null;
-      if (!id) return null;
-      return { id };
+      const dto = (await res.json()) as Message | null;
+      if (!dto) return null;
+      return dto;
     } catch (err) {
       logger.error(`user-service addMessage failed: ${err instanceof Error ? err.message : String(err)}`);
       return null;

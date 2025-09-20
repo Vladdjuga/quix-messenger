@@ -4,7 +4,7 @@ import { Message, MessageStatus } from '@/lib/types';
 export type NewMessagePayload = {
   senderId: string;
   message: {
-    id?: string;
+    id: string;
     chatId: string;
     text: string;
     createdAt?: string | Date;
@@ -30,25 +30,33 @@ export async function sendChatMessage(socket: Socket | null, chatId: string, tex
 
 export function onNewMessage(socket: Socket | null, handler: (msg: Message) => void) {
   if (!socket) return () => {};
+
   const listener = (payload: unknown) => {
-    const obj = (payload ?? {}) as Partial<NewMessagePayload>;
-    const senderId = typeof obj.senderId === 'string' ? obj.senderId : undefined;
-    const message = obj.message as Partial<NewMessagePayload["message"]> | undefined;
-  if (!message || typeof message.chatId !== 'string' || typeof message.text !== 'string') return;
-    const msg: Message = {
-      id: message.id ?? `srv-${Date.now()}`,
-      chatId: message.chatId,
-      text: message.text,
-      userId: senderId ?? message.userId ?? 'unknown',
-      createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
-      status: (message.status as MessageStatus) ?? MessageStatus.Delivered
-    };
-    handler(msg);
+    try {
+      const obj = payload as Partial<NewMessagePayload> | undefined;
+      if (!obj?.message) return;
+
+      const msgPayload = obj.message;
+
+      const msg: Message = {
+        id: msgPayload.id,
+        chatId: msgPayload.chatId,
+        text: msgPayload.text,
+        userId: msgPayload.userId ?? 'unknown',
+        createdAt: msgPayload.createdAt ? new Date(msgPayload.createdAt) : new Date(),
+        status: (msgPayload.status as MessageStatus) ?? MessageStatus.Delivered,
+      };
+
+      handler(msg);
+
+    } catch (e) {
+      console.error('Failed to parse newMessage payload', e);
+    }
   };
+
   socket.on('newMessage', listener);
   return () => socket.off('newMessage', listener);
 }
-
 export function onSocketError(socket: Socket | null, handler: (err: unknown) => void) {
   if (!socket) return () => {};
   socket.on('error', handler);

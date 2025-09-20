@@ -1,9 +1,10 @@
 "use client";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Message } from "@/lib/types";
-import { getLastMessagesByChatId } from "@/lib/api/messagesApi";
-import { SocketContext } from "@/lib/contexts/SocketContext";
-import { joinChat, leaveChat, onNewMessage, sendChatMessage } from "@/lib/realtime/chatSocketUseCases";
+import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
+import {Message, MessageStatus} from "@/lib/types";
+import {getLastMessagesByChatId} from "@/lib/api/messagesApi";
+import {SocketContext} from "@/lib/contexts/SocketContext";
+import {joinChat, leaveChat, onNewMessage, sendChatMessage} from "@/lib/realtime/chatSocketUseCases";
+import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 interface ChatWindowProps {
   chatId?: string;
@@ -16,6 +17,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
   const [text, setText] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const socket = useContext(SocketContext);
+  const { user, loading: userLoading } = useCurrentUser();
+
+  function scrollToBottom() {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }
+  const addMessage = useCallback((msg: Message) => {
+    setMessages(prev => {
+      const tmp = prev.find(m => m.id === msg.id);
+      if (!tmp) return [...prev, msg];
+      return prev.map(m => m.id === msg.id ? { ...m, ...msg } : m);
+    });
+  }, [setMessages]);
 
   useEffect(() => {
     let mounted = true;
@@ -34,17 +47,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     joinChat(socket, chatId);
     const offNewMessage = onNewMessage(socket, (msg) => {
       if (msg.chatId !== chatId) return;
-      setMessages(prev => [...prev, msg]);
+      addMessage(msg);
     });
     return () => {
       leaveChat(socket, chatId);
       offNewMessage?.();
     };
-  }, [socket, chatId]);
+  }, [socket, chatId, addMessage]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToBottom();
   }, [messages]);
+
+  if(userLoading) {
+    return <div className="flex-1 flex items-center justify-center">Loading...</div>;
+  }
+    if (!user) {
+        return <div className="flex-1 flex items-center justify-center">Please log in to view the chat.</div>;
+    }
 
   const handleSend = async () => {
     const value = text.trim();
@@ -52,6 +72,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     setText("");
     try {
       await sendChatMessage(socket, chatId, value);
+      const msg : Message = {
+        id: `local-${Date.now()}`,
+        chatId:chatId,
+        text: value,
+        userId: user.id,
+        createdAt: new Date(),
+        status: MessageStatus.Sent,
+      }
+      addMessage(msg);
     } catch (e) {
       console.error(e);
     }
@@ -73,7 +102,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
         {loading && <div className="text-muted">Loading...</div>}
         {!loading && messages.length === 0 && <div className="text-muted">No messages yet</div>}
         {!loading && messages.map(m => {
-          const own = m.userId === 'me';
+          const own = m.userId === user.id;
           return (
             <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'}`}>
               <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>{m.text}</div>

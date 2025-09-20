@@ -30,11 +30,11 @@ public class MessagesController : Controller
     [Authorize]
     [GetUserGuid]
     [HttpPost]
-    public async Task<Results<Ok<Guid>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Create(
+    public async Task<Results<Ok<ReadMessageDto>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> Create(
         [FromBody] CreateMessageDto dto)
     {
         var userId = HttpContext.GetUserGuid();
-    var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId, dto.CreatedAt);
+        var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId);
         _logger.LogInformation("User {UserId} sending message to chat {ChatId}", userId, dto.ChatId);
         var result = await _mediator.Send(command);
         if (result.IsFailure)

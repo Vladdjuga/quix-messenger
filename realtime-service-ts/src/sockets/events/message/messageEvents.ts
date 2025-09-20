@@ -6,6 +6,7 @@ import {validate} from "class-validator";
 import {plainToInstance} from "class-transformer";
 import type {User} from "../../../types/user.js";
 import { NewMessageDto } from "../../../types/dto/NewMessageDto.js";
+import {getIO} from "../../../io.js";
 
 export async function onMessageSent(
     this: Socket,
@@ -54,16 +55,17 @@ export async function onMessageSent(
             socket.emit('error', {message: 'Failed to send message'});
             return;
         }
-        // Emit the message to the room with enriched payload (includes id and server timestamp)
-        socket.to(createDto.chatId).emit('newMessage', {
+        // Emit the message to the room with enriched payload
+        // Note: We emit to all in the room including sender; client should handle duplicates if needed
+        getIO().to(createDto.chatId).emit('newMessage', {
             senderId: authenticatedUser.id,
             message: {
                 id: result.id,
-                chatId: createDto.chatId,
-                text: createDto.text,
-                userId: authenticatedUser.id,
-                createdAt: new Date().toISOString(),
-                status: 2 // Delivered
+                chatId: result.chatId,
+                text: result.text,
+                userId: result.userId,
+                createdAt: result.createdAt,
+                status: result.status
             }
         });
     } catch (error) {
