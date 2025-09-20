@@ -16,9 +16,11 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
         builder.Property(x => x.Text)
             .IsRequired();
 
-        builder.Property(x => x.SentAt)
+        builder.Property(x => x.CreatedAt)
+            .ValueGeneratedOnAdd()
             .HasColumnType("timestamp with time zone")
-            .HasDefaultValueSql("CURRENT_TIMESTAMP");
+            .HasDefaultValueSql("CURRENT_TIMESTAMP")
+            .IsRequired();
 
         builder.Property(x => x.Status)
             .IsRequired()
@@ -34,7 +36,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(x => new { x.ChatId, x.SentAt }).HasDatabaseName("ix_messages_chatid_sentat");
-        builder.HasIndex(x => new { x.UserId, x.SentAt }).HasDatabaseName("ix_messages_userid_sentat");
+        builder.HasIndex(x => new { x.ChatId, x.CreatedAt }).HasDatabaseName("ix_messages_chatid_sentat");
+        builder.HasIndex(x => new { x.UserId, x.CreatedAt }).HasDatabaseName("ix_messages_userid_sentat");
     }
 }

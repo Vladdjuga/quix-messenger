@@ -4,5 +4,5 @@ public class CreateMessageDto
 {
     public required string Text { get; set; }
     public required Guid ChatId { get; set; }
-    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -7,7 +7,7 @@ export type NewMessagePayload = {
     id?: string;
     chatId: string;
     text: string;
-    sentAt?: string | Date;
+    createdAt?: string | Date;
     userId?: string;
     status?: number;
   }
@@ -40,7 +40,7 @@ export function onNewMessage(socket: Socket | null, handler: (msg: Message) => v
       chatId: message.chatId,
       text: message.text,
       userId: senderId ?? message.userId ?? 'unknown',
-      sentAt: message.sentAt ? new Date(message.sentAt) : new Date(),
+      createdAt: message.createdAt ? new Date(message.createdAt) : new Date(),
       status: (message.status as MessageStatus) ?? MessageStatus.Delivered
     };
     handler(msg);

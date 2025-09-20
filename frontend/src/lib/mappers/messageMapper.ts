@@ -8,7 +8,7 @@ export function mapReadMessageDto(dto: ReadMessageDto): Message {
     userId: dto.userId,
     chatId: dto.chatId,
     status: (typeof dto.status === 'number' ? dto.status : dto.status) as MessageStatus,
-    sentAt: new Date(dto.sentAt)
+    createdAt: new Date(dto.createdAt)
   };
 }
 

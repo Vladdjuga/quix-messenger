@@ -34,7 +34,7 @@ public class MessagesController : Controller
         [FromBody] CreateMessageDto dto)
     {
         var userId = HttpContext.GetUserGuid();
-        var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId, dto.SentAt);
+    var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId, dto.CreatedAt);
         _logger.LogInformation("User {UserId} sending message to chat {ChatId}", userId, dto.ChatId);
         var result = await _mediator.Send(command);
         if (result.IsFailure)

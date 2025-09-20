@@ -62,7 +62,7 @@ export async function onMessageSent(
                 chatId: createDto.chatId,
                 text: createDto.text,
                 userId: authenticatedUser.id,
-                sentAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
                 status: 2 // Delivered
             }
         });

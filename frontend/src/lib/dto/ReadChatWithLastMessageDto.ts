@@ -16,7 +16,7 @@ export interface ReadChatWithLastMessageDto {
     userId: string;
     chatId: string;
     status: MessageStatus | number;
-    sentAt: string;
+    createdAt: string;
     receivedAt: string;
   };
 }

@@ -12,6 +12,6 @@ public class MessageEntity
     public virtual UserEntity? User { get; init; }
 
     public required string Text { get; set; }
-    public required DateTime SentAt { get; init; }
+    public required DateTime CreatedAt { get; init; }
     public required MessageStatus Status { get; set; }
 }

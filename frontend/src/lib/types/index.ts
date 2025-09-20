@@ -4,7 +4,7 @@ export { ChatType, ChatRole, MessageStatus } from './enums';
 // Message types matching backend
 export interface Message {
   id: string;
-  sentAt: Date;
+  createdAt: Date;
   text: string;
   userId: string;
   chatId: string;

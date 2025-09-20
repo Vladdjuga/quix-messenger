@@ -9,7 +9,7 @@ export class Message{
 
     @IsDefined()
     @IsDate()
-    sentAt: Date;
+    createdAt: Date;
 
     @IsDefined()
     @IsString()
@@ -29,14 +29,14 @@ export class Message{
 
     constructor(
         id: UUID,
-        sentAt: Date,
+        createdAt: Date,
         text: string,
         userId: UUID,
         chatId: UUID,
         status: number
     ) {
         this.id = id;
-        this.sentAt = sentAt;
+        this.createdAt = createdAt;
         this.text = text;
         this.userId = userId;
         this.chatId = chatId;

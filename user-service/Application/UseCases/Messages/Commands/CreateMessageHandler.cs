@@ -34,7 +34,7 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
             ChatId = request.ChatId,
             Text = request.Text,
             UserId = request.UserId,
-            SentAt = request.SentAt,
+            CreatedAt = request.CreatedAt,
             Status = MessageStatus.Sent
         };
         await _repository.AddMessageAsync(message);

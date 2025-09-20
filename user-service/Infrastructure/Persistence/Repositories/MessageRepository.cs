@@ -31,7 +31,7 @@ public class MessageRepository : IMessageRepository
     public async Task<IEnumerable<MessageEntity>> GetMessagesAsync()
     {
         return await _dbSet.AsNoTracking()
-            .OrderByDescending(m => m.SentAt)
+            .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
     }
 
@@ -39,7 +39,7 @@ public class MessageRepository : IMessageRepository
     {
         return await _dbSet.AsNoTracking()
             .Where(m => m.ChatId == chatId)
-            .OrderByDescending(m => m.SentAt)
+            .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
     }
 
@@ -52,7 +52,7 @@ public class MessageRepository : IMessageRepository
             query = query.Where(m => m.ChatId == chatId.Value);
 
         return await query
-            .OrderByDescending(m => m.SentAt)
+            .OrderByDescending(m => m.CreatedAt)
             .Take(count)
             .ToListAsync(cancellationToken);
     }
@@ -65,9 +65,9 @@ public class MessageRepository : IMessageRepository
         if (chatId.HasValue)
             query = query.Where(m => m.ChatId == chatId.Value);
 
-        // Keyset pagination by SentAt
-        query = query.Where(m => m.SentAt < lastCreatedAt)
-            .OrderByDescending(m => m.SentAt)
+        // Keyset pagination by CreatedAt
+        query = query.Where(m => m.CreatedAt < lastCreatedAt)
+            .OrderByDescending(m => m.CreatedAt)
             .Take(pageSize);
 
         return await query.ToListAsync(cancellationToken);

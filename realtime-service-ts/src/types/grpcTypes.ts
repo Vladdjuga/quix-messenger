@@ -17,7 +17,7 @@ export enum MessageStatus {
 }
 
 export interface SendMessageRequest {
-    sentAt: Date;
+    createdAt: Date;
     text: string;
     chatId: string;
 }
