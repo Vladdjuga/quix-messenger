@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import { safeParseJSON } from '@/lib/utils';
+import {NextResponse} from 'next/server';
+import {safeParseJSON} from '@/lib/utils';
 
 const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
@@ -19,8 +19,7 @@ export class BackendApiClient {
     }
 
     try {
-  const baseUrl = USER_SERVICE_URL;
-  let url = `${baseUrl}${endpoint}`;
+      let url = `${USER_SERVICE_URL}${endpoint}`;
       
       if (queryParams) {
         const params = new URLSearchParams();

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ReadUserDto } from "@/lib/dto/ReadUserDto";
 import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
 import { UserStatus } from "@/lib/types/enums";
+import { useOnlinePolling } from "@/lib/hooks/data/user/useOnlinePolling";
 
 type UserRelationshipStatus = UserStatus | UserStatus.Self;
 
@@ -18,6 +19,9 @@ export function useProfile(username?: string | null) {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Presence hook based on the resolved profile id (safe to pass null initially)
+  const { isOnline } = useOnlinePolling(profile?.id ?? null, { intervalMs: 10000, enabled: true, immediate: true });
 
   async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string }> {
     try {
@@ -75,9 +79,7 @@ export function useProfile(username?: string | null) {
       setProfile({
         ...userData,
         status: friendshipInfo.status,
-        friendshipId: friendshipInfo.friendshipId,
-        isOnline: Math.random() > 0.5, // Mock online status
-        lastSeen: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000) // Mock last seen
+        friendshipId: friendshipInfo.friendshipId
       });
     } catch (e) {
       setError((e as Error).message ?? "Failed to load profile");
@@ -92,8 +94,13 @@ export function useProfile(username?: string | null) {
     loadProfile();
   }, [currentUser, username, currentUserLoading, loadProfile]);
 
+  const mergedProfile = useMemo(() => {
+    if (!profile) return null;
+    return { ...profile, isOnline: isOnline ?? profile.isOnline } as ProfileData;
+  }, [profile, isOnline]);
+
   return {
-    profile,
+    profile: mergedProfile,
     loading: loading || currentUserLoading,
     error,
     refetch: loadProfile,

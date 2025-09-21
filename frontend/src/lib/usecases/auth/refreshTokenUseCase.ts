@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getToken, setToken, clearToken } from "@/app/api/token";
+import { setToken, clearToken } from "@/app/api/token";
 import { refreshSocketAuth } from "@/lib/socket/socket";
 
 export type AuthResponse = { accessToken: string } | string;
@@ -37,15 +37,5 @@ export async function refreshAuthTokenUseCase(): Promise<string> {
     throw err;
   } finally {
     isRefreshing = false;
-  }
-}
-
-export async function getValidTokenOrRefreshUseCase(): Promise<string | null> {
-  const token = getToken();
-  if (token) return token;
-  try {
-    return await refreshAuthTokenUseCase();
-  } catch {
-    return null;
   }
 }

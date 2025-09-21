@@ -83,4 +83,9 @@ export const api = {
         paginated: (chatId: string, lastCreatedAt: string, pageSize: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/paginated`, { params: { chatId, lastCreatedAt, pageSize } }),
     },
+    realtime: {
+        // Check if a user is online right now via proxy to realtime-service
+        isUserOnline: (userId: string, signal?: AbortSignal) =>
+            apiClient.get<{ isOnline: boolean }>(`/online/${encodeURIComponent(userId)}`, { signal }),
+    },
 }
