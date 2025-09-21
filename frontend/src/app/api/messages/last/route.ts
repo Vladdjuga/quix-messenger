@@ -1,13 +1,20 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { z } from 'zod';
+import { proxy } from '@/lib/proxy';
+
+const qSchema = z.object({
+  chatId: z.string().min(1),
+  count: z.coerce.number().int().positive().default(50),
+});
 
 export async function GET(req: Request) {
-  const params = BackendApiClient.extractQueryParams(req);
-  const chatId = params.get('chatId');
-  const count = params.get('count') ?? '50';
-  if (!chatId) return BackendApiClient.validationError('chatId is required');
-
-  return BackendApiClient.request(req, '/Messages/last', {
+  const url = new URL(req.url);
+  const parsed = qSchema.safeParse(Object.fromEntries(url.searchParams.entries()));
+  if (!parsed.success) {
+    return Response.json({ message: 'Invalid query', details: parsed.error.flatten() }, { status: 400 });
+  }
+  const { chatId, count } = parsed.data;
+  return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, '/Messages/last', {
     method: 'GET',
-    queryParams: { chatId, count },
+    query: { chatId, count },
   });
 }

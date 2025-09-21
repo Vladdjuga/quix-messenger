@@ -1,13 +1,9 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { proxy } from '@/lib/proxy';
 
 export async function DELETE(req: Request, context: { params: Promise<{ friendshipId: string }> }) {
     const { friendshipId } = await context.params;
-    
     if (!friendshipId) {
-        return BackendApiClient.validationError('Friendship ID is required');
+        return Response.json({ message: 'Friendship ID is required' }, { status: 400 });
     }
-
-    return BackendApiClient.request(req, `/Friendship/cancelFriendRequest/${friendshipId}`, { 
-        method: 'DELETE' 
-    });
+    return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, `/Friendship/cancelFriendRequest/${encodeURIComponent(friendshipId)}`, { method: 'DELETE' });
 }

@@ -1,22 +1,12 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { proxy } from '@/lib/proxy';
 
 export async function GET(
     req: Request, 
     { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const resolvedParams = await params;
-        const { id } = resolvedParams;
-        
-        if (!id) {
-            return BackendApiClient.validationError('Friendship ID is required');
-        }
-
-        return BackendApiClient.request(
-            req,
-            `/Friendship/getFriendship/${encodeURIComponent(id)}`
-        );
-    } catch {
-        return BackendApiClient.validationError('Invalid request parameters');
+    const { id } = await params;
+    if (!id) {
+        return Response.json({ message: 'Friendship ID is required' }, { status: 400 });
     }
+    return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, `/Friendship/getFriendship/${encodeURIComponent(id)}`);
 }

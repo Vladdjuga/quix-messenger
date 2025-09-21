@@ -1,18 +1,21 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { z } from 'zod';
+import { proxy } from '@/lib/proxy';
+
+const qSchema = z.object({
+  chatId: z.string().min(1),
+  lastCreatedAt: z.string().datetime().optional(),
+  pageSize: z.coerce.number().int().positive().max(200).default(50),
+});
 
 export async function GET(req: Request) {
-  const params = BackendApiClient.extractQueryParams(req);
-  const chatId = params.get('chatId');
-  const lastCreatedAt = params.get('lastCreatedAt');
-  const pageSize = params.get('pageSize') ?? '50';
-
-  if (!chatId) return BackendApiClient.validationError('chatId is required');
-  if (lastCreatedAt && isNaN(Date.parse(lastCreatedAt))) {
-    return BackendApiClient.validationError('Invalid lastCreatedAt date format');
+  const url = new URL(req.url);
+  const parsed = qSchema.safeParse(Object.fromEntries(url.searchParams.entries()));
+  if (!parsed.success) {
+    return Response.json({ message: 'Invalid query', details: parsed.error.flatten() }, { status: 400 });
   }
-
-  return BackendApiClient.request(req, '/Messages/paginated', {
+  const { chatId, lastCreatedAt, pageSize } = parsed.data;
+  return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, '/Messages/paginated', {
     method: 'GET',
-    queryParams: { chatId, lastCreatedAt: lastCreatedAt ?? undefined, pageSize },
+    query: { chatId, lastCreatedAt, pageSize },
   });
 }

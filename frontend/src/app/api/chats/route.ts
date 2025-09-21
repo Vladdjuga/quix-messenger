@@ -1,6 +1,6 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { proxy } from '@/lib/proxy';
 
 export async function GET(req: Request) {
   // Proxy to user-service ChatController.getChats
-  return BackendApiClient.request(req, '/Chat/getChats', { method: 'GET' });
+  return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, '/Chat/getChats', { method: 'GET' });
 }

@@ -1,21 +1,19 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { z } from 'zod';
+import { proxy } from '@/lib/proxy';
 
 export async function GET(req: Request) {
-    const searchParams = BackendApiClient.extractQueryParams(req);
-    const paginationValidation = BackendApiClient.validatePaginationParams(searchParams);
-    
-    if (!paginationValidation.isValid) {
-        return BackendApiClient.validationError(paginationValidation.error!);
-    }
-
-    const queryParams: Record<string, string | number> = {
-        query: paginationValidation.query!,
-        pageSize: paginationValidation.pageSize
-    };
-
-    if (paginationValidation.lastCreatedAt) {
-        queryParams.lastCreatedAt = paginationValidation.lastCreatedAt;
-    }
-
-    return BackendApiClient.request(req, '/Friendship/getSentRequests', { queryParams });
+        const qSchema = z.object({
+            query: z.string().trim().default(''),
+            pageSize: z.coerce.number().int().positive().max(100).default(10),
+            lastCreatedAt: z.string().datetime().optional(),
+        });
+        const url = new URL(req.url);
+        const parsed = qSchema.safeParse(Object.fromEntries(url.searchParams.entries()));
+        if (!parsed.success) {
+            return Response.json({ message: 'Invalid query', details: parsed.error.flatten() }, { status: 400 });
+        }
+        const { query, pageSize, lastCreatedAt } = parsed.data;
+        return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, '/Friendship/getSentRequests', {
+            query: { query, pageSize, lastCreatedAt },
+        });
 }

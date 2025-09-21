@@ -1,12 +1,18 @@
-import { BackendApiClient } from '@/lib/backend-api';
+import { z } from 'zod';
+import { proxy } from '@/lib/proxy';
 
 export async function GET(req: Request) {
-    const searchParams = BackendApiClient.extractQueryParams(req);
-    
-    const queryParams: Record<string, string | number | undefined> = {
-        pageSize: searchParams.get('pageSize') || undefined,
-        lastCreatedAt: searchParams.get('lastCreatedAt') || undefined
-    };
-
-    return BackendApiClient.request(req, '/Friendship/getFriendships', { queryParams });
+        const qSchema = z.object({
+            pageSize: z.coerce.number().int().positive().max(100).default(20),
+            lastCreatedAt: z.string().datetime().optional(),
+        });
+        const url = new URL(req.url);
+        const parsed = qSchema.safeParse(Object.fromEntries(url.searchParams.entries()));
+        if (!parsed.success) {
+            return Response.json({ message: 'Invalid query', details: parsed.error.flatten() }, { status: 400 });
+        }
+        const { pageSize, lastCreatedAt } = parsed.data;
+        return proxy(req, process.env.NEXT_PUBLIC_USER_SERVICE_URL!, '/Friendship/getFriendships', {
+            query: { pageSize, lastCreatedAt },
+        });
 }

@@ -1,7 +1,8 @@
 "use client";
 import React, {useCallback, useContext, useEffect, useRef, useState} from "react";
 import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
-import {getLastMessagesByChatId} from "@/lib/api/messagesApi";
+import { api } from "@/app/api";
+import { mapReadMessageDtos } from "@/lib/mappers/messageMapper";
 import {SocketContext} from "@/lib/contexts/SocketContext";
 import {joinChat, leaveChat, onNewMessage, sendChatMessage} from "@/lib/realtime/chatSocketUseCases";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
@@ -46,7 +47,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     (async () => {
       if (!chatId) return;
       setLoading(true);
-      const data = await getLastMessagesByChatId(chatId);
+  const resp = await api.messages.last(chatId, 50);
+  const data = mapReadMessageDtos(resp.data);
       if (mounted) setMessages(data);
       setLoading(false);
     })();

@@ -1,20 +1,16 @@
 import { NextResponse } from 'next/server';
-import { BackendApiClient } from '@/lib/backend-api';
+import { z } from 'zod';
 
 export async function POST(req: Request) {
     try {
-        const bodyResult = await BackendApiClient.extractBody(req);
-        if (!bodyResult.success) {
-            return bodyResult.response;
+        const schema = z.object({ identity: z.string().min(1), password: z.string().min(1) });
+        let body: unknown;
+        try { body = await req.json(); } catch { return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 }); }
+        const parsed = schema.safeParse(body);
+        if (!parsed.success) {
+            return NextResponse.json({ message: 'Invalid body', details: parsed.error.flatten() }, { status: 400 });
         }
-
-        const { identity, password } = bodyResult.data as { identity: string; password: string };
-        
-        // Validate required fields
-        const validation = BackendApiClient.validateRequiredFields({ identity, password }, ['identity', 'password']);
-        if (!validation.isValid) {
-            return BackendApiClient.validationError(`Missing required fields: ${validation.missingFields.join(', ')}`);
-        }
+        const { identity, password } = parsed.data;
 
         // Login endpoint doesn't need authorization, so we handle it manually
         const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
