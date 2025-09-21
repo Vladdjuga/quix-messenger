@@ -1,52 +1,90 @@
-# Messenger Backend (Microservices)
+# Quix Messenger (Monorepo)
 
-💬 Microservice-based messenger backend with MongoDB, PostgreSQL, gRPC and WebSocket.
+End-to-end messenger with a Next.js frontend, a real-time service (WebSocket), and a .NET user service. The frontend uses a lightweight BFF pattern (Next API routes) to proxy calls to backend services and centralize auth, validation, and error handling.
 
-## 📦 Services
-- **user-service**: Handles auth, profile and friendships (PostgreSQL, ASP.NET Core)
-- **message-service**: Message storage and querying (MongoDB, ASP.NET Core)
-- **realtime-service-ts**: Real-time messaging via WebSocket (TypeScript/Express)
-- **frontend**: Next.js web application (TypeScript, Tailwind CSS)
+## 📦 Services (in this repo)
+- `frontend` — Next.js 15 app (TypeScript, Tailwind CSS)
+- `realtime-service-ts` — WebSocket gateway (TypeScript/Express, socket.io)
+- `user-service` — ASP.NET Core service for auth, profiles, friendships (PostgreSQL/EF Core)
 
-## ⚙️ Stack
-- ASP.NET Core 9
-- Node.js/Express (TypeScript)
-- Next.js 15
-- EF Core
-- MongoDB / PostgreSQL
-- Domain driven design
-- gRPC
-- WebSocket
-- React/TypeScript
+> Note: A separate message persistence service may be introduced later. The real-time service currently mediates message flow.
+
+## ⚙️ Tech Stack
+- ASP.NET Core 9, EF Core, PostgreSQL
+- Node.js/Express (TypeScript), socket.io
+- Next.js 15, React 19, Tailwind CSS 4
+- WebSocket (client real-time)
+
+## 🧠 Frontend Architecture (BFF)
+
+The frontend acts as a thin Backend-For-Frontend (BFF):
+
+- API Proxy: Next API routes under `frontend/src/app/api/**` forward to backend services via a single helper `src/lib/proxy.ts`.
+  - Example: `/api/chats` → `USER_SERVICE_URL/Chat/getChats`
+  - Example: `/api/online/[userId]` → `REALTIME_URL/online/:userId`
+- Validation: Each route validates query/body with `zod` and returns a consistent error shape `{ message, details? }`.
+- Auth: Client uses `axios` (`src/app/api/http.ts`) with an interceptor that:
+  - Attaches `Authorization: Bearer <token>` when present
+  - Auto-refreshes tokens via `/api/auth/refresh` on 401 (see `refreshTokenUseCase.ts`)
+  - Redirects to `/login` if refresh fails
+- Data mapping: UI consumes `api.*` from `src/app/api/index.ts`; DTOs from backend are mapped to domain types with small mappers in `src/lib/mappers/*` when needed.
+- Real-time: `socket.io-client` is initialized in `src/lib/socket/socket.ts` with token-based auth. High-level socket actions live in `src/lib/realtime/chatSocketUseCases.ts`.
+
+### Key Frontend Paths
+- `src/app/api/**` — Next.js API routes (BFF)
+- `src/lib/proxy.ts` — Unified proxy helper for BFF routes
+- `src/app/api/http.ts` — Axios instance + interceptors
+- `src/app/api/index.ts` — Client-facing API surface for the UI
+- `src/lib/realtime/chatSocketUseCases.ts` — Socket workflows (join/leave/send/listen)
+- `src/lib/mappers/*` — Map backend DTOs → UI domain types
+- `src/lib/types/*` — Domain types and enums for the UI
 
 ## 🔧 Setup
 
-- ### Build all Dockerfiles 
-  ```bash
-  make build # this command will build the app by simply building all docker containers
-  ```
-- ### Turn on the application
-  ```bash
-  make up # this command will run docker compose file
-  ```
-- ### Turn off the application
-  ```bash
-  make down # this command will stop all services
-  ```
+### With Docker
+```bash
+make build   # Build all containers
+make up      # Start docker compose
+make down    # Stop all services
+```
 
-## 🧠 Architecture
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/d7510037-0e1a-4b47-9570-60c7ea91e057" width="400"/>
-</p>
+### Local Dev (Frontend only)
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## ✅ Planned Features
-- [x] Authorization & Authentication
-- [x] Friendship management system
-- [x] Logging
-- [x] Containerization
-- [x] gRPC microservice communication
+## 🔐 Environment Variables
+
+Frontend expects these (e.g., via `.env.local` or container env):
+
+- `NEXT_PUBLIC_USER_SERVICE_URL` — Base URL of the user-service (used by BFF proxy)
+- `NEXT_PUBLIC_REALTIME_URL` — Base URL of the realtime-service (used by BFF proxy and socket.io)
+
+The BFF forwards `Authorization` headers to backend services when present and uses `Set-Cookie` from backend auth endpoints where applicable.
+
+## 🧭 Request Flow Summary
+1) UI calls `api.*` (axios → Next API route)
+2) Next API route validates input with zod and proxies via `proxy.ts`
+3) Backend responds; route streams response back to UI with a consistent content-type
+4) On 401, axios interceptor triggers `/api/auth/refresh` and retries once
+5) For real-time events, UI uses socket.io with the current access token
+
+## ✅ Status & Roadmap
+- [x] Auth (login/logout/refresh)
+- [x] Friendships (requests, accepts, lists)
 - [x] WebSocket real-time messaging
-- [x] Frontend (Next.js)
+- [x] BFF Proxy + Validation (zod)
+- [x] Containerization
 - [ ] File/image uploading
-- [ ] Video/voice calls
-- [ ] Caching
+- [ ] Calls (voice/video)
+- [ ] Caching and performance tuning
+
+## 🖼️ Diagram
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d7510037-0e1a-4b47-9570-60c7ea91e057" width="520"/>
+  <br/>
+  <em>High-level overview. Frontend uses a BFF layer to talk to backend services.</em>
+  
+</p>
