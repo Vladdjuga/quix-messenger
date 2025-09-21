@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { SocketProvider } from "@/lib/contexts/SocketContext";
 import { ChatWithLastMessage } from "@/lib/types";
 import { getChats } from "@/lib/api/chatsApi";
 import { ChatList } from "@/components/messaging/ChatList";
@@ -34,7 +33,6 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
 
 
   return (
-    <SocketProvider>
       <div className="h-[calc(100vh-80px)] flex bg-surface">
         <aside className="w-80 border-r border-default bg-surface flex flex-col">
           <div className="chat-header font-semibold">Chats</div>
@@ -57,6 +55,5 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
           {children}
         </section>
       </div>
-    </SocketProvider>
   );
 }

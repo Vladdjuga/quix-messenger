@@ -1,5 +1,4 @@
 import {NextResponse} from 'next/server';
-import {safeParseJSON} from '@/lib/utils';
 
 const REALTIME_SERVICE_URL = process.env.NEXT_PUBLIC_REALTIME_URL;
 
@@ -42,12 +41,12 @@ export class RealtimeApiClient {
         body: body && (method === 'POST' || method === 'PUT') ? JSON.stringify(body) : undefined,
       });
 
-      if (response.status === 204 || response.headers.get('content-length') === '0') {
-        return new NextResponse(null, { status: response.status });
-      }
-
-      const data = await safeParseJSON(response);
-      return NextResponse.json(data, { status: response.status });
+      // Stream the upstream response through without parsing to avoid JSON parse errors
+      const contentType = response.headers.get('content-type') || 'application/json';
+      return new NextResponse(response.body, {
+        status: response.status,
+        headers: { 'content-type': contentType },
+      });
     } catch (error) {
       console.error(`Error in ${method} ${endpoint}:`, error);
       return NextResponse.json({ message: 'Server error' }, { status: 500 });
