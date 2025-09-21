@@ -16,8 +16,7 @@ export interface MessageWithLocalId extends Message {
     localId?: string; // Optional local ID for optimistic UI updates
 }
 
-// Prefer DTOs in dto folder; keep legacy CreateMessageRequest for backward compatibility if still imported.
-export interface CreateMessageRequest { text: string; userId: string; chatId: string; }
+// (Removed legacy CreateMessageRequest interface)
 
 // Chat types matching backend
 export interface Chat {
