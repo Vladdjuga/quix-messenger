@@ -24,6 +24,8 @@ services:
       - app-network
     depends_on:
       - postgres
+    volumes:
+      - user_wwwroot:/app/wwwroot
   redis:
     image: redis:7-alpine
     restart: always
@@ -81,6 +83,8 @@ volumes:
   pgadmin_data:
     driver: local
   redisdata:
+    driver: local
+  user_wwwroot:
     driver: local
 networks:
   app-network:
