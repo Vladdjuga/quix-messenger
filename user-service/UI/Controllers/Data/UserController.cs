@@ -1,7 +1,9 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Application.Common;
+using Application.DTOs;
 using Application.DTOs.User;
+using Application.UseCases.Files;
 using Application.UseCases.Users.Data;
 using Application.UseCases.Users.Data.GetUser;
 using Application.UseCases.Users.Data.UpdateUser;
@@ -164,4 +166,39 @@ public class UserController : Controller
         return TypedResults.Ok(result.Value);
     }
 
+
+    [Authorize]
+    [GetUserGuid]
+    [HttpPost("uploadAvatar")]
+    public async Task<Results<Ok<string>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> UploadAvatar(
+        IFormFile avatar)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        if (avatar.Length == 0)
+        {
+            _logger.LogWarning("No avatar file provided by user {UserGuid}", userGuid);
+            return TypedResults.BadRequest(new ErrorResponse("No file provided"));
+        }
+        using var memory = new MemoryStream();
+        await avatar.CopyToAsync(memory);
+
+        var fileDto = new FileDto
+        {
+            Name = Path.GetFileName(avatar.FileName),
+            ContentType = avatar.ContentType,
+            Content= memory.ToArray()
+        };
+        var command = new UploadAvatarCommand(fileDto, userGuid);
+        _logger.LogInformation("User {UserGuid} is uploading an avatar", userGuid);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to upload avatar for user {UserGuid}", userGuid);
+            _logger.LogError("Error: {Error}", result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        _logger.LogInformation("User {UserGuid} uploaded avatar successfully", userGuid);
+        return TypedResults.Ok(result.Value);
+    }
 }

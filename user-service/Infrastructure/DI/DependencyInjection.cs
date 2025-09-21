@@ -17,8 +17,10 @@ using Infrastructure.Auth;
 using Infrastructure.ExceptionHandlers;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
+using Infrastructure.Persistence.Files;
 using Infrastructure.Persistence.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +39,13 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(opt =>
             configuration.GetSection(nameof(JwtSettings)).Bind(opt));
 
+        
+        services.AddSingleton<IAvatarStorageService>(sp =>
+        {
+            var env = sp.GetRequiredService<IWebHostEnvironment>();
+            return new AvatarStorageService(env.WebRootPath, "uploads/avatars");
+        });
+        
         // Comment this if you want to use global exception middleware
         services.AddExceptionHandler<GlobalExceptionHandler>();
         

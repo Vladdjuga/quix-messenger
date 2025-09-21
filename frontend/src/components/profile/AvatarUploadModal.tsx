@@ -21,11 +21,19 @@ const AvatarUploadModal: React.FC<Props> = ({ open, onClose, onUpload }) => {
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
+  const handleFileSelected = (f: File | null) => {
     setFile(f);
     setError(null);
     if (f) {
+      if (!f.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      const maxBytes = 5 * 1024 * 1024; // 5MB
+      if (f.size > maxBytes) {
+        setError('File is too large (max 5MB)');
+        return;
+      }
       const url = URL.createObjectURL(f);
       setPreview(url);
 
@@ -34,14 +42,19 @@ const AvatarUploadModal: React.FC<Props> = ({ open, onClose, onUpload }) => {
       img.onload = () => {
         const cropWidth = 300;
         const cropHeight = 300;
-        const minZoom = Math.min(cropWidth / img.width, cropHeight / img.height);
-        setZoom(minZoom);
+        const minZoom = Math.min(cropWidth / (img.width || 1), cropHeight / (img.height || 1));
+        setZoom(minZoom || 1);
       };
 
       setCrop({ x: 0, y: 0 });
     } else {
       setPreview(null);
     }
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    handleFileSelected(f);
   };
 
   const onCropComplete = useCallback((_: Area, croppedPixels: Area) => {
@@ -75,7 +88,26 @@ const AvatarUploadModal: React.FC<Props> = ({ open, onClose, onUpload }) => {
       <div className="bg-surface rounded-lg border border-default w-full max-w-lg p-4">
         <h2 className="text-lg font-semibold mb-3">Update Avatar</h2>
         <div className="space-y-3">
-          <input ref={inputRef} type="file" accept="image/*" onChange={onFileChange} />
+          <input id="avatar-file" ref={inputRef} type="file" accept="image/*" onChange={onFileChange} className="hidden" />
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => inputRef.current?.click()}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click(); } }}
+            onDragOver={(e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); }}
+            onDrop={(e: React.DragEvent<HTMLDivElement>) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const f = e.dataTransfer.files?.[0] ?? null;
+              if (f) handleFileSelected(f);
+            }}
+            className="flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-default/60 bg-background hover:border-primary/60 hover:bg-primary/5 cursor-pointer p-6 text-center"
+            aria-label="Choose image file"
+          >
+            <div className="text-sm">Click to choose or drag & drop</div>
+            <div className="text-xs text-muted-foreground">PNG, JPG up to 5MB</div>
+            {file && <div className="text-xs mt-1">Selected: {file.name}</div>}
+          </div>
           {preview && (
             <div className="relative w-full h-72 bg-black/20 rounded">
               <Cropper
