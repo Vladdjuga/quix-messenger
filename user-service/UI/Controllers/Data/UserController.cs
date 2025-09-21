@@ -83,7 +83,7 @@ public class UserController : Controller
     [GetUserGuid]
     [HttpPatch("updateUserInfo")]
     public async Task<Results<Ok<ReadUserDto>, BadRequest<ErrorResponse>>> UpdateUserInfo(
-        UpdateUserDto userDto)
+        [FromBody] UpdateUserDto userDto)
     {
         var userGuid = HttpContext.GetUserGuid();
         

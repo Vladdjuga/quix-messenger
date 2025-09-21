@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { UpdateUserDto } from '@/lib/dto/UpdateUserDto';
 
 const editSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters'),
@@ -17,16 +18,6 @@ const editSchema = z.object({
 });
 
 type EditForm = z.infer<typeof editSchema>;
-
-// Used for API payload
-interface UserPayload{
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string; // ISO date string
-    password?: string;
-}
 
 export default function EditProfilePage() {
   const { user, loading, setUser } = useCurrentUser();
@@ -48,15 +39,15 @@ export default function EditProfilePage() {
   if (!user) return <div className="p-6">You must be logged in.</div>;
 
   const onSubmit = async (data: EditForm) => {
-    const payload:UserPayload = {
+    const dto = new UpdateUserDto({
       username: data.username,
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
       dateOfBirth: new Date(data.dateOfBirth).toISOString(),
-    };
-    if (data.password) payload.password = data.password;
-    const resp = await api.user.update(payload);
+      password: data.password || undefined,
+    });
+    const resp = await api.user.update(dto);
     setUser(resp.data);
     // Redirect back to profile and indicate saved
     router.push('/profile?saved=1');
