@@ -1,9 +1,12 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { ProfileData } from '@/lib/hooks/data/profile/useProfile';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
 import { useRouter } from 'next/navigation';
+import AvatarUploadModal from './AvatarUploadModal';
+import { api } from '@/app/api';
+import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -13,6 +16,8 @@ interface ProfileHeaderProps {
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate }) => {
   const { sending, error, sendFriendRequest, acceptFriendRequest, clearError } = useFriendshipActions();
   const router = useRouter();
+  const { setUser } = useCurrentUser();
+  const [avatarOpen, setAvatarOpen] = useState(false);
 
   function getLastSeenText(): string {
     if (!profile?.lastSeen) return "";
@@ -58,6 +63,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
 
   return (
     <div className="bg-surface border-b border-default">
+      <AvatarUploadModal
+        open={avatarOpen}
+        onClose={() => setAvatarOpen(false)}
+        onUpload={async (file) => {
+          const resp = await api.user.uploadAvatar(file);
+          // Update current user and profile with returned data
+          setUser(resp.data);
+          onProfileUpdate?.({ ...profile, ...resp.data });
+        }}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Cover Photo */}
         <div className="h-48 bg-gradient-to-r from-accent-600 to-accent-400 relative">
@@ -69,7 +84,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
           <div className="flex flex-col md:flex-row md:items-end md:space-x-6 -mt-20 relative">
             {/* Profile Picture */}
             <div className="relative">
-              <div className="w-32 h-32 bg-surface-elevated rounded-full border-4 border-background flex items-center justify-center shadow-lg">
+              <div
+                className={`w-32 h-32 bg-surface-elevated rounded-full border-4 border-background flex items-center justify-center shadow-lg ${profile.status === UserStatus.Self ? 'cursor-pointer hover:opacity-90' : ''}`}
+                onClick={() => { if (profile.status === UserStatus.Self) setAvatarOpen(true); }}
+                title={profile.status === UserStatus.Self ? 'Click to change avatar' : undefined}
+              >
                 <span className="text-4xl font-bold text-secondary">
                   {profile.firstName.charAt(0).toUpperCase()}{profile.lastName.charAt(0).toUpperCase()}
                 </span>

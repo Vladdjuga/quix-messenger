@@ -20,6 +20,13 @@ export const api = {
         getCurrentUser: () =>
             apiClient.get<ReadUserDto>('/user/getCurrentUser'),
         update: (dto: UpdateUserDto) => apiClient.patch<ReadUserDto>('/user/update', dto),
+        uploadAvatar: (file: File) => {
+            const form = new FormData();
+            form.append('file', file);
+            return apiClient.post<ReadUserDto>('/user/avatar', form, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+        },
         searchUsers: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
             return apiClient.get<ReadUserDto[]>(
                 `/user/search`,
