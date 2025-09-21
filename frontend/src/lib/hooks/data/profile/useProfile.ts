@@ -10,6 +10,7 @@ type UserRelationshipStatus = UserStatus | UserStatus.Self;
 export interface ProfileData extends ReadUserDto {
   status: UserRelationshipStatus;
   friendshipId?: string;
+  privateChatId?: string;
   isOnline?: boolean;
   lastSeen?: Date;
 }
@@ -23,7 +24,7 @@ export function useProfile(username?: string | null) {
   // Presence hook based on the resolved profile id (safe to pass null initially)
   const { isOnline } = useOnlinePolling(profile?.id ?? null, { intervalMs: 10000, enabled: true, immediate: true });
 
-  async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string }> {
+  async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string; privateChatId?: string }> {
     try {
       const [requests, sentRequests, friends] = await Promise.all([
         api.friendship.getFriendRequests("", 50).then(res => res.data),
@@ -32,7 +33,7 @@ export function useProfile(username?: string | null) {
       ]);
 
       const friend = friends.find(f => f.username === username);
-      if (friend) return { status: UserStatus.Friends, friendshipId: friend.id };
+      if (friend) return { status: UserStatus.Friends, friendshipId: friend.id, privateChatId: friend.privateChatId };
       
       const request = requests.find(r => r.username === username);
       if (request) return { status: UserStatus.PendingReceived, friendshipId: request.id };
@@ -79,7 +80,8 @@ export function useProfile(username?: string | null) {
       setProfile({
         ...userData,
         status: friendshipInfo.status,
-        friendshipId: friendshipInfo.friendshipId
+        friendshipId: friendshipInfo.friendshipId,
+        privateChatId: friendshipInfo.privateChatId
       });
     } catch (e) {
       setError((e as Error).message ?? "Failed to load profile");

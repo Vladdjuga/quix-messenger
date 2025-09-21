@@ -1,7 +1,9 @@
+"use client";
 import React from 'react';
 import { ReadFriendshipDto } from '@/lib/dto/ReadFriendshipDto';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
+import { useRouter } from 'next/navigation';
 
 interface FriendshipCardProps {
   friendship: ReadFriendshipDto;
@@ -16,6 +18,7 @@ const FriendshipCard: React.FC<FriendshipCardProps> = ({
   onRemove, 
   onAccept 
 }) => {
+  const router = useRouter();
   const { 
     sending, 
     error, 
@@ -98,7 +101,10 @@ const FriendshipCard: React.FC<FriendshipCardProps> = ({
       case UserStatus.Friends:
         return (
           <div className="flex space-x-2">
-            <button className="btn-secondary text-sm">
+            <button className="btn-secondary text-sm" onClick={() => {
+              if (friendship.privateChatId) router.push(`/chats/${encodeURIComponent(friendship.privateChatId)}`);
+              else router.push('/chats');
+            }}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>

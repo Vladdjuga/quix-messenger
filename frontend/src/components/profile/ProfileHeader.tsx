@@ -1,7 +1,9 @@
+"use client";
 import React from 'react';
 import { ProfileData } from '@/lib/hooks/data/profile/useProfile';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
+import { useRouter } from 'next/navigation';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -10,6 +12,7 @@ interface ProfileHeaderProps {
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate }) => {
   const { sending, error, sendFriendRequest, acceptFriendRequest, clearError } = useFriendshipActions();
+  const router = useRouter();
 
   function getLastSeenText(): string {
     if (!profile?.lastSeen) return "";
@@ -41,6 +44,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
     if (result.success && onProfileUpdate) {
       onProfileUpdate({ ...profile, status: UserStatus.Friends });
     }
+  }
+
+  function handleMessageClick() {
+    // If we know the private chat id from friendship, navigate directly
+    if (profile.privateChatId) {
+      router.push(`/chats/${encodeURIComponent(profile.privateChatId)}`);
+      return;
+    }
+    // Fallback: open chats list; ChatList should include their direct chat if exists
+    router.push('/chats');
   }
 
   return (
@@ -103,7 +116,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
                             </svg>
                             Friends
                           </span>
-                          <button className="btn-secondary">
+                          <button className="btn-secondary" onClick={handleMessageClick}>
                             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                             </svg>

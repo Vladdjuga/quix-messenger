@@ -1,5 +1,5 @@
 export type ProxyOptions = {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: unknown;
   query?: Record<string, string | number | undefined | null>;
 };
@@ -34,7 +34,7 @@ export async function proxy(
     const res = await fetch(url, {
       method,
       headers,
-      body: body && (method === 'POST' || method === 'PUT') ? JSON.stringify(body) : undefined,
+      body: body && (method === 'POST' || method === 'PUT' || method === 'PATCH') ? JSON.stringify(body) : undefined,
     });
 
     // Stream upstream response as-is

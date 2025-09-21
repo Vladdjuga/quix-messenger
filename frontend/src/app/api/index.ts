@@ -18,6 +18,17 @@ export const api = {
     user: {
         getCurrentUser: () =>
             apiClient.get<ReadUserDto>('/user/getCurrentUser'),
+        update: (payload: Partial<{ username: string; email: string; password: string; firstName: string; lastName: string; dateOfBirth: string }>) => {
+            // Backend expects PascalCase properties (Username, Email, Password, FirstName, LastName, DateOfBirth)
+            const body: Record<string, unknown> = {};
+            if (payload.username !== undefined) body.Username = payload.username;
+            if (payload.email !== undefined) body.Email = payload.email;
+            if (payload.password) body.Password = payload.password;
+            if (payload.firstName !== undefined) body.FirstName = payload.firstName;
+            if (payload.lastName !== undefined) body.LastName = payload.lastName;
+            if (payload.dateOfBirth !== undefined) body.DateOfBirth = payload.dateOfBirth;
+            return apiClient.patch<ReadUserDto>('/user/update', body);
+        },
         searchUsers: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
             return apiClient.get<ReadUserDto[]>(
                 `/user/search`,
