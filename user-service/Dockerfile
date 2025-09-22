@@ -15,6 +15,9 @@ COPY UI/UI.csproj ./UI/
 COPY Infrastructure/Infrastructure.csproj ./Infrastructure/
 ## Removed Grpc project
 
+# копируем стартовые файлы в /app/wwwroot
+COPY UI/wwwroot /app/wwwroot
+
 # Восстанавливаем зависимости
 RUN dotnet restore "./UI/UI.csproj"
 

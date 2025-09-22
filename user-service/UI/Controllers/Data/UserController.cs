@@ -171,11 +171,11 @@ public class UserController : Controller
     [GetUserGuid]
     [HttpPost("uploadAvatar")]
     public async Task<Results<Ok<string>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> UploadAvatar(
-        IFormFile avatar)
+        [FromForm] IFormFile avatar)
     {
         var userGuid = HttpContext.GetUserGuid();
-
-        if (avatar.Length == 0)
+    
+        if (avatar is null ||avatar.Length == 0)
         {
             _logger.LogWarning("No avatar file provided by user {UserGuid}", userGuid);
             return TypedResults.BadRequest(new ErrorResponse("No file provided"));

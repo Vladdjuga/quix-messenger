@@ -39,5 +39,8 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
             .IsRequired()
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
+        builder.Property(u => u.AvatarUrl)
+            .IsRequired()
+            .HasDefaultValue("default-avatar.jpg"); // In case avatar is not provided
     }
 }

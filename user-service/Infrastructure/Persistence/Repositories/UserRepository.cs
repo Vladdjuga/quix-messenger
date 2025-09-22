@@ -64,7 +64,6 @@ public sealed class UserRepository : IUserRepository
         if (existingEntity == null)
             throw new Exception("User not found");
         _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
-        _dbContext.Entry(existingEntity).Property(x => x.Id).IsModified = false;
         _dbContext.Entry(existingEntity).Property(x => x.CreatedAt).IsModified = false;
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

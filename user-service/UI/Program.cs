@@ -28,6 +28,11 @@ builder.WebHost.ConfigureKestrel((context,options) =>
     options.Configure(context.Configuration.GetSection("Kestrel"));
 });
 
+// Ensure the uploads directory exists (causes error if not)
+var uploadsPath = Path.Combine(builder.Environment.WebRootPath, "uploads");
+if (!Directory.Exists(uploadsPath))
+    Directory.CreateDirectory(uploadsPath);
+
 // Add CORS
 builder.Services.AddCors(options =>
 {
@@ -100,8 +105,6 @@ app.MapGet("/health", () => Results.Ok("OK"))
 // Use CORS before authentication and authorization
 app.UseCors("AllowFrontend");
 
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -110,6 +113,9 @@ app.UseStaticFiles(new StaticFileOptions
     ),
     RequestPath = "/uploads" 
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 // app.MapGrpcService<UI.gRPCClients.ChatService>(); // removed: gRPC no longer used

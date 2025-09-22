@@ -14,6 +14,7 @@ using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using Infrastructure.Auth;
+using Infrastructure.Configuration;
 using Infrastructure.ExceptionHandlers;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
@@ -24,6 +25,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.DI;
 
@@ -46,6 +48,12 @@ public static class DependencyInjection
             return new AvatarStorageService(env.WebRootPath, "uploads/avatars");
         });
         
+        services.Configure<UserDefaultsOptions>(
+            configuration.GetSection(UserDefaultsOptions.SectionName));
+        
+        services.AddScoped<IUserDefaults>(sp =>
+            sp.GetRequiredService<IOptionsSnapshot<UserDefaultsOptions>>().Value);
+        
         // Comment this if you want to use global exception middleware
         services.AddExceptionHandler<GlobalExceptionHandler>();
         
@@ -56,7 +64,7 @@ public static class DependencyInjection
         services.AddScoped<IUserSessionRepository,UserSessionRepository>();
         services.AddScoped<IFriendshipRepository,FriendshipRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
-    services.AddScoped<IMessageRepository,MessageRepository>();
+        services.AddScoped<IMessageRepository,MessageRepository>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();

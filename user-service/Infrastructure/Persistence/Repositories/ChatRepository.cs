@@ -37,21 +37,15 @@ public class ChatRepository:IChatRepository
 
     public async Task UpdateAsync(ChatEntity entity, CancellationToken cancellationToken)
     {
-        var trackedEntity = await _dbContext.Chats
-            .AsNoTracking().FirstOrDefaultAsync(x => x.Id == entity.Id,cancellationToken);
-        if (trackedEntity is null)
+        var existingEntity = await _dbContext.Chats
+            .FirstOrDefaultAsync(x => x.Id == entity.Id, cancellationToken);
+
+        if (existingEntity is null)
             throw new Exception("Chat not found");
-        var entry = _dbContext.Entry(entity);
-        foreach (var p in entry.Properties)
-        {
-            var propertyName = p.Metadata.Name;
-            if (propertyName is nameof(ChatEntity.Id) or nameof(ChatEntity.CreatedAt))
-                continue;
-            var currValue=p.CurrentValue;
-            var originalValue = _dbContext.Entry(trackedEntity)
-                .Property(propertyName).CurrentValue;
-            p.IsModified = !Equals(currValue, originalValue);
-        }
+        
+        _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+        _dbContext.Entry(existingEntity).Property(x => x.CreatedAt).IsModified = false;
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

@@ -71,7 +71,6 @@ public class UserSessionRepository:IUserSessionRepository
             .FirstOrDefaultAsync(x => x.Id == userSession.Id, cancellationToken);
         ArgumentNullException.ThrowIfNull(existingEntity);
         _dbContext.Entry(existingEntity).CurrentValues.SetValues(userSession);
-        _dbContext.Entry(existingEntity).Property(x => x.Id).IsModified = false;
         _dbContext.Entry(existingEntity).Property(x => x.CreatedAt).IsModified = false;
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

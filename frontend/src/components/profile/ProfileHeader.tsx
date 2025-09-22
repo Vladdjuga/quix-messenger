@@ -7,11 +7,14 @@ import { useRouter } from 'next/navigation';
 import AvatarUploadModal from './AvatarUploadModal';
 import { api } from '@/app/api';
 import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
+import Image from "next/image";
 
 interface ProfileHeaderProps {
   profile: ProfileData;
   onProfileUpdate?: (updatedProfile: ProfileData) => void;
 }
+
+const NEXT_PUBLIC_AVATAR_URL = process.env.NEXT_PUBLIC_AVATAR_URL || '';
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate }) => {
   const { sending, error, sendFriendRequest, acceptFriendRequest, clearError } = useFriendshipActions();
@@ -21,9 +24,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
 
   function getLastSeenText(): string {
     if (!profile?.lastSeen) return "";
-    
+
+    const lastSeenDate = new Date(profile.lastSeen);
+    if (isNaN(lastSeenDate.getTime())) {
+      return "";
+    }
+
     const now = new Date();
-    const diff = now.getTime() - new Date(profile.lastSeen).getTime();
+    const diff = now.getTime() - lastSeenDate.getTime();
     const minutes = Math.floor(diff / (1000 * 60));
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -89,9 +97,21 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
                 onClick={() => { if (profile.status === UserStatus.Self) setAvatarOpen(true); }}
                 title={profile.status === UserStatus.Self ? 'Click to change avatar' : undefined}
               >
-                <span className="text-4xl font-bold text-secondary">
-                  {profile.firstName.charAt(0).toUpperCase()}{profile.lastName.charAt(0).toUpperCase()}
-                </span>
+                {profile.avatarUrl ? (
+                  <Image
+                    src={NEXT_PUBLIC_AVATAR_URL+profile.avatarUrl}
+                    alt={`${profile.firstName} ${profile.lastName}`}
+                    width={128}
+                    height={128}
+                    className="w-32 h-32 rounded-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                    <span className="text-4xl text-muted">
+                      {profile.firstName?.charAt(0).toUpperCase() ?? ''}
+                      {profile.lastName?.charAt(0).toUpperCase() ?? ''}
+                    </span>
+                )}
               </div>
               {profile.status !== UserStatus.Self && (
                 <div className={`absolute bottom-2 right-2 w-6 h-6 rounded-full border-2 border-background ${
