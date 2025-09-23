@@ -5,7 +5,7 @@ import { refreshAuthTokenUseCase } from "@/lib/usecases/auth/refreshTokenUseCase
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: "/api",
-  headers: { "Content-Type": "application/json" },
+  // Don't set a global Content-Type; let Axios determine per request (JSON vs multipart)
   withCredentials: true,
 });
 

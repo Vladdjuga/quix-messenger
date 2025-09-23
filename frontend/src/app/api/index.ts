@@ -23,8 +23,8 @@ export const api = {
         uploadAvatar: (file: File) => {
             const form = new FormData();
             form.append('avatar', file as Blob, file.name);
-            return apiClient.post<ReadUserDto>('/user/avatar', form,
-                { headers: { 'Content-Type': 'multipart/form-data' } });
+            // Let axios set the proper multipart boundary; don't set Content-Type manually
+            return apiClient.post<ReadUserDto>('/user/avatar', form);
         },
         searchUsers: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
             return apiClient.get<ReadUserDto[]>(
