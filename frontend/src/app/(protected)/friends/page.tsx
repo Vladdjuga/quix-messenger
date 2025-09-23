@@ -17,8 +17,8 @@ export default function FriendsPage() {
     
     const query = searchQuery.toLowerCase();
     return friends.filter(friend => 
-      friend.username.toLowerCase().includes(query) ||
-      friend.email.toLowerCase().includes(query)
+      friend.user.username.toLowerCase().includes(query) ||
+      friend.user.email.toLowerCase().includes(query)
     );
   }, [friends, searchQuery]);
 

@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ChatWithLastMessage } from "@/lib/types";
 import { api } from "@/app/api";
-import { mapReadChatWithLastMessageDtos } from "@/lib/mappers/chatMapper";
 import { ChatList } from "@/components/messaging/ChatList";
 import { usePathname } from "next/navigation";
 
@@ -25,9 +24,8 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
     let mounted = true;
     (async () => {
     setLoading(true);
-    const resp = await api.chats.list();
-    const list: ChatWithLastMessage[] = mapReadChatWithLastMessageDtos(resp.data);
-    if (mounted) setChats(list);
+  const list = await api.chats.list();
+  if (mounted) setChats(list as ChatWithLastMessage[]);
       setLoading(false);
     })();
     return () => { mounted = false; };

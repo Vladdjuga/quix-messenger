@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
-import { ReadFriendshipDto } from '@/lib/dto/ReadFriendshipDto';
-import { ReadUserDto } from '@/lib/dto/ReadUserDto';
+import type { Friendship, User } from '@/lib/types';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
 import { useRouter } from 'next/navigation';
@@ -291,7 +290,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
 export default PersonCard;
 
 // Helper functions to convert existing data types to PersonData
-export function userToPersonData(user: ReadUserDto): PersonData {
+export function userToPersonData(user: User): PersonData {
   return {
     id: user.id,
     avatarUrl: user.avatarUrl,
@@ -304,13 +303,13 @@ export function userToPersonData(user: ReadUserDto): PersonData {
   };
 }
 
-export function friendshipToPersonData(friendship: ReadFriendshipDto): PersonData {
+export function friendshipToPersonData(friendship: Friendship): PersonData {
   return {
-    id: friendship.userId,
-    avatarUrl: friendship.avatarUrl,
-    username: friendship.username,
-    email: friendship.email,
-    dateOfBirth: friendship.dateOfBirth,
+    id: friendship.user.id,
+    avatarUrl: friendship.user.avatarUrl,
+    username: friendship.user.username,
+    email: friendship.user.email,
+    dateOfBirth: friendship.user.dateOfBirth,
     createdAt: friendship.createdAt,
     privateChatId: friendship.privateChatId
   };

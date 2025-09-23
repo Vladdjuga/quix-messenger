@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
+import type { Friendship } from "@/lib/types";
 import { api } from "@/app/api";
+import { mapReadFriendshipDtos } from "@/lib/mappers/friendshipMapper";
 
 const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
 
 export function useFriendRequests() {
-  const [requests, setRequests] = useState<ReadFriendshipDto[]>([]);
+  const [requests, setRequests] = useState<Friendship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,8 +14,8 @@ export function useFriendRequests() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.friendship.getFriendRequests("", PAGE_SIZE);
-      setRequests(response.data);
+  const response = await api.friendship.getFriendRequests("", PAGE_SIZE);
+  setRequests(mapReadFriendshipDtos(response.data));
     } catch (e) {
       setError((e as Error).message ?? "Failed to load friend requests");
     } finally {
@@ -40,7 +41,7 @@ export function useFriendRequests() {
 }
 
 export function useSentRequests() {
-  const [sentRequests, setSentRequests] = useState<ReadFriendshipDto[]>([]);
+  const [sentRequests, setSentRequests] = useState<Friendship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +49,8 @@ export function useSentRequests() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.friendship.getSentRequests("", PAGE_SIZE);
-      setSentRequests(response.data);
+  const response = await api.friendship.getSentRequests("", PAGE_SIZE);
+  setSentRequests(mapReadFriendshipDtos(response.data));
     } catch (e) {
       setError((e as Error).message ?? "Failed to load sent requests");
     } finally {
@@ -75,7 +76,7 @@ export function useSentRequests() {
 }
 
 export function useFriends() {
-  const [friends, setFriends] = useState<ReadFriendshipDto[]>([]);
+  const [friends, setFriends] = useState<Friendship[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,8 +84,8 @@ export function useFriends() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.friendship.getFriendships(PAGE_SIZE);
-      setFriends(response.data);
+  const response = await api.friendship.getFriendships(PAGE_SIZE);
+  setFriends(mapReadFriendshipDtos(response.data));
     } catch (e) {
       setError((e as Error).message ?? "Failed to load friends");
     } finally {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { ReadUserDto } from "@/lib/dto/ReadUserDto";
+import type { User } from "@/lib/types";
 import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
 import { UserStatus } from "@/lib/types/enums";
@@ -7,7 +7,7 @@ import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePol
 
 type UserRelationshipStatus = UserStatus | UserStatus.Self;
 
-export interface ProfileData extends ReadUserDto {
+export interface ProfileData extends User {
   status: UserRelationshipStatus;
   friendshipId?: string;
   privateChatId?: string;

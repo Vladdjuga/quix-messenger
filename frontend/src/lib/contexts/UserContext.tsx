@@ -1,15 +1,15 @@
 "use client";
 
-import {ReadUserDto} from "@/lib/dto/ReadUserDto";
+import type { User } from "@/lib/types";
 import React, {createContext, useEffect, useState} from "react";
 import {getCurrentUserUseCase} from "@/lib/usecases/user/getCurrentUserUseCase";
 import { localStorageShim as localStorage } from "@/lib/shims/localStorage";
 
 type UserContextType = {
-    user: ReadUserDto | null;
+    user: User | null;
     isLoading: boolean;
     isAuthenticated: boolean;
-    setUser: (user: ReadUserDto | null) => void;
+    setUser: (user: User | null) => void;
 };
 
 export const UserContext = createContext<UserContextType>({
@@ -20,7 +20,7 @@ export const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider = ({children}: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<ReadUserDto | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -52,7 +52,7 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
         loadUser();
     }, []);
 
-    const handleSetUser = (newUser: ReadUserDto | null) => {
+    const handleSetUser = (newUser: User | null) => {
         setUser(newUser);
         setIsAuthenticated(!!newUser);
     };

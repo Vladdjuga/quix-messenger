@@ -1,11 +1,11 @@
 "use client";
 import React from 'react';
-import { ReadFriendshipDto } from '@/lib/dto/ReadFriendshipDto';
+import type { Friendship } from '@/lib/types';
 import { UserStatus } from '@/lib/types/enums';
 import PersonCard, { friendshipToPersonData } from './PersonCard';
 
 interface FriendshipCardProps {
-  friendship: ReadFriendshipDto;
+  friendship: Friendship;
   type: UserStatus.PendingReceived | UserStatus.PendingSent | UserStatus.Friends;
   onRemove: (friendshipId: string) => void;
   onAccept?: (friendshipId: string) => void;

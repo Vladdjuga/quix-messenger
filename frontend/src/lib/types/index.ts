@@ -45,3 +45,25 @@ export interface ChatWithLastMessage extends Chat {
   unreadCount: number;
   isOnline: boolean;
 }
+
+// User domain type used across the app (mapped from DTO at API boundary)
+export interface User {
+  id: string;
+  avatarUrl: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  createdAt: Date;
+}
+
+// Friendship domain type
+import type { FriendshipStatus } from './enums';
+export interface Friendship {
+  id: string;
+  user: User; // the "other" user
+  status: FriendshipStatus;
+  privateChatId?: string;
+  createdAt: Date;
+}

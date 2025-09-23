@@ -5,6 +5,8 @@ import {RegisterUserDto} from "@/lib/dto/RegisterUserDto";
 import { ReadMessageDto } from "@/lib/dto/ReadMessageDto";
 import { ReadChatDto } from "@/lib/dto/ReadChatDto";
 import { UpdateUserDto } from "@/lib/dto/UpdateUserDto";
+import { mapReadChatWithLastMessageDtos } from "@/lib/mappers/chatMapper";
+import { ChatWithLastMessage } from "@/lib/types";
 
 export const api = {
     auth: {
@@ -72,8 +74,11 @@ export const api = {
         },
     },
     chats: {
-        // Next API routes proxy to user-service. This returns chats for the current user.
-        list: () => apiClient.get<ReadChatDto[]>(`/chats`),
+        // Next API routes proxy to user-service. Returns domain chats for the current user.
+        list: async (): Promise<ChatWithLastMessage[]> => {
+            const resp = await apiClient.get<ReadChatDto[]>(`/chats`);
+            return mapReadChatWithLastMessageDtos(resp.data);
+        },
     },
     messages: {
         // Get last N messages by chat id

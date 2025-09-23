@@ -12,42 +12,83 @@ interface Props {
 
 export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) => {
   // For direct chats, determine the other user and track presence
-  const otherUserId = useMemo(() => {
+  const otherUser = useMemo(() => {
     if (chat.chatType !== ChatType.Direct) return null;
     const others = (chat.participants ?? []).filter(u => u.id !== currentUserId);
-    return others.length > 0 ? others[0].id : null;
+    return others.length > 0 ? others[0] : null;
   }, [chat.chatType, chat.participants, currentUserId]);
 
+  const otherUserId = otherUser?.id ?? null;
   const { isOnline } = useOnlinePolling(otherUserId, { intervalMs: 10000, enabled: !!otherUserId });
+
   const displayTitle = useMemo(() => {
-    if (chat.chatType === ChatType.Direct) {
-      const others = (chat.participants ?? []).filter(u => u.id !== currentUserId);
-      if (others.length > 0) return others[0].username || chat.title;
+    if (chat.chatType === ChatType.Direct && otherUser) {
+      return otherUser.username || chat.title;
     }
     return chat.title;
-  }, [chat, currentUserId]);
+  }, [chat.title, chat.chatType, otherUser]);
+
+  const subtitle = useMemo(() => {
+    if (!chat.lastMessage) return "No messages yet";
+    return chat.lastMessage.text || "\u00A0";
+  }, [chat.lastMessage]);
+
+  const timeLabel = useMemo(() => {
+    if (!chat.lastMessage?.createdAt) return "";
+    const d = chat.lastMessage.createdAt;
+    const now = new Date();
+    const sameDay = d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    return sameDay
+      ? d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+      : d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }, [chat.lastMessage]);
 
   const unread = chat.unreadCount > 0 ? chat.unreadCount : 0;
+  const avatarUrl = otherUser?.avatarUrl;
+  const initials = useMemo(() => {
+    const name = (chat.chatType === ChatType.Direct ? otherUser?.username : chat.title) || "?";
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.[0] ?? "?";
+    const second = parts.length > 1 ? parts[1][0] : "";
+    return (first + second).toUpperCase();
+  }, [chat.title, chat.chatType, otherUser]);
+
   return (
     <Link
       key={chat.id}
       href={{ pathname: `/chats/${chat.id}` }}
-      className={`block px-3 py-2 rounded text-sm border ${active ? 'border-default bg-muted/10 font-medium' : 'border-transparent hover:bg-muted/10'} truncate`}
+      className={`block px-3 py-2 rounded border ${active ? 'border-default bg-muted/10' : 'border-transparent hover:bg-muted/10'}`}
     >
-      <div className="truncate flex items-center gap-2">
-        {chat.chatType === ChatType.Direct && isOnline && (
-          <span className="inline-block w-2 h-2 rounded-full bg-green-500" aria-hidden />
-        )}
-  <span className="truncate">{displayTitle}</span>
-        {unread > 0 && (
-          <span className="ml-auto inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white">
-            {unread}
-          </span>
-        )}
+      <div className="flex items-center gap-3">
+        {/* Avatar */}
+        <div className="relative w-10 h-10 shrink-0">
+          {avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={avatarUrl} alt={displayTitle} className="w-10 h-10 rounded-full object-cover" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs text-primary">
+              {initials}
+            </div>
+          )}
+          {chat.chatType === ChatType.Direct && isOnline && (
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 ring-2 ring-surface" aria-hidden />
+          )}
+        </div>
+
+        {/* Text block */}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <div className={`truncate text-sm ${active ? 'font-semibold' : 'font-medium'}`}>{displayTitle}</div>
+            {unread > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white">
+                {unread}
+              </span>
+            )}
+            <div className="ml-auto text-[10px] text-muted shrink-0">{timeLabel}</div>
+          </div>
+          <div className="text-xs text-muted truncate">{subtitle}</div>
+        </div>
       </div>
-      {chat.lastMessage && (
-        <div className="text-xs text-muted truncate">{chat.lastMessage.text}</div>
-      )}
     </Link>
   );
 };

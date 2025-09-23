@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ReadUserDto } from "@/lib/dto/ReadUserDto";
+import type { User } from "@/lib/types";
 import { api } from "@/app/api";
 import { UserStatus } from "@/lib/types/enums";
+import { mapReadUserDtos } from "@/lib/mappers/userMapper";
 
 type UserRelationshipStatus = UserStatus;
 
 export interface UserWithStatus {
-  user: ReadUserDto;
+  user: User;
   status: UserRelationshipStatus;
   friendshipId?: string;
 }
@@ -21,7 +22,7 @@ export function useUserSearch() {
   const [hasMore, setHasMore] = useState(false);
   const [lastCreatedAt, setLastCreatedAt] = useState<string>();
 
-  async function getStatuses(users: ReadUserDto[]): Promise<UserWithStatus[]> {
+  async function getStatuses(users: User[]): Promise<UserWithStatus[]> {
     try {
       const [requests, sentRequests, friends] = await Promise.all([
         api.friendship.getFriendRequests("", PAGE_SIZE)
@@ -60,13 +61,14 @@ export function useUserSearch() {
     setError(null);
 
     try {
-      const users = await api.user.searchUsers(query, PAGE_SIZE, append ? lastCreatedAt : undefined)
+      const usersDto = await api.user.searchUsers(query, PAGE_SIZE, append ? lastCreatedAt : undefined)
         .then(res => res.data);
+      const users = mapReadUserDtos(usersDto);
       const withStatuses = await getStatuses(users);
 
       setResults(prev => (append ? [...prev, ...withStatuses] : withStatuses));
       setHasMore(users.length === PAGE_SIZE);
-      setLastCreatedAt(users.at(-1)?.createdAt.toString());
+  setLastCreatedAt(usersDto.at(-1)?.createdAt?.toString());
     } catch (e) {
       setError((e as Error).message ?? "Search failed");
     } finally {
