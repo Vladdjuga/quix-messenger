@@ -4,6 +4,7 @@ using UI.Swagger;
 using Infrastructure.DI;
 using Infrastructure.Middleware;
 using Infrastructure.Persistence.Contexts;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -91,7 +92,11 @@ using (var scope = app.Services.CreateScope())
     // Apply migrations at startup
     // This will ensure that the database is created and migrations are applied
     var db = scope.ServiceProvider.GetRequiredService<MessengerDbContext>();
-    db.Database.Migrate(); 
+    db.Database.Migrate();
+    
+    // Migrate avatar assets to new storage location
+    var avatarMigrationService = scope.ServiceProvider.GetRequiredService<AvatarMigrationService>();
+    await avatarMigrationService.MigrateDefaultAssetsAsync();
 }
 //app.UseHttpsRedirection();
 

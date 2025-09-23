@@ -20,6 +20,7 @@ using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
 using Infrastructure.Persistence.Files;
 using Infrastructure.Persistence.Repositories;
+using Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,8 @@ public static class DependencyInjection
             var fileStorageOptions = sp.GetRequiredService<IOptionsSnapshot<FileStorageOptions>>().Value;
             return new AvatarStorageService(fileStorageOptions.AvatarStoragePath, "");
         });
+        
+        services.AddScoped<AvatarMigrationService>();
         
         services.Configure<UserDefaultsOptions>(
             configuration.GetSection(UserDefaultsOptions.SectionName));

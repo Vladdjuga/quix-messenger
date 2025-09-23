@@ -71,10 +71,19 @@ The user-service uses configurable storage for user avatars. Configuration is do
 ```json
 {
   "FileStorage": {
-    "AvatarStoragePath": "/var/lib/quix-messenger/avatars"
+    "AvatarStoragePath": "/var/lib/quix-messenger/avatars",
+    "MigrateDefaultAssetsOnStartup": true
   }
 }
 ```
+
+### Default Avatar Migration
+
+The service automatically migrates default assets (like `default-avatar.jpg`) from the application's `wwwroot` directory to the configured storage location on startup. This ensures that default avatars are available even when using external storage volumes.
+
+- **`MigrateDefaultAssetsOnStartup`**: Controls whether default assets are automatically copied to the storage location during application startup
+- The migration only runs if the default avatar doesn't already exist in the target location
+- The original file in `wwwroot/uploads/avatars/default-avatar.jpg` is copied to `{AvatarStoragePath}/default-avatar.jpg`
 
 ### Docker Volume Setup
 
@@ -95,7 +104,8 @@ For development, you can use a local path:
 ```json
 {
   "FileStorage": {
-    "AvatarStoragePath": "C:\\temp\\quix-messenger\\avatars"
+    "AvatarStoragePath": "C:\\temp\\quix-messenger\\avatars",
+    "MigrateDefaultAssetsOnStartup": true
   }
 }
 ```
