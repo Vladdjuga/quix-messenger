@@ -5,7 +5,9 @@ const redis = RedisSingleton.getInstance();
 
 export async function checkIfUserIsOnline(userId: string): Promise<boolean> {
     logger.info(`Checking if user ${userId} has online status`);
-    return await redis.sIsMember('online_users_set', `user:${userId}`)===1;
+    const res = await redis.sIsMember('online_users_set', `user:${userId}`)===1;
+    logger.info(`User ${userId} online status: ${res}`);
+    return res;
 }
 
 export async function addUserToOnlineSet(userId: string): Promise<void> {
@@ -29,5 +31,6 @@ export async function setUserLastSeen(userId: string): Promise<void> {
 export async function getUserLastSeen(userId: string): Promise<string | null> {
     logger.info(`Getting last seen for user ${userId}`);
     const lastSeen = await redis.hGet('user_last_seen', `user:${userId}`);
+    logger.info(`User ${userId} last seen: ${lastSeen}`);
     return lastSeen || null;
 }
