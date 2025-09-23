@@ -2,7 +2,6 @@ using System.Text;
 using UI.Swagger;
 // using Chat; // removed: gRPC no longer used
 using Infrastructure.DI;
-using Infrastructure.Middleware;
 using Infrastructure.Persistence.Contexts;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
 // using UI.gRPCClients; // removed: gRPC no longer used

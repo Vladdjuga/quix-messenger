@@ -37,12 +37,6 @@ export const api = {
         },
     },
     friendship: {
-        searchFriendships: (query: string, pageSize: number, lastCreatedAt?: string) => {
-            return apiClient.get<ReadFriendshipDto[]>(
-                `/friendship/searchFriendships`,
-                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
-            );
-        },
         requestFriendship: (username: string) =>
             apiClient.post<ReadFriendshipDto>('/friendship/requestFriendship', {username}),
 
@@ -75,11 +69,6 @@ export const api = {
                 `/friendship/getFriendships`,
                 {params: {pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
-        },
-
-        // Get friendship relationship by friendship ID
-        getFriendship: (friendshipId: string) => {
-            return apiClient.get<ReadFriendshipDto>(`/friendship/getFriendship/${friendshipId}`);
         },
     },
     chats: {
