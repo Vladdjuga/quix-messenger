@@ -26,6 +26,7 @@ services:
       - postgres
     volumes:
       - ./user-service/UI/wwwroot:/app/wwwroot
+      - avatar-storage:/var/lib/quix-messenger/avatars
   redis:
     image: redis:7-alpine
     restart: always
@@ -83,6 +84,8 @@ volumes:
   pgadmin_data:
     driver: local
   redisdata:
+    driver: local
+  avatar-storage:
     driver: local
 networks:
   app-network:

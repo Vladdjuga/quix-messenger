@@ -41,11 +41,13 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(opt =>
             configuration.GetSection(nameof(JwtSettings)).Bind(opt));
 
+        services.Configure<FileStorageOptions>(
+            configuration.GetSection(FileStorageOptions.SectionName));
         
         services.AddSingleton<IAvatarStorageService>(sp =>
         {
-            var env = sp.GetRequiredService<IWebHostEnvironment>();
-            return new AvatarStorageService(env.WebRootPath, "uploads/avatars");
+            var fileStorageOptions = sp.GetRequiredService<IOptionsSnapshot<FileStorageOptions>>().Value;
+            return new AvatarStorageService(fileStorageOptions.AvatarStoragePath, "");
         });
         
         services.Configure<UserDefaultsOptions>(

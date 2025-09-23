@@ -37,10 +37,7 @@ public class GetAvatarHandler : IRequestHandler<GetAvatarQuery, Result<FileDto>>
             var bytes = ms.ToArray();
 
             var ext = Path.GetExtension(path).ToLowerInvariant();
-            var contentType = _userDefaults.AvatarContentTypes.TryGetValue(ext, out var ct)
-                ? ct
-                : "application/octet-stream";
-
+            var contentType = _userDefaults.AvatarContentTypes.GetValueOrDefault(ext, "application/octet-stream");
             var file = new FileDto
             {
                 Name = Path.GetFileName(path),

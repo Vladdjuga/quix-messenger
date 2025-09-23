@@ -19,8 +19,8 @@ public class PhysicalFileStorageService: IFileStorageService
         folder ??= _baseFolder;
         var path = Path.Combine(_webRoot, folder, filename);
         var dir = Path.GetDirectoryName(path);
-        if (dir is null)
-            Directory.CreateDirectory(path);
+        if (dir is not null && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
         await File.WriteAllBytesAsync(path, content, cancellationToken);
         
         return filename;

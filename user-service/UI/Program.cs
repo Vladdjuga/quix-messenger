@@ -105,15 +105,6 @@ app.MapGet("/health", () => Results.Ok("OK"))
 // Use CORS before authentication and authorization
 app.UseCors("AllowFrontend");
 
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.WebRootPath, "uploads")
-    ),
-    RequestPath = "/uploads" 
-});
-
 app.UseAuthentication();
 app.UseAuthorization();
 

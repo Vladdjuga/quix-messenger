@@ -64,6 +64,42 @@ Frontend expects these (e.g., via `.env.local` or container env):
 
 The BFF forwards `Authorization` headers to backend services when present and uses `Set-Cookie` from backend auth endpoints where applicable.
 
+## 📁 File Storage Configuration
+
+The user-service uses configurable storage for user avatars. Configuration is done via the `FileStorage` section in `appsettings.json`:
+
+```json
+{
+  "FileStorage": {
+    "AvatarStoragePath": "/var/lib/quix-messenger/avatars"
+  }
+}
+```
+
+### Docker Volume Setup
+
+The avatar storage is configured as a Docker volume to persist files outside the container:
+
+```yaml
+services:
+  user-service:
+    volumes:
+      - avatar-storage:/var/lib/quix-messenger/avatars
+
+volumes:
+  avatar-storage:
+    driver: local
+```
+
+For development, you can use a local path:
+```json
+{
+  "FileStorage": {
+    "AvatarStoragePath": "C:\\temp\\quix-messenger\\avatars"
+  }
+}
+```
+
 ## 🧭 Request Flow Summary
 1) UI calls `api.*` (axios → Next API route)
 2) Next API route validates input with zod and proxies via `proxy.ts`
@@ -77,7 +113,8 @@ The BFF forwards `Authorization` headers to backend services when present and us
 - [x] WebSocket real-time messaging
 - [x] BFF Proxy + Validation (zod)
 - [x] Containerization
-- [ ] File/image uploading
+- [x] Avatar uploading with configurable storage
+- [ ] File/image uploading (other types)
 - [ ] Calls (voice/video)
 - [ ] Caching and performance tuning
 

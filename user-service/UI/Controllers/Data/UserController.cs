@@ -209,7 +209,7 @@ public class UserController : Controller
     [HttpGet("getAvatar/{userId:guid}")]
     public async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetAvatar(Guid userId)
     {
-        var result = await _mediator.Send(new Application.UseCases.Files.GetAvatarQuery(userId));
+        var result = await _mediator.Send(new GetAvatarQuery(userId));
         if (result.IsFailure)
         {
             _logger.LogError("Failed to get avatar for user {UserId}: {Error}", userId, result.Error);
