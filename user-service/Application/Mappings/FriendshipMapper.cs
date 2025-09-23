@@ -31,6 +31,8 @@ public static class FriendshipMapper
         return new ReadFriendshipDto
         {
             Id = friendship.Id,
+            UserId = targetUser?.Id ?? Guid.Empty,
+            AvatarUrl = targetUser?.AvatarUrl ?? "",
             Username = targetUser?.Username ?? "",
             Email = targetUser?.Email ?? "",
             DateOfBirth = targetUser?.DateOfBirth ?? DateTime.MinValue,

@@ -34,7 +34,9 @@ public class SearchIncomingFriendRequestsHandler :
             return Result<IEnumerable<ReadFriendshipDto>>.Success([]);
 
         // Map the entities - but we need to create DTOs that represent the sender, not the contact
-        var mappedFriends = friendships.Select(uc => uc.MapToDto(uc.User));
+        var mappedFriends = friendships
+            .Where(uc => uc.User != null)
+            .Select(uc => uc.MapToDto(uc.User!));
 
         return Result<IEnumerable<ReadFriendshipDto>>.Success(mappedFriends);
     }
