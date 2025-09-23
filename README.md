@@ -23,7 +23,7 @@ A modern, full-stack real-time messaging application built with a microservices 
 
 ### 📦 Services (in this repo)
 - **`frontend`** — Next.js 15 app with BFF pattern (TypeScript, React 19, Tailwind CSS 4)
-- **`realtime-service-ts`** — WebSocket gateway for real-time messaging (TypeScript, Express, Socket.io, Redis)
+- **`realtime-service-ts`** — WebSocket gateway for real-time messaging (Express.js 4.18, Socket.io 4.8, Redis)
 - **`user-service`** — ASP.NET Core service for authentication, user profiles, and friendships (PostgreSQL, EF Core)
 
 ### 🗄️ Data Stores
@@ -35,7 +35,7 @@ A modern, full-stack real-time messaging application built with a microservices 
 
 ### Backend Services
 - **ASP.NET Core 9** — User service with Entity Framework Core
-- **Node.js 18** — TypeScript-based realtime service with Express
+- **Express.js 4.18** — TypeScript-based realtime service with Node.js 18
 - **PostgreSQL 16** — Primary database
 - **Redis 7** — Cache and real-time data store
 
