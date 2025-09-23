@@ -32,6 +32,7 @@ export function registerEvents(io: Server) {
         socket.on('disconnect', async () => {
             logger.info(`Client disconnected: ${socket.id}`);
             await removeUserFromOnlineSet(user.id);
+            // Note: removeUserFromOnlineSet now calls setUserLastSeen automatically
         })
 
         // Wrap socket event handlers

@@ -3,7 +3,7 @@ import { ReadUserDto } from "@/lib/dto/ReadUserDto";
 import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
 import { UserStatus } from "@/lib/types/enums";
-import { useOnlinePolling } from "@/lib/hooks/data/user/useOnlinePolling";
+import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePolling";
 
 type UserRelationshipStatus = UserStatus | UserStatus.Self;
 
@@ -22,7 +22,11 @@ export function useProfile(username?: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   // Presence hook based on the resolved profile id (safe to pass null initially)
-  const { isOnline } = useOnlinePolling(profile?.id ?? null, { intervalMs: 10000, enabled: true, immediate: true });
+  const { isOnline, lastSeenAt } = useUserPresencePolling(profile?.id ?? null, { 
+    intervalMs: 10000, 
+    enabled: true, 
+    immediate: true 
+  });
 
   async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string; privateChatId?: string }> {
     try {
@@ -98,8 +102,12 @@ export function useProfile(username?: string | null) {
 
   const mergedProfile = useMemo(() => {
     if (!profile) return null;
-    return { ...profile, isOnline: isOnline ?? profile.isOnline } as ProfileData;
-  }, [profile, isOnline]);
+    return { 
+      ...profile, 
+      isOnline: isOnline ?? profile.isOnline,
+      lastSeen: lastSeenAt ? new Date(lastSeenAt) : profile.lastSeen
+    } as ProfileData;
+  }, [profile, isOnline, lastSeenAt]);
 
   return {
     profile: mergedProfile,

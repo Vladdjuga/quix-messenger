@@ -98,5 +98,8 @@ export const api = {
         // Check if a user is online right now via proxy to realtime-service
         isUserOnline: (userId: string, signal?: AbortSignal) =>
             apiClient.get<{ isOnline: boolean }>(`/online/${encodeURIComponent(userId)}`, { signal }),
+        // Get user presence info (online status and last seen timestamp)
+        getUserPresence: (userId: string, signal?: AbortSignal) =>
+            apiClient.get<{ isOnline: boolean; lastSeenAt: string | null }>(`/online/user/${encodeURIComponent(userId)}/presence`, { signal }),
     },
 }

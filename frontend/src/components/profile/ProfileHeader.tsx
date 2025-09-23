@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, {useCallback, useState} from 'react';
 import { ProfileData } from '@/lib/hooks/data/profile/useProfile';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
@@ -16,8 +16,6 @@ interface ProfileHeaderProps {
   onProfileUpdate?: (updatedProfile: ProfileData) => void;
 }
 
-const NEXT_PUBLIC_AVATAR_URL = process.env.NEXT_PUBLIC_AVATAR_URL || '';
-
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate }) => {
   const { sending, error, sendFriendRequest, acceptFriendRequest, clearError } = useFriendshipActions();
   const router = useRouter();
@@ -25,23 +23,25 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
 
-  useEffect(() => {
+  const updateAvatar = useCallback((profileId: string) => {
     let revoked: string | null = null;
     (async () => {
-      if (!profile?.id) { setAvatarSrc(null); return; }
+      if (!profileId) { setAvatarSrc(null); return; }
       const url = await getProtectedAvatarUrl(profile.id);
       if (url) {
         setAvatarSrc(url);
         revoked = url; // remember to revoke on cleanup
-      } else if (profile.avatarUrl) {
-        // Fallback to public URL if protected fetch fails
-        setAvatarSrc(NEXT_PUBLIC_AVATAR_URL + profile.avatarUrl);
       } else {
         setAvatarSrc(null);
       }
     })();
     return () => { if (revoked) URL.revokeObjectURL(revoked); };
-  }, [profile?.id, profile?.avatarUrl]);
+  }, [profile.id]);
+
+  useEffect(() => {
+    // Re-fetch avatar if avatarUrl changes (indicates a new upload)
+    return updateAvatar(profile.id);
+  }, [profile.id, profile.avatarUrl, updateAvatar]);
 
   function getLastSeenText(): string {
     if (!profile?.lastSeen) return "";
@@ -99,6 +99,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
           const resp = await api.user.uploadAvatar(file);
           // Update current user and profile with returned data
           setUser(resp.data);
+          updateAvatar(profile.id);
+          setAvatarOpen(false);
           onProfileUpdate?.({ ...profile, ...resp.data });
         }}
       />
