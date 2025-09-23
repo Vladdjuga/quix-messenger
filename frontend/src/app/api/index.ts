@@ -20,11 +20,14 @@ export const api = {
         getCurrentUser: () =>
             apiClient.get<ReadUserDto>('/user/getCurrentUser'),
         update: (dto: UpdateUserDto) => apiClient.patch<ReadUserDto>('/user/update', dto),
-        uploadAvatar: (file: File) => {
+        uploadAvatar: async (file: File) => {
             const form = new FormData();
-            form.append('avatar', file as Blob, file.name);
-            // Let axios set the proper multipart boundary; don't set Content-Type manually
-            return apiClient.post<ReadUserDto>('/user/avatar', form);
+            form.append('avatar', file, file.name || 'avatar');
+            // Upload via BFF, then fetch the updated user to keep return type stable
+            await apiClient.post<{ avatarUrl: string }>('/user/avatar', form, {
+                headers: { /* Axios will set correct multipart boundary */ },
+            });
+            return apiClient.get<ReadUserDto>('/user/getCurrentUser');
         },
         searchUsers: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
             return apiClient.get<ReadUserDto[]>(

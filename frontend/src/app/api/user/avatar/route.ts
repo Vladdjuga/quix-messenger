@@ -1,54 +1,51 @@
 import { NextResponse } from 'next/server';
 
+// Ensure Node.js runtime for streaming support
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
   const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
 
   try {
-    // Forward only required headers and stream the body. Node fetch requires duplex: 'half' for streaming bodies.
-  const initialHeaders = new Headers();
-  const initialAuth = req.headers.get('authorization');
-  if (initialAuth) initialHeaders.set('authorization', initialAuth);
-  const contentType = req.headers.get('content-type');
-  if (contentType) initialHeaders.set('content-type', contentType);
-
-    // Parse incoming multipart form and rebuild to ensure correct boundary and field names
-    const inForm = await req.formData();
-    const file = inForm.get('avatar');
-    if (!(file instanceof Blob)) {
-      return NextResponse.json({ message: 'No file provided' }, { status: 400 });
+    if (!USER_SERVICE_URL) {
+      return NextResponse.json({ message: 'Service URL is not configured' }, { status: 500 });
     }
 
-    const outForm = new FormData();
-    const filename = file instanceof File && file.name.trim() !== ''
-      ? file.name
-      : 'avatar';
-    outForm.append('avatar', file, filename);
+    // Stream the original multipart body directly to the backend
+    const headers = new Headers();
+    const auth = req.headers.get('authorization');
+    const contentType = req.headers.get('content-type');
+    if (auth) headers.set('authorization', auth);
+    if (contentType) headers.set('content-type', contentType);
 
-    // Forward only Authorization; let undici set multipart content-type with boundary
-  const headers = new Headers();
-  const auth = req.headers.get('authorization');
-  if (auth) headers.set('authorization', auth);
-
-    const init: RequestInit & { duplex?: 'half' } = {
+    const res = await fetch(`${USER_SERVICE_URL}/User/uploadAvatar`, {
       method: 'POST',
       headers,
-      body: outForm,
-    };
-    const res = await fetch(`${USER_SERVICE_URL}/User/uploadAvatar`, init);
+      body: req.body,
+      // Required by undici when streaming a request body
+      duplex: 'half',
+    } as RequestInit & { duplex: 'half' });
+
     if (!res.ok) {
       const errorText = await res.text();
       console.error('Backend response error:', res.status, errorText);
       return NextResponse.json(
-        { error: `Backend error: ${res.status}` },
+        { message: 'Avatar upload failed' },
         { status: res.status }
       );
     }
-    const data = await res.json();
-    return NextResponse.json(data);
+
+    // Backend returns a plain string (avatar URL). Forward as JSON string.
+    const text = await res.text();
+    let avatarUrl = text.trim();
+    if (avatarUrl.startsWith('"') && avatarUrl.endsWith('"')) {
+      avatarUrl = avatarUrl.slice(1, -1);
+    }
+    return NextResponse.json({ avatarUrl });
   } catch (error) {
     console.error('Avatar upload proxy error:', error);
     return NextResponse.json(
-      { error: 'Failed to process avatar upload' },
+      { message: 'Failed to process avatar upload' },
       { status: 500 }
     );
   }

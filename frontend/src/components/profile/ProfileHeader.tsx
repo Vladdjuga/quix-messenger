@@ -8,6 +8,8 @@ import AvatarUploadModal from './AvatarUploadModal';
 import { api } from '@/app/api';
 import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
 import Image from "next/image";
+import { useEffect } from 'react';
+import { getProtectedAvatarUrl } from '@/lib/utils/protectedAvatar';
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -21,6 +23,25 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
   const router = useRouter();
   const { setUser } = useCurrentUser();
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    let revoked: string | null = null;
+    (async () => {
+      if (!profile?.id) { setAvatarSrc(null); return; }
+      const url = await getProtectedAvatarUrl(profile.id);
+      if (url) {
+        setAvatarSrc(url);
+        revoked = url; // remember to revoke on cleanup
+      } else if (profile.avatarUrl) {
+        // Fallback to public URL if protected fetch fails
+        setAvatarSrc(NEXT_PUBLIC_AVATAR_URL + profile.avatarUrl);
+      } else {
+        setAvatarSrc(null);
+      }
+    })();
+    return () => { if (revoked) URL.revokeObjectURL(revoked); };
+  }, [profile?.id, profile?.avatarUrl]);
 
   function getLastSeenText(): string {
     if (!profile?.lastSeen) return "";
@@ -97,9 +118,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
                 onClick={() => { if (profile.status === UserStatus.Self) setAvatarOpen(true); }}
                 title={profile.status === UserStatus.Self ? 'Click to change avatar' : undefined}
               >
-                {profile.avatarUrl ? (
+                {avatarSrc ? (
                   <Image
-                    src={NEXT_PUBLIC_AVATAR_URL+profile.avatarUrl}
+                    src={avatarSrc}
                     alt={`${profile.firstName} ${profile.lastName}`}
                     width={128}
                     height={128}

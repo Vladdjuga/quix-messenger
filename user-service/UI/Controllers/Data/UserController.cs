@@ -201,4 +201,22 @@ public class UserController : Controller
         _logger.LogInformation("User {UserGuid} uploaded avatar successfully", userGuid);
         return TypedResults.Ok(result.Value);
     }
+
+    /// <summary>
+    /// Returns the avatar image bytes for the specified user. Requires authorization.
+    /// </summary>
+    [Authorize]
+    [HttpGet("getAvatar/{userId:guid}")]
+    public async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetAvatar(Guid userId)
+    {
+        var result = await _mediator.Send(new Application.UseCases.Files.GetAvatarQuery(userId));
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to get avatar for user {UserId}: {Error}", userId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+
+        var file = result.Value;
+        return TypedResults.File(file.Content, file.ContentType, file.Name);
+    }
 }

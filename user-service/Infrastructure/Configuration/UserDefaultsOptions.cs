@@ -8,4 +8,12 @@ public class UserDefaultsOptions:IUserDefaults
     public string DefaultAvatar { get; set; } = "default-avatar.png"; // Default avatar filename, but can be configured
     public int MaxAvatarSizeInBytes { get; } = 5 * 1024 * 1024; // 5 MB as default, but can be configured
     public string[] AllowedAvatarFileExtensions { get; } = new []{".jpg", ".jpeg", ".png", ".gif" }; // Default allowed extensions, but can be configured
+    public IReadOnlyDictionary<string, string> AvatarContentTypes { get; init; } =
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            [".jpg"] = "image/jpeg",
+            [".jpeg"] = "image/jpeg",
+            [".png"] = "image/png",
+            [".gif"] = "image/gif"
+        };
 }
