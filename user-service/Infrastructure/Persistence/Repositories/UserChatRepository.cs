@@ -45,7 +45,12 @@ public class UserChatRepository:IUserChatRepository
     {
         var query=_dbSet.Where(x=>x.UserId == userId);
         if (includeChat)
-            query=query.Include(x=>x.Chat);
+            query = query
+                .Include(x => x.Chat)
+                .ThenInclude(c => c.UserChatEntities)
+                .ThenInclude(uc => uc.User)
+                .Include(x => x.Chat)
+                .ThenInclude(c => c.Messages);
         var objs=await query.ToListAsync(cancellationToken);
         return objs;
     }

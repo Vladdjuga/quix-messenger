@@ -10,4 +10,5 @@ public class ChatEntity
     public required ChatType ChatType { get; init; } 
     public required DateTime CreatedAt { get; init; }
     public virtual IEnumerable<UserChatEntity> UserChatEntities { get; init; } = new List<UserChatEntity>();
+    public virtual IEnumerable<MessageEntity> Messages { get; init; } = new List<MessageEntity>();
 }

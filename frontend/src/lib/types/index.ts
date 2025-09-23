@@ -27,17 +27,16 @@ export interface Chat {
   isMuted: boolean;
   chatRole: ChatRole;
   createdAt: Date;
-}
-
-// User types
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: Date;
-  createdAt: Date;
+  participants?: {
+    id: string;
+    avatarUrl: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    createdAt: Date;
+  }[];
 }
 
 // Extended types for UI

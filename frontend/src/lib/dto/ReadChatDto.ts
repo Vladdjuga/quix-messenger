@@ -1,6 +1,6 @@
 import { MessageStatus } from "@/lib/types";
 
-export interface ReadChatWithLastMessageDto {
+export interface ReadChatDto {
   id: string;
   title: string;
   isPrivate: boolean;
@@ -10,6 +10,16 @@ export interface ReadChatWithLastMessageDto {
   createdAt: string; // ISO
   unreadCount?: number;
   isOnline?: boolean;
+  participants?: {
+    id: string;
+    avatarUrl: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: string | Date;
+    createdAt: string | Date;
+  }[];
   lastMessage?: {
     id: string;
     text: string;

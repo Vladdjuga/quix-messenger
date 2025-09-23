@@ -3,7 +3,7 @@ import {ReadUserDto} from "@/lib/dto/ReadUserDto";
 import {ReadFriendshipDto} from "@/lib/dto/ReadFriendshipDto";
 import {RegisterUserDto} from "@/lib/dto/RegisterUserDto";
 import { ReadMessageDto } from "@/lib/dto/ReadMessageDto";
-import { ReadChatWithLastMessageDto } from "@/lib/dto/ReadChatWithLastMessageDto";
+import { ReadChatDto } from "@/lib/dto/ReadChatDto";
 import { UpdateUserDto } from "@/lib/dto/UpdateUserDto";
 
 export const api = {
@@ -73,7 +73,7 @@ export const api = {
     },
     chats: {
         // Next API routes proxy to user-service. This returns chats for the current user.
-        list: () => apiClient.get<ReadChatWithLastMessageDto[]>(`/chats`),
+        list: () => apiClient.get<ReadChatDto[]>(`/chats`),
     },
     messages: {
         // Get last N messages by chat id
