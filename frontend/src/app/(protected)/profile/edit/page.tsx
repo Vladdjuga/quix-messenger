@@ -4,34 +4,27 @@ import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
 import { api } from '@/app/api';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UpdateUserDto } from '@/lib/dto/UpdateUserDto';
+import { updateUserSchema, UpdateUserFormData } from '@/lib/schemas/updateUserSchema';
 
-const editSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  dateOfBirth: z.string().refine(val => !isNaN(Date.parse(val)), { message: 'Invalid date' }),
-  password: z.string().min(8, 'Password must be at least 8 characters').max(128).optional().or(z.literal('')),
-});
-
-type EditForm = z.infer<typeof editSchema>;
+type EditForm = UpdateUserFormData;
 
 export default function EditProfilePage() {
   const { user, loading, setUser } = useCurrentUser();
   const router = useRouter();
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<EditForm>({
-    resolver: zodResolver(editSchema),
+    resolver: zodResolver(updateUserSchema),
     values: {
       username: user?.username ?? '',
       email: user?.email ?? '',
       firstName: user?.firstName ?? '',
       lastName: user?.lastName ?? '',
-      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().slice(0,10) : '',
-      password: '',
+      // Keep date as Date to match schema; map incoming string to Date
+      dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth) : undefined,
+      password: undefined,
+      confirmPassword: undefined,
     },
   });
 
@@ -44,7 +37,8 @@ export default function EditProfilePage() {
       email: data.email,
       firstName: data.firstName,
       lastName: data.lastName,
-      dateOfBirth: new Date(data.dateOfBirth).toISOString(),
+      // data.dateOfBirth is already ISO string (or undefined)
+      dateOfBirth: data.dateOfBirth,
       password: data.password || undefined,
     });
     const resp = await api.user.update(dto);
@@ -81,13 +75,39 @@ export default function EditProfilePage() {
         </div>
         <div>
           <label className="block text-sm mb-1">Date of birth</label>
-          <input className="input-primary w-full" type="date" {...register('dateOfBirth')} />
+          <input
+            className="input-primary w-full"
+            type="date"
+            {...register('dateOfBirth', {
+              setValueAs: (v) => (v && v !== '') ? new Date(v) : undefined,
+            })}
+            defaultValue={user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().slice(0,10) : ''}
+          />
           {errors.dateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.dateOfBirth.message}</p>}
         </div>
         <div>
           <label className="block text-sm mb-1">New password (optional)</label>
-          <input className="input-primary w-full" type="password" placeholder="Leave blank to keep current" {...register('password')} />
+          <input
+            className="input-primary w-full"
+            type="password"
+            placeholder="Leave blank to keep current"
+            {...register('password', {
+              setValueAs: (v) => (v && v.trim() !== '') ? v : undefined,
+            })}
+          />
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+        </div>
+        <div>
+          <label className="block text-sm mb-1">Confirm new password</label>
+          <input
+            className="input-primary w-full"
+            type="password"
+            placeholder="Repeat new password"
+            {...register('confirmPassword', {
+              setValueAs: (v) => (v && v.trim() !== '') ? v : undefined,
+            })}
+          />
+          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
         </div>
         <div className="flex gap-3">
           <button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save changes'}</button>

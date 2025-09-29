@@ -1,34 +1,13 @@
 "use client";
 
 import {Controller, useForm} from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import PasswordInput from "@/components/inputs/PasswordInput";
 import DefaultButton from "@/components/buttons/DefaultButton";
 import Link from "next/link";
 import React from "react";
 import {api} from "@/app/api";
-
-const registerSchema = z
-    .object({
-        username: z.string().min(3, "Username must be at least 3 characters"),
-        email: z.string().email("Invalid email address"),
-        password: z.string().min(6, "Password must be at least 6 characters"),
-        confirmPassword: z.string(),
-        firstName: z.string().min(1, "First name is required"),
-        lastName: z.string().min(1, "Last name is required"),
-        dateOfBirth: z
-            .string()
-            .refine((val) => !isNaN(Date.parse(val)), {
-                message: "Invalid date",
-            }),
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-        message: "Passwords do not match",
-        path: ["confirmPassword"],
-    });
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { registerSchema, RegisterFormData } from "@/lib/schemas/registerSchema";
 
 export default function RegisterForm() {
     const {
@@ -45,7 +24,8 @@ export default function RegisterForm() {
             confirmPassword: "",
             firstName: "",
             lastName: "",
-            dateOfBirth: "",
+            // schema coerces to Date; keep undefined initially
+            dateOfBirth: undefined as unknown as Date,
         }
     });
 
@@ -58,7 +38,7 @@ export default function RegisterForm() {
                 confirmPassword: data.confirmPassword,
                 firstName: data.firstName,
                 lastName: data.lastName,
-                dateOfBirth: new Date(data.dateOfBirth),
+                dateOfBirth: data.dateOfBirth, // schema coerces to Date in API route
             });
             if (response.status === 201 || response.status === 200) {
                 window.location.href = "/login"; // Redirect to login page on successful registration
@@ -139,7 +119,9 @@ export default function RegisterForm() {
                     <div className="mb-4">
                         <label className="text-white">Date of Birth:</label>
                         <input
-                            {...register("dateOfBirth")}
+                            {...register("dateOfBirth", {
+                                setValueAs: (v) => (v && v !== '') ? new Date(v) : undefined,
+                            })}
                             className="w-full p-3 border rounded"
                             type="date"
                         />

@@ -1,32 +1,31 @@
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
+import { updateUserSchema } from '@/lib/schemas/updateUserSchema';
 
 export async function PATCH(req: Request) {
   try {
-    const schema = z.object({
-      username: z.string().min(1).optional(),
-      email: z.string().email().optional(),
-      password: z.string().min(8).max(128).optional(),
-      firstName: z.string().min(1).optional(),
-      lastName: z.string().min(1).optional(),
-      dateOfBirth: z.string().datetime().optional(),
-    });
-
     let body: unknown;
     try { body = await req.json(); } catch { return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 }); }
-    const parsed = schema.safeParse(body);
+    const parsed = updateUserSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ message: 'Invalid body', details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { username, email, password, firstName, lastName, dateOfBirth } = parsed.data;
+    const { username, email, password, firstName, lastName, dateOfBirth } = parsed.data as {
+      username?: string;
+      email?: string;
+      password?: string;
+      confirmPassword?: string;
+      firstName?: string;
+      lastName?: string;
+      dateOfBirth?: Date;
+    };
     const payload: Record<string, unknown> = {};
     if (username !== undefined) payload.Username = username;
     if (email !== undefined) payload.Email = email;
     if (password !== undefined && password !== '') payload.Password = password;
     if (firstName !== undefined) payload.FirstName = firstName;
     if (lastName !== undefined) payload.LastName = lastName;
-    if (dateOfBirth !== undefined) payload.DateOfBirth = dateOfBirth;
+    if (dateOfBirth !== undefined) payload.DateOfBirth = new Date(dateOfBirth).toISOString();
 
     const USER_SERVICE_URL = process.env.NEXT_PUBLIC_USER_SERVICE_URL;
     const response = await fetch(`${USER_SERVICE_URL}/User/updateUserInfo`, {
