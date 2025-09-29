@@ -4,6 +4,7 @@ import { api } from "@/app/api";
 import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
 import { UserStatus } from "@/lib/types/enums";
 import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePolling";
+import { mapReadUserDto } from "@/lib/mappers/userMapper";
 
 type UserRelationshipStatus = UserStatus | UserStatus.Self;
 
@@ -28,28 +29,7 @@ export function useProfile(username?: string | null) {
     immediate: true 
   });
 
-  async function getFriendshipStatus(username: string): Promise<{ status: UserRelationshipStatus; friendshipId?: string; privateChatId?: string }> {
-    try {
-      const [requests, sentRequests, friends] = await Promise.all([
-        api.friendship.getFriendRequests("", 50).then(res => res.data),
-        api.friendship.getSentRequests("", 50).then(res => res.data),
-        api.friendship.getFriendships(50).then(res => res.data),
-      ]);
-
-      const friend = friends.find(f => f.username === username);
-      if (friend) return { status: UserStatus.Friends, friendshipId: friend.id, privateChatId: friend.privateChatId };
-      
-      const request = requests.find(r => r.username === username);
-      if (request) return { status: UserStatus.PendingReceived, friendshipId: request.id };
-      
-      const sentRequest = sentRequests.find(r => r.username === username);
-      if (sentRequest) return { status: UserStatus.PendingSent, friendshipId: sentRequest.id };
-      
-      return { status: UserStatus.NotFriends };
-    } catch {
-      return { status: UserStatus.NotFriends };
-    }
-  }
+  // Relationship status will be provided by the backend in user search results now.
 
   const loadProfile = useCallback(async () => {
     if (!currentUser) return;
@@ -68,24 +48,22 @@ export function useProfile(username?: string | null) {
         return;
       }
 
-      // Search for the user by username
+  // Search for the user by username (now includes relationship status)
       const userResponse = await api.user.searchUsers(username, 1);
-      const users = userResponse.data;
-      const userData = users.find(u => u.username === username);
+      const usersDto = userResponse.data;
+      const userDto = usersDto.find(u => u.username === username);
 
-      if (!userData) {
+      if (!userDto) {
         setError("User not found");
         return;
       }
-
-      // Get friendship status
-      const friendshipInfo = await getFriendshipStatus(userData.username);
+      const userData = mapReadUserDto(userDto);
 
       setProfile({
         ...userData,
-        status: friendshipInfo.status,
-        friendshipId: friendshipInfo.friendshipId,
-        privateChatId: friendshipInfo.privateChatId
+        status: (userData.relationshipStatus ?? UserStatus.NotFriends) as UserRelationshipStatus,
+        friendshipId: userData.friendshipId,
+        privateChatId: userData.privateChatId
       });
     } catch (e) {
       setError((e as Error).message ?? "Failed to load profile");

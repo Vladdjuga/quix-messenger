@@ -1,13 +1,13 @@
 export enum ChatType {
-    Direct = "Direct",
-    Group = "Group",
-    Channel = "Channel"
+    Direct = 0,
+    Group = 1,
+    Channel = 2
 }
 
 export enum ChatRole {
-    Admin = "Admin",
-    Moderator = "Moderator",
-    User = "User"
+    Admin = 0,
+    Moderator = 1,
+    User = 2
 }
 
 // Message delivery / state flags (bitwise-friendly if backend uses flags)
@@ -19,10 +19,10 @@ export enum MessageStatus {
 }
 
 export enum FriendshipStatus {
-    Pending = "Pending",
-    Active = "Active",
-    Blocked = "Blocked",
-    Archived = "Archived"
+    Pending = 0,
+    Active = 1,
+    Blocked = 2,
+    Archived = 3
 }
 // Used for user status like Online, Offline, Busy, Away
 export enum UserStatus{

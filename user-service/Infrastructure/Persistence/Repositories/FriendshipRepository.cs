@@ -35,6 +35,26 @@ public class FriendshipRepository:IFriendshipRepository
 
         return friendships;
     }
+    
+    public async Task<IEnumerable<FriendshipEntity>> GetFriendshipsWithUsersAsync(
+        Guid userId,
+        IEnumerable<Guid> otherUserIds,
+        CancellationToken cancellationToken)
+    {
+        var ids = otherUserIds.ToList();
+        if (ids.Count == 0)
+            return [];
+
+        var friendships = await _dbSet
+            .Where(f =>
+                (f.UserId == userId && ids.Contains(f.FriendId)) ||
+                (f.FriendId == userId && ids.Contains(f.UserId)))
+            .Include(f => f.User)
+            .Include(f => f.Friend)
+            .ToListAsync(cancellationToken);
+
+        return friendships;
+    }
 
     public async Task<FriendshipEntity?> GetFriendshipAsync(Guid userId, Guid friendId,
         CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UpdateUserDto } from '@/lib/dto/UpdateUserDto';
 import { updateUserSchema, UpdateUserFormData } from '@/lib/schemas/updateUserSchema';
+import {mapReadUserDto} from "@/lib/mappers/userMapper";
 
 type EditForm = UpdateUserFormData;
 
@@ -24,7 +25,6 @@ export default function EditProfilePage() {
       // Keep date as Date to match schema; map incoming string to Date
       dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth) : undefined,
       password: undefined,
-      confirmPassword: undefined,
     },
   });
 
@@ -42,7 +42,11 @@ export default function EditProfilePage() {
       password: data.password || undefined,
     });
     const resp = await api.user.update(dto);
-    setUser(resp.data);
+    // cast to user type
+    if(!resp.data)return;
+    const user = mapReadUserDto(resp.data);
+
+    setUser(user);
     // Redirect back to profile and indicate saved
     router.push('/profile?saved=1');
   };
@@ -97,18 +101,7 @@ export default function EditProfilePage() {
           />
           {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
         </div>
-        <div>
-          <label className="block text-sm mb-1">Confirm new password</label>
-          <input
-            className="input-primary w-full"
-            type="password"
-            placeholder="Repeat new password"
-            {...register('confirmPassword', {
-              setValueAs: (v) => (v && v.trim() !== '') ? v : undefined,
-            })}
-          />
-          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
-        </div>
+        {/* No confirm password for updates */}
         <div className="flex gap-3">
           <button className="btn-primary" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save changes'}</button>
           <button type="button" className="btn-secondary" onClick={() => router.back()} disabled={isSubmitting}>Cancel</button>

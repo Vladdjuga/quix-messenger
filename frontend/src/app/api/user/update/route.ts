@@ -14,7 +14,6 @@ export async function PATCH(req: Request) {
       username?: string;
       email?: string;
       password?: string;
-      confirmPassword?: string;
       firstName?: string;
       lastName?: string;
       dateOfBirth?: Date;

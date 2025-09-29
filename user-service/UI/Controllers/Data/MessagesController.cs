@@ -106,5 +106,23 @@ public class MessagesController : Controller
         }
         return TypedResults.Ok(result.Value);
     }
+
+    // DELETE api/messages/{messageId}
+    [Authorize]
+    [GetUserGuid]
+    [HttpDelete("{messageId:guid}")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> Delete([FromRoute] Guid messageId)
+    {
+        var userId = HttpContext.GetUserGuid();
+        var command = new DeleteMessageCommand(messageId, userId);
+        _logger.LogInformation("User {UserId} requests deletion of message {MessageId}", userId, messageId);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to delete message {MessageId}: {Error}", messageId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        return TypedResults.Ok();
+    }
 }
 

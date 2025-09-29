@@ -87,6 +87,8 @@ export const api = {
         // Get paginated messages by chat id using lastCreatedAt cursor
         paginated: (chatId: string, lastCreatedAt: string, pageSize: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/paginated`, { params: { chatId, lastCreatedAt, pageSize } }),
+        // Delete a message by id
+        delete: (messageId: string) => apiClient.delete<void>(`/messages/${encodeURIComponent(messageId)}`),
     },
     realtime: {
         // Check if a user is online right now via proxy to realtime-service

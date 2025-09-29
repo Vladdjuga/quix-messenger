@@ -19,14 +19,6 @@ export default function PublicHeader() {
                         </li>
                         <li>
                             <Link
-                                href="/about"
-                                className="transition-colors hover:text-black duration-300"
-                            >
-                                About
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
                                 href="/login"
                                 className="transition-colors hover:text-black duration-300"
                             >

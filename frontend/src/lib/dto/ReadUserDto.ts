@@ -8,6 +8,9 @@ export class ReadUserDto{
     lastName: string;
     dateOfBirth: Date;
     createdAt: Date;
+    relationshipStatus?: number;
+    friendshipId?: string;
+    privateChatId?: string;
 
     constructor(
         id: string,
@@ -17,7 +20,10 @@ export class ReadUserDto{
         firstName: string,
         lastName: string,
         dateOfBirth: Date,
-        createdAt: Date
+        createdAt: Date,
+        relationshipStatus?: number,
+        friendshipId?: string,
+        privateChatId?: string
     ) {
         this.id = id;
         this.avatarUrl = avatarUrl;
@@ -27,5 +33,8 @@ export class ReadUserDto{
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.createdAt = createdAt;
+        this.relationshipStatus = relationshipStatus;
+        this.friendshipId = friendshipId;
+        this.privateChatId = privateChatId;
     }
 }

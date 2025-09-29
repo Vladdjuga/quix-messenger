@@ -4,7 +4,7 @@ import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
 import { api } from "@/app/api";
 import { mapReadMessageDtos } from "@/lib/mappers/messageMapper";
 import {SocketContext} from "@/lib/contexts/SocketContext";
-import {joinChat, leaveChat, onNewMessage, sendChatMessage} from "@/lib/realtime/chatSocketUseCases";
+import {joinChat, leaveChat, onNewMessage, sendChatMessage, deleteChatMessage, onMessageDeleted} from "@/lib/realtime/chatSocketUseCases";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 interface ChatWindowProps {
@@ -12,7 +12,7 @@ interface ChatWindowProps {
   headerTitle?: string;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState("");
@@ -23,6 +23,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
   function scrollToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
+  const handleDelete = useCallback(async (messageId: string) => {
+    if (!chatId) return;
+    // Optimistically remove the message
+    setMessages(prev => prev.filter(m => m.id !== messageId));
+    try {
+      if (socket) {
+        await deleteChatMessage(socket, chatId, messageId);
+      } else {
+        await api.messages.delete(messageId);
+      }
+    } catch (e) {
+      console.error('Failed to delete message', e);
+      try {
+        const resp = await api.messages.last(chatId, 50);
+        const data = mapReadMessageDtos(resp.data);
+        setMessages(data);
+      } catch {}
+    }
+  }, [chatId, socket]);
   const addMessage = useCallback((msg: MessageWithLocalId) => {
     setMessages(prev => {
       let exists = false;
@@ -47,8 +66,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     (async () => {
       if (!chatId) return;
       setLoading(true);
-  const resp = await api.messages.last(chatId, 50);
-  const data = mapReadMessageDtos(resp.data);
+      const resp = await api.messages.last(chatId, 50);
+      const data = mapReadMessageDtos(resp.data);
       if (mounted) setMessages(data);
       setLoading(false);
     })();
@@ -62,9 +81,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
       if (msg.chatId !== chatId) return;
       addMessage(msg);
     });
+    const offDeleted = onMessageDeleted(socket, ({ messageId, chatId: cid }) => {
+      if (cid !== chatId) return;
+      setMessages(prev => prev.filter(m => m.id !== messageId));
+    });
     return () => {
       leaveChat(socket, chatId);
       offNewMessage?.();
+      offDeleted?.();
     };
   }, [socket, chatId, addMessage]);
 
@@ -99,12 +123,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
     }
   };
 
+
+
   return (
     <div className="flex flex-col h-full bg-surface">
       <div className="chat-header font-semibold flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="status-online" aria-hidden />
-          <span>{headerTitle ?? 'Chat'}</span>
+          {/*<span>{headerTitle ?? 'Chat'}</span>*/}
         </div>
         <div className="flex items-center gap-2">
           <button className="btn-ghost">Search</button>
@@ -117,7 +142,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
         {!loading && messages.map(m => {
           const own = m.userId === user.id;
           return (
-            <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'}`}>
+            <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'} items-center gap-2`}>
+              {own && (
+                <button
+                  className="btn-ghost text-xs opacity-70 hover:opacity-100"
+                  title="Remove message"
+                  onClick={() => handleDelete(m.id)}
+                >
+                  ✕
+                </button>
+              )}
               <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>{m.text}</div>
             </div>
           );

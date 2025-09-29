@@ -42,14 +42,6 @@ export default function AuthenticatedHeader() {
                                 Home
                             </Link>
                         </li>
-                        <li>
-                            <Link
-                                href="/about"
-                                className="transition-colors hover:text-black duration-300"
-                            >
-                                About
-                            </Link>
-                        </li>
                         {user && (
                             <>
                                 <li className="ml-4 font-semibold text-yellow-200">

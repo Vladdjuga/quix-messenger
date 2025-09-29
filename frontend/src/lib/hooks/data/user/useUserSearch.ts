@@ -4,11 +4,9 @@ import { api } from "@/app/api";
 import { UserStatus } from "@/lib/types/enums";
 import { mapReadUserDtos } from "@/lib/mappers/userMapper";
 
-type UserRelationshipStatus = UserStatus;
-
 export interface UserWithStatus {
   user: User;
-  status: UserRelationshipStatus;
+  status: UserStatus;
   friendshipId?: string;
 }
 
@@ -22,33 +20,7 @@ export function useUserSearch() {
   const [hasMore, setHasMore] = useState(false);
   const [lastCreatedAt, setLastCreatedAt] = useState<string>();
 
-  async function getStatuses(users: User[]): Promise<UserWithStatus[]> {
-    try {
-      const [requests, sentRequests, friends] = await Promise.all([
-        api.friendship.getFriendRequests("", PAGE_SIZE)
-          .then(res => res.data),
-        api.friendship.getSentRequests("", PAGE_SIZE)
-          .then(res => res.data),
-        api.friendship.getFriendships(PAGE_SIZE)
-          .then(res => res.data),
-      ]);
-
-      return users.map(user => {
-        const friend = friends.find(f => f.username === user.username);
-        if (friend) return { user, status: UserStatus.Friends, friendshipId: friend.id };
-
-        const request = requests.find(r => r.username === user.username);
-        if (request) return { user, status: UserStatus.PendingReceived, friendshipId: request.id };
-
-        const sentRequest = sentRequests.find(r => r.username === user.username);
-        if (sentRequest) return { user, status: UserStatus.PendingSent, friendshipId: sentRequest.id };
-
-        return { user, status: UserStatus.NotFriends };
-      });
-    } catch {
-      return users.map(user => ({ user, status: UserStatus.NotFriends }));
-    }
-  }
+  // Backend now returns relationshipStatus and friendship/private chat ids directly
 
   const fetchUsers = useCallback(async (append = false) => {
     if (!query.trim()) {
@@ -64,11 +36,15 @@ export function useUserSearch() {
       const usersDto = await api.user.searchUsers(query, PAGE_SIZE, append ? lastCreatedAt : undefined)
         .then(res => res.data);
       const users = mapReadUserDtos(usersDto);
-      const withStatuses = await getStatuses(users);
+      const withStatuses: UserWithStatus[] = users.map(u => ({
+        user: u,
+        status: u.relationshipStatus ?? UserStatus.NotFriends,
+        friendshipId: u.friendshipId,
+      }));
 
       setResults(prev => (append ? [...prev, ...withStatuses] : withStatuses));
       setHasMore(users.length === PAGE_SIZE);
-  setLastCreatedAt(usersDto.at(-1)?.createdAt?.toString());
+      setLastCreatedAt(usersDto.at(-1)?.createdAt?.toString());
     } catch (e) {
       setError((e as Error).message ?? "Search failed");
     } finally {

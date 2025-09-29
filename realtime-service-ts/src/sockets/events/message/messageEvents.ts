@@ -106,3 +106,39 @@ export async function onMessageEdited(
         socket.emit('error', {message: 'Failed to edit message'});
     }
 }
+
+export async function onMessageDeleted(
+    this: Socket,
+    data: any
+): Promise<void> {
+    const socket = this;
+    const authenticatedUser = socket.data.user as User;
+    if (!authenticatedUser || !authenticatedUser.id) {
+        logger.error(`User not authenticated for socket ${socket.id}`);
+        socket.emit('error', { message: 'Authentication required' });
+        return;
+    }
+    const token = socket.data.token as string | undefined;
+    if (!token) {
+        logger.error(`Missing bearer token for user ${authenticatedUser.id}`);
+        socket.emit('error', { message: 'Authentication required' });
+        return;
+    }
+    const { messageId, chatId } = data || {};
+    if (!messageId || !chatId) {
+        socket.emit('error', { message: 'Invalid delete payload' });
+        return;
+    }
+    try {
+        const ok = await messageServiceClient.deleteMessage({ messageId, token });
+        if (!ok) {
+            socket.emit('error', { message: 'Failed to delete message' });
+            return;
+        }
+        // Inform all clients in the chat room
+        getIO().to(chatId).emit('messageDeleted', { messageId, chatId, senderId: authenticatedUser.id });
+    } catch (error) {
+        logger.error(`Error deleting message for user ${authenticatedUser.id}:`, error);
+        socket.emit('error', { message: 'Failed to delete message' });
+    }
+}

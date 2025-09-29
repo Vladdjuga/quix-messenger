@@ -4,9 +4,9 @@ export interface ReadChatDto {
   id: string;
   title: string;
   isPrivate: boolean;
-  chatType: string; // keep string for transport; map to ChatType
+  chatType: number;
   isMuted: boolean;
-  chatRole: string; // transport string
+  chatRole: number;
   createdAt: string; // ISO
   unreadCount?: number;
   isOnline?: boolean;

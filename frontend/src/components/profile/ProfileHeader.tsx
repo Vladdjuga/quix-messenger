@@ -10,6 +10,8 @@ import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
 import Image from "next/image";
 import { useEffect } from 'react';
 import { getProtectedAvatarUrl } from '@/lib/utils/protectedAvatar';
+import { formatLastSeen } from '@/lib/utils/formatLastSeen';
+import {mapReadUserDto} from "@/lib/mappers/userMapper";
 
 interface ProfileHeaderProps {
   profile: ProfileData;
@@ -43,25 +45,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
     return updateAvatar(profile.id);
   }, [profile.id, profile.avatarUrl, updateAvatar]);
 
-  function getLastSeenText(): string {
-    if (!profile?.lastSeen) return "";
-
-    const lastSeenDate = new Date(profile.lastSeen);
-    if (isNaN(lastSeenDate.getTime())) {
-      return "";
-    }
-
-    const now = new Date();
-    const diff = now.getTime() - lastSeenDate.getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  }
+  const lastSeenText = formatLastSeen(profile?.lastSeen ?? null);
 
   async function handleSendFriendRequest() {
     clearError();
@@ -97,11 +81,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
         onClose={() => setAvatarOpen(false)}
         onUpload={async (file) => {
           const resp = await api.user.uploadAvatar(file);
+          // cast to User from ReadUserDto
+          if (!resp.data) return;
+          const user = mapReadUserDto(resp.data)
+
           // Update current user and profile with returned data
-          setUser(resp.data);
+          setUser(user);
           updateAvatar(profile.id);
           setAvatarOpen(false);
-          onProfileUpdate?.({ ...profile, ...resp.data });
+          onProfileUpdate?.({ ...profile, ...user });
         }}
       />
       <div className="max-w-4xl mx-auto">
@@ -156,7 +144,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
                       {profile.isOnline ? (
                         <span className="text-green-500">Online</span>
                       ) : (
-                        `Last seen ${getLastSeenText()}`
+                        `Last seen ${lastSeenText}`
                       )}
                     </p>
                   )}

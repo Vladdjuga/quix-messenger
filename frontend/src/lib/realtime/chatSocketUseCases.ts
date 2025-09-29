@@ -29,6 +29,11 @@ export async function sendChatMessage(socket: Socket | null, chatId: string, tex
   socket.emit('message', { chatId, text, localId});
 }
 
+export async function deleteChatMessage(socket: Socket | null, chatId: string, messageId: string): Promise<void> {
+  if (!socket) throw new Error('Socket not connected');
+  socket.emit('deleteMessage', { chatId, messageId });
+}
+
 export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLocalId) => void) {
   if (!socket) return () => {};
 
@@ -58,6 +63,21 @@ export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLo
 
   socket.on('newMessage', listener);
   return () => socket.off('newMessage', listener);
+}
+
+export function onMessageDeleted(socket: Socket | null, handler: (payload: { messageId: string; chatId: string; senderId?: string }) => void) {
+  if (!socket) return () => {};
+  const listener = (payload: unknown) => {
+    try {
+      const obj = payload as { messageId?: string; chatId?: string; senderId?: string } | undefined;
+      if (!obj?.messageId || !obj?.chatId) return;
+      handler({ messageId: obj.messageId, chatId: obj.chatId, senderId: obj.senderId });
+    } catch (e) {
+      console.error('Failed to parse messageDeleted payload', e);
+    }
+  };
+  socket.on('messageDeleted', listener);
+  return () => socket.off('messageDeleted', listener);
 }
 export function onSocketError(socket: Socket | null, handler: (err: unknown) => void) {
   if (!socket) return () => {};

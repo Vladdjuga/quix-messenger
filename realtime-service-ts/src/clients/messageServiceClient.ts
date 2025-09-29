@@ -43,4 +43,29 @@ export class MessageServiceClient {
       return null;
     }
   }
+
+  /**
+   * DELETE /api/Messages/{messageId}
+   */
+  async deleteMessage(params: { messageId: string; token: string }): Promise<boolean> {
+    const { messageId, token } = params;
+    const url = `${this.baseUrl}/api/Messages/${encodeURIComponent(messageId)}`;
+    try {
+      const res = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+        },
+      });
+      if (!res.ok) {
+        logger.warn(`user-service deleteMessage non-2xx: ${res.status} ${res.statusText}`);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      logger.error(`user-service deleteMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+      return false;
+    }
+  }
 }

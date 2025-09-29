@@ -49,4 +49,8 @@ public interface IFriendshipRepository
         int pageSize,
         FriendshipStatus targetStatus,
         CancellationToken cancellationToken);
+    Task<IEnumerable<FriendshipEntity>> GetFriendshipsWithUsersAsync(
+        Guid userId,
+        IEnumerable<Guid> otherUserIds,
+        CancellationToken cancellationToken);
 }

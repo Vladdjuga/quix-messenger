@@ -1,4 +1,4 @@
-import { ChatType, ChatRole, MessageStatus } from './enums';
+import { ChatType, ChatRole, MessageStatus, UserStatus } from './enums';
 export { ChatType, ChatRole, MessageStatus } from './enums';
 
 // Message types matching backend
@@ -56,6 +56,10 @@ export interface User {
   lastName: string;
   dateOfBirth: Date;
   createdAt: Date;
+  // Relationship to current user (available in contexts like search/profile)
+  relationshipStatus?: UserStatus;
+  friendshipId?: string;
+  privateChatId?: string;
 }
 
 // Friendship domain type

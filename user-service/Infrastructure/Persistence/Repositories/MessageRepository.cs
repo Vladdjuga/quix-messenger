@@ -61,4 +61,15 @@ public class MessageRepository : IMessageRepository
             .ToListAsync(cancellationToken);
         return query;
     }
+
+    public async Task<MessageEntity?> GetByIdAsync(Guid messageId, CancellationToken cancellationToken)
+    {
+        return await _dbSet.FirstOrDefaultAsync(m => m.Id == messageId, cancellationToken);
+    }
+
+    public async Task DeleteAsync(MessageEntity entity, CancellationToken cancellationToken)
+    {
+        _dbSet.Remove(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

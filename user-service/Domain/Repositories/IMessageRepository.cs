@@ -13,4 +13,6 @@ public interface IMessageRepository
     Task<IEnumerable<MessageEntity>> GetMessagesPaginatedAsync(Guid chatId,
         DateTime lastCreatedAt,
         int pageSize, CancellationToken cancellationToken);
+    Task<MessageEntity?> GetByIdAsync(Guid messageId, CancellationToken cancellationToken);
+    Task DeleteAsync(MessageEntity entity, CancellationToken cancellationToken);
 }

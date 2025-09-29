@@ -10,4 +10,8 @@ public class ReadUserDto
     public required string LastName { get; set; }
     public required DateTime DateOfBirth { get; set; }
     public required DateTime CreatedAt { get; set; }
+    // Relationship to current (requesting) user, if available in context
+    public RelationshipStatusDto RelationshipStatus { get; set; } = RelationshipStatusDto.None;
+    public Guid? FriendshipId { get; set; }
+    public Guid? PrivateChatId { get; set; }
 }

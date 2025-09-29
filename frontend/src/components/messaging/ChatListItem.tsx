@@ -1,8 +1,11 @@
 "use client";
-import React, { useMemo } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import { ChatType, ChatWithLastMessage } from "@/lib/types";
-import { useOnlinePolling } from "@/lib/hooks/data/user/useOnlinePolling";
+import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePolling";
+import { formatLastSeen } from "@/lib/utils/formatLastSeen";
+import Image from "next/image";
+import {getProtectedAvatarUrl} from "@/lib/utils/protectedAvatar";
 
 interface Props {
   chat: ChatWithLastMessage;
@@ -19,7 +22,7 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
   }, [chat.chatType, chat.participants, currentUserId]);
 
   const otherUserId = otherUser?.id ?? null;
-  const { isOnline } = useOnlinePolling(otherUserId, { intervalMs: 10000, enabled: !!otherUserId });
+  const { isOnline, lastSeenAt } = useUserPresencePolling(otherUserId, { intervalMs: 10000, enabled: !!otherUserId });
 
   const displayTitle = useMemo(() => {
     if (chat.chatType === ChatType.Direct && otherUser) {
@@ -44,7 +47,21 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
   }, [chat.lastMessage]);
 
   const unread = chat.unreadCount > 0 ? chat.unreadCount : 0;
-  const avatarUrl = otherUser?.avatarUrl;
+
+  const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      if (!otherUserId) { setAvatarSrc(null); return; }
+      const url = await getProtectedAvatarUrl(otherUserId);
+      if (url) {
+        setAvatarSrc(url);
+      } else {
+        setAvatarSrc(null);
+      }
+    })();
+  }, [otherUserId]);
+
   const initials = useMemo(() => {
     const name = (chat.chatType === ChatType.Direct ? otherUser?.username : chat.title) || "?";
     const parts = name.trim().split(/\s+/);
@@ -62,9 +79,15 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
       <div className="flex items-center gap-3">
         {/* Avatar */}
         <div className="relative w-10 h-10 shrink-0">
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt={displayTitle} className="w-10 h-10 rounded-full object-cover" />
+          {avatarSrc ? (
+              <Image
+                  src={avatarSrc}
+                  alt={`${initials}`}
+                  width={128}
+                  height={128}
+                  className="w-10 h-10 rounded-full object-cover"
+                  unoptimized
+              />
           ) : (
             <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs text-primary">
               {initials}
@@ -86,7 +109,11 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
             )}
             <div className="ml-auto text-[10px] text-muted shrink-0">{timeLabel}</div>
           </div>
-          <div className="text-xs text-muted truncate">{subtitle}</div>
+          <div className="text-xs text-muted truncate">
+            {chat.chatType === ChatType.Direct && !isOnline && lastSeenAt
+              ? `Last seen ${formatLastSeen(lastSeenAt)}`
+              : subtitle}
+          </div>
         </div>
       </div>
     </Link>
