@@ -51,3 +51,34 @@ export async function onLeaveChat(this: Socket, chat: string): Promise<void> {
     }
     socket.leave(chat);
 }
+
+export async function onTyping(this: Socket, data: any): Promise<void> {
+    const socket = this;
+    const authenticatedUser = socket.data.user as User;
+    if (!authenticatedUser || !authenticatedUser.id) {
+        socket.emit('error', { message: 'Authentication required' });
+        return;
+    }
+    const { chatId } = data || {};
+    if (!chatId) {
+        socket.emit('error', { message: 'Invalid typing payload' });
+        return;
+    }
+    // Emit to others in the room (not the sender)
+    socket.to(chatId).emit('typing', { chatId, userId: authenticatedUser.id });
+}
+
+export async function onStopTyping(this: Socket, data: any): Promise<void> {
+    const socket = this;
+    const authenticatedUser = socket.data.user as User;
+    if (!authenticatedUser || !authenticatedUser.id) {
+        socket.emit('error', { message: 'Authentication required' });
+        return;
+    }
+    const { chatId } = data || {};
+    if (!chatId) {
+        socket.emit('error', { message: 'Invalid stopTyping payload' });
+        return;
+    }
+    socket.to(chatId).emit('stopTyping', { chatId, userId: authenticatedUser.id });
+}

@@ -23,6 +23,10 @@ export const initSocket = () => {
             console.error("Socket connection error:", err);
             // Try refreshing the token
             const token = await refreshAuthTokenUseCase();
+            if(!token) {
+                console.error("Failed to refresh token");
+                return;
+            }
             refreshSocketAuth(token);
         });
     }
@@ -36,13 +40,11 @@ export const getSocket = () => {
 // Update socket auth with a new token and reconnect to apply it
 export const refreshSocketAuth = (newToken: string | null) => {
     if (!socket) return;
-    // Update auth payload for next handshake
     socket.auth = { token: newToken };
-    try {
-        if (socket.connected) {
-            socket.disconnect();
-        }
-    } catch {}
-    // Reconnect will use the updated auth token
-    socket.connect();
+    if (socket.connected) {
+        socket.once("disconnect", () => socket!.connect());
+        socket.disconnect();
+    } else {
+        socket.connect();
+    }
 };

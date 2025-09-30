@@ -113,3 +113,43 @@ export function onSocketError(socket: Socket | null, handler: (err: unknown) => 
   socket.on('error', handler);
   return () => socket.off('error', handler);
 }
+
+export async function sendTyping(socket: Socket | null, chatId: string): Promise<void> {
+  if (!socket) return;
+  socket.emit('typing', { chatId });
+}
+
+export async function sendStopTyping(socket: Socket | null, chatId: string): Promise<void> {
+  if (!socket) return;
+  socket.emit('stopTyping', { chatId });
+}
+
+export function onTyping(socket: Socket | null, handler: (payload: { chatId: string; userId: string }) => void) {
+  if (!socket) return () => {};
+  const listener = (payload: unknown) => {
+    try {
+      const obj = payload as { chatId?: string; userId?: string } | undefined;
+      if (!obj?.chatId || !obj?.userId) return;
+      handler({ chatId: obj.chatId, userId: obj.userId });
+    } catch (e) {
+      console.error('Failed to parse typing payload', e);
+    }
+  };
+  socket.on('typing', listener);
+  return () => socket.off('typing', listener);
+}
+
+export function onStopTyping(socket: Socket | null, handler: (payload: { chatId: string; userId: string }) => void) {
+  if (!socket) return () => {};
+  const listener = (payload: unknown) => {
+    try {
+      const obj = payload as { chatId?: string; userId?: string } | undefined;
+      if (!obj?.chatId || !obj?.userId) return;
+      handler({ chatId: obj.chatId, userId: obj.userId });
+    } catch (e) {
+      console.error('Failed to parse stopTyping payload', e);
+    }
+  };
+  socket.on('stopTyping', listener);
+  return () => socket.off('stopTyping', listener);
+}

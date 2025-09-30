@@ -4,7 +4,7 @@ import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
 import { api } from "@/app/api";
 import { mapReadMessageDtos } from "@/lib/mappers/messageMapper";
 import {SocketContext} from "@/lib/contexts/SocketContext";
-import {joinChat, leaveChat, onNewMessage, sendChatMessage, deleteChatMessage, onMessageDeleted, editChatMessage, onMessageEdited} from "@/lib/realtime/chatSocketUseCases";
+import {joinChat, leaveChat, onNewMessage, sendChatMessage, deleteChatMessage, onMessageDeleted, editChatMessage, onMessageEdited, sendTyping, sendStopTyping, onTyping, onStopTyping} from "@/lib/realtime/chatSocketUseCases";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 interface ChatWindowProps {
@@ -21,64 +21,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const { user, loading: userLoading } = useCurrentUser();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState<string>("");
+  const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const typingTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const typingCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stopTypingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function scrollToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }
-  const handleDelete = useCallback(async (messageId: string) => {
-    if (!chatId) return;
-    // Optimistically remove the message
-    setMessages(prev => prev.filter(m => m.id !== messageId));
-    try {
-      if (socket) {
-        await deleteChatMessage(socket, chatId, messageId);
-      } else {
-        await api.messages.delete(messageId);
-      }
-    } catch (e) {
-      console.error('Failed to delete message', e);
-      try {
-        const resp = await api.messages.last(chatId, 50);
-        const data = mapReadMessageDtos(resp.data);
-        setMessages(data);
-      } catch {}
-    }
-  }, [chatId, socket]);
 
 
-  const startEdit = useCallback((messageId: string, currentText: string) => {
-    setEditingId(messageId);
-    setEditingText(currentText);
-  }, []);
-
-  const cancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditingText("");
-  }, []);
-
-  const saveEdit = useCallback(async () => {
-    if (!chatId || !editingId) return;
-    const newText = editingText.trim();
-    if (!newText) return;
-  // Optimistic update: preserve existing flags and mark as modified
-  setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: (m.status | MessageStatus.Modified) } : m));
-    try {
-      if (socket) {
-        await editChatMessage(socket, chatId, editingId, newText);
-      } else {
-        await fetch(`/api/messages/${encodeURIComponent(editingId)}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: newText }),
-        });
-      }
-    } catch (e) {
-      console.error('Failed to edit message', e);
-    } finally {
-      setEditingId(null);
-      setEditingText("");
-    }
-  }, [chatId, editingId, editingText, socket]);
 
   const addMessage = useCallback((msg: MessageWithLocalId) => {
     setMessages(prev => {
@@ -114,7 +66,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   }, [chatId]);
 
   useEffect(() => {
-    if (!socket || !chatId) return;
+    if (!socket || !chatId || !user) return;
     joinChat(socket, chatId);
     const offNewMessage = onNewMessage(socket, (msg) => {
       if (msg.chatId !== chatId) return;
@@ -128,13 +80,51 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
       if (cid !== chatId) return;
       setMessages(prev => prev.filter(m => m.id !== messageId));
     });
+    const offTyping = onTyping(socket, ({ chatId: cid, userId }) => {
+      if (cid !== chatId || userId === user?.id) return;
+      setTypingUsers(prev => {
+        const next = new Set(prev);
+        next.add(userId);
+        return next;
+      });
+      // Auto-clear after 2s if no further typing from this user
+      const existing = typingTimeoutsRef.current.get(userId);
+      if (existing) clearTimeout(existing);
+      const t = setTimeout(() => {
+        setTypingUsers(prev => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
+        typingTimeoutsRef.current.delete(userId);
+      }, 2000);
+      typingTimeoutsRef.current.set(userId, t);
+    });
+    const offStopTyping = onStopTyping(socket, ({ chatId: cid, userId }) => {
+      if (cid !== chatId || userId === user?.id) return;
+      const existing = typingTimeoutsRef.current.get(userId);
+      if (existing) clearTimeout(existing);
+      typingTimeoutsRef.current.delete(userId);
+      setTypingUsers(prev => {
+        const next = new Set(prev);
+        next.delete(userId);
+        return next;
+      });
+    });
     return () => {
       leaveChat(socket, chatId);
       offNewMessage?.();
       offEdited?.();
       offDeleted?.();
+      offTyping?.();
+      offStopTyping?.();
+      // Clear any timers
+      typingTimeoutsRef.current.forEach(clearTimeout);
+      typingTimeoutsRef.current.clear();
+      if (typingCooldownRef.current) clearTimeout(typingCooldownRef.current);
+      if (stopTypingRef.current) clearTimeout(stopTypingRef.current);
     };
-  }, [socket, chatId, addMessage]);
+  }, [socket, chatId, addMessage, user]);
 
   useEffect(() => {
     scrollToBottom();
@@ -162,9 +152,30 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
       }
       await sendChatMessage(socket, chatId, value,msg.id);
       addMessage(msg);
+      // stop typing after sending
+      if (socket) await sendStopTyping(socket, chatId);
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const v = e.target.value;
+    setText(v);
+    if (!socket || !chatId) return;
+    // Throttle typing emits to at most once per 1s
+    if (!typingCooldownRef.current) {
+      sendTyping(socket, chatId).catch(() => {});
+      typingCooldownRef.current = setTimeout(() => {
+        if (typingCooldownRef.current) clearTimeout(typingCooldownRef.current);
+        typingCooldownRef.current = null;
+      }, 1000);
+    }
+    // Schedule stopTyping after 1500ms of inactivity
+    if (stopTypingRef.current) clearTimeout(stopTypingRef.current);
+    stopTypingRef.current = setTimeout(() => {
+      if (socket && chatId) sendStopTyping(socket, chatId).catch(() => {});
+    }, 1500);
   };
 
 
@@ -180,72 +191,25 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
           <button className="btn-ghost">Search</button>
           <button className="btn-ghost">More</button>
         </div>
+      {typingUsers.size > 0 && (
+        <div className="px-4 py-1 text-[12px] text-muted">Someone is typing…</div>
+      )}
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-surface">
         {loading && <div className="text-muted">Loading...</div>}
         {!loading && messages.length === 0 && <div className="text-muted">No messages yet</div>}
         {!loading && messages.map(m => {
-          const own = m.userId === user.id;
-          const isModified = (m.status & MessageStatus.Modified) === MessageStatus.Modified;
-          const isDelivered = (m.status & MessageStatus.Delivered) === MessageStatus.Delivered;
-          const isSent = (m.status & MessageStatus.Sent) === MessageStatus.Sent;
-          return (
-            <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'} items-center gap-2`}>
-              {own && (
-                <div className="flex gap-1">
-                  <button
-                    className="btn-ghost text-xs opacity-70 hover:opacity-100"
-                    title="Edit message"
-                    onClick={() => startEdit(m.id, m.text)}
-                  >
-                    ✎
-                  </button>
-                  <button
-                    className="btn-ghost text-xs opacity-70 hover:opacity-100"
-                    title="Remove message"
-                    onClick={() => handleDelete(m.id)}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-              <div className={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
-                <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>
-                  {editingId === m.id ? (
-                    <div className="flex items-end gap-2">
-                      <input
-                        className="input-primary"
-                        value={editingText}
-                        onChange={e => setEditingText(e.target.value)}
-                      />
-                      <button className="btn-primary text-xs" onClick={saveEdit}>Save</button>
-                      <button className="btn-secondary text-xs" onClick={cancelEdit}>Cancel</button>
-                    </div>
-                  ) : (
-                    m.text
-                  )}
-                </div>
-                {editingId !== m.id && (isModified || (own && (isSent || isDelivered))) && (
-                  <div className="text-[10px] text-muted mt-1 flex items-center gap-1">
-                    {isModified && <span>edited</span>}
-                    {own && (isSent || isDelivered) && (
-                      <>
-                        {isModified && <span>•</span>}
-                        <span title={isDelivered ? 'Delivered' : 'Sent'}>{isDelivered ? '✓✓' : '✓'}</span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
+
         })}
+        <div className="flex justify ">
+
+        </div>
         <div ref={bottomRef} />
       </div>
       <div className="message-input-container flex items-end gap-2">
         <textarea
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={handleInputChange}
           rows={1}
           placeholder={`Message...`}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
