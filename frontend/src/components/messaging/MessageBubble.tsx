@@ -1,6 +1,5 @@
 import {Message, MessageStatus} from "@/lib/types";
 import React, {useCallback, useState} from "react";
-import { Socket } from "socket.io-client";
 import {useMessages} from "@/lib/hooks/data/messages/useMessages";
 
 type Props = {
@@ -22,7 +21,7 @@ const MessageBubble = (props: Props) => {
 
     const { editMessage, deleteMessage, loading } = useMessages({chatId});
 
-    const handleDelete = useCallback(async (messageId: string) => {
+    const handleDelete = useCallback(async () => {
         try{
             await deleteMessage(m.id);
         } catch(e) {
@@ -73,7 +72,7 @@ const MessageBubble = (props: Props) => {
                     <button
                         className="btn-ghost text-xs opacity-70 hover:opacity-100"
                         title="Remove message"
-                        onClick={() => handleDelete(m.id)}
+                        onClick={() => handleDelete()}
                     >
                         ✕
                     </button>
