@@ -107,6 +107,24 @@ public class MessagesController : Controller
         return TypedResults.Ok(result.Value);
     }
 
+    // PATCH api/messages/{messageId}
+    [Authorize]
+    [GetUserGuid]
+    [HttpPatch("{messageId:guid}")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> Edit([FromRoute] Guid messageId, [FromBody] EditMessageDto dto)
+    {
+        var userId = HttpContext.GetUserGuid();
+        var command = new EditMessageCommand(messageId, userId, dto.Text);
+        _logger.LogInformation("User {UserId} requests edit of message {MessageId}", userId, messageId);
+        var result = await _mediator.Send(command);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to edit message {MessageId}: {Error}", messageId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        return TypedResults.Ok();
+    }
+
     // DELETE api/messages/{messageId}
     [Authorize]
     [GetUserGuid]

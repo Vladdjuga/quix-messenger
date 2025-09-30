@@ -15,4 +15,5 @@ public interface IMessageRepository
         int pageSize, CancellationToken cancellationToken);
     Task<MessageEntity?> GetByIdAsync(Guid messageId, CancellationToken cancellationToken);
     Task DeleteAsync(MessageEntity entity, CancellationToken cancellationToken);
+    Task UpdateAsync(MessageEntity entity, CancellationToken cancellationToken);
 }

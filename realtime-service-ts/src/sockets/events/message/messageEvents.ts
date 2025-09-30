@@ -1,5 +1,4 @@
 import type {Socket} from "socket.io";
-import {Message} from "../../../types/message.js";
 import {messageServiceClient} from "../../../clients/index.js";
 import logger from "../../../config/logger.js"
 import {validate} from "class-validator";
@@ -82,25 +81,38 @@ export async function onMessageEdited(
     const socket = this;
 
     // Get authenticated user from socket data
-    const authenticatedUser = socket.data.user;
+    const authenticatedUser = socket.data.user as User;
     if (!authenticatedUser || !authenticatedUser.id) {
         logger.error(`User not authenticated for socket ${socket.id}`);
         socket.emit('error', {message: 'Authentication required'});
         return;
     }
-
-    const message = plainToInstance(Message, data);
-    const errors = await validate(message);
-    if (errors.length > 0) {
-        logger.error(`Validation errors: ${errors}`);
-        socket.emit('error', {message: 'Invalid message format', details: errors});
-        return;
-    }
     try {
-        // Log the incoming message edit request
-        logger.info(`Received edit request from authenticated user ${authenticatedUser.id}:`, data);
-        // Placeholder implementation for editing a message
-        data;
+        const token = socket.data.token as string | undefined;
+        if (!token) {
+            logger.error(`Missing bearer token for user ${authenticatedUser.id}`);
+            socket.emit('error', {message: 'Authentication required'});
+            return;
+        }
+        const { messageId, chatId, text } = data || {};
+        if (!messageId || !chatId || typeof text !== 'string') {
+            socket.emit('error', { message: 'Invalid edit payload' });
+            return;
+        }
+        const ok = await messageServiceClient.editMessage({ messageId, text, token });
+        if (!ok) {
+            socket.emit('error', { message: 'Failed to edit message' });
+            return;
+        }
+        getIO().to(chatId).emit('messageEdited', {
+            senderId: authenticatedUser.id,
+            message: {
+                id: messageId,
+                chatId,
+                text,
+                status: 3 // Modified
+            }
+        });
     } catch (error) {
         console.error(`Error editing message for user ${authenticatedUser.id}:`, error);
         socket.emit('error', {message: 'Failed to edit message'});

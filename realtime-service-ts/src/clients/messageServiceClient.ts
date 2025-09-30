@@ -68,4 +68,31 @@ export class MessageServiceClient {
       return false;
     }
   }
+
+  /**
+   * PATCH /api/Messages/{messageId}
+   */
+  async editMessage(params: { messageId: string; text: string; token: string }): Promise<boolean> {
+    const { messageId, text, token } = params;
+    const url = `${this.baseUrl}/api/Messages/${encodeURIComponent(messageId)}`;
+    try {
+      const res = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text })
+      });
+      if (!res.ok) {
+        logger.warn(`user-service editMessage non-2xx: ${res.status} ${res.statusText}`);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      logger.error(`user-service editMessage failed: ${err instanceof Error ? err.message : String(err)}`);
+      return false;
+    }
+  }
 }

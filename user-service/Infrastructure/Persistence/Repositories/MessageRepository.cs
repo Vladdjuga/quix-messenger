@@ -72,4 +72,10 @@ public class MessageRepository : IMessageRepository
         _dbSet.Remove(entity);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(MessageEntity entity, CancellationToken cancellationToken)
+    {
+        _dbSet.Update(entity);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }
