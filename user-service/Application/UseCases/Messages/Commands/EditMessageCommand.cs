@@ -37,7 +37,8 @@ public class EditMessageHandler : IRequestHandler<EditMessageCommand, Result<boo
         }
 
         msg.Text = request.NewText.Trim();
-        msg.Status = MessageStatus.Modified;
+        // Preserve existing flags and mark as Modified
+        msg.Status |= MessageStatus.Modified;
         await _messageRepository.UpdateAsync(msg, cancellationToken);
         return Result<bool>.Success(true);
     }

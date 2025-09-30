@@ -1,9 +1,12 @@
+using System;
+
 namespace Domain.Enums;
 
+[Flags]
 public enum MessageStatus
 {
-    Read = 0,
-    Sent = 1,
-    Delivered = 2,
-    Modified = 3,
+    Read = 1,
+    Sent = 2,
+    Delivered = 4,
+    Modified = 8,
 }

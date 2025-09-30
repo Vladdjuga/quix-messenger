@@ -36,7 +36,8 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
             Text = request.Text,
             UserId = request.UserId,
             CreatedAt = DateTime.UtcNow,
-            Status = MessageStatus.Delivered // Default status
+            // When message reaches backend, we consider it Sent and Delivered
+            Status = MessageStatus.Sent | MessageStatus.Delivered
         };
         await _repository.AddMessageAsync(message);
         var dto = new ReadMessageDto()

@@ -60,8 +60,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     if (!chatId || !editingId) return;
     const newText = editingText.trim();
     if (!newText) return;
-    // Optimistic update
-    setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: MessageStatus.Modified } : m));
+  // Optimistic update: preserve existing flags and mark as modified
+  setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: (m.status | MessageStatus.Modified) } : m));
     try {
       if (socket) {
         await editChatMessage(socket, chatId, editingId, newText);
@@ -122,7 +122,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     });
     const offEdited = onMessageEdited(socket, (msg) => {
       if (msg.chatId !== chatId) return;
-      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, text: msg.text, status: MessageStatus.Modified } : m));
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, text: msg.text, status: (m.status | MessageStatus.Modified) } : m));
     });
     const offDeleted = onMessageDeleted(socket, ({ messageId, chatId: cid }) => {
       if (cid !== chatId) return;
@@ -186,6 +186,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
         {!loading && messages.length === 0 && <div className="text-muted">No messages yet</div>}
         {!loading && messages.map(m => {
           const own = m.userId === user.id;
+          const isModified = (m.status & MessageStatus.Modified) === MessageStatus.Modified;
+          const isDelivered = (m.status & MessageStatus.Delivered) === MessageStatus.Delivered;
+          const isSent = (m.status & MessageStatus.Sent) === MessageStatus.Sent;
           return (
             <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'} items-center gap-2`}>
               {own && (
@@ -222,8 +225,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
                     m.text
                   )}
                 </div>
-                {editingId !== m.id && (m.status === MessageStatus.Modified) && (
-                  <div className="text-[10px] text-muted mt-1">edited</div>
+                {editingId !== m.id && (isModified || (own && (isSent || isDelivered))) && (
+                  <div className="text-[10px] text-muted mt-1 flex items-center gap-1">
+                    {isModified && <span>edited</span>}
+                    {own && (isSent || isDelivered) && (
+                      <>
+                        {isModified && <span>•</span>}
+                        <span title={isDelivered ? 'Delivered' : 'Sent'}>{isDelivered ? '✓✓' : '✓'}</span>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

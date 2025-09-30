@@ -5,6 +5,7 @@ import {validate} from "class-validator";
 import {plainToInstance} from "class-transformer";
 import type {User} from "../../../types/user.js";
 import { NewMessageDto } from "../../../types/dto/NewMessageDto.js";
+import { MessageStatus } from "../../../types/grpcTypes.js";
 import {getIO} from "../../../io.js";
 
 export async function onMessageSent(
@@ -110,7 +111,7 @@ export async function onMessageEdited(
                 id: messageId,
                 chatId,
                 text,
-                status: 3 // Modified
+                status: MessageStatus.Modified
             }
         });
     } catch (error) {
