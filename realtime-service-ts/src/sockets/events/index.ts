@@ -36,16 +36,16 @@ export function registerEvents(io: Server) {
         })
 
         // Wrap socket event handlers
-    socket.on('joinChat', wrapSocketHandler(onJoinChat))
+        socket.on('joinChat', wrapSocketHandler(onJoinChat))
         socket.on('leaveChat', wrapSocketHandler(onLeaveChat));
-    // Typing indicators
-    socket.on('typing', wrapSocketHandler(onTyping));
-    socket.on('stopTyping', wrapSocketHandler(onStopTyping));
+        // Typing indicators
+        socket.on('typing', wrapSocketHandler(onTyping));
+        socket.on('stopTyping', wrapSocketHandler(onStopTyping));
 
         // Message events
         socket.on('message', wrapSocketHandler(onMessageSent));
-    socket.on('editMessage', wrapSocketHandler(onMessageEdited));
-    socket.on('deleteMessage', wrapSocketHandler(onMessageDeleted));
+        socket.on('editMessage', wrapSocketHandler(onMessageEdited));
+        socket.on('deleteMessage', wrapSocketHandler(onMessageDeleted));
 
         socket.on('error', (error: Error) => {
             logger.error(`Socket error: ${error.message}`);

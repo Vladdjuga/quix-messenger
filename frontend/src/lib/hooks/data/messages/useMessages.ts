@@ -7,7 +7,7 @@ import {
     editChatMessage,
     joinChat, leaveChat, onMessageDeleted,
     onMessageEdited,
-    onNewMessage
+    onNewMessage, sendChatMessage, sendStopTyping
 } from "@/lib/realtime/chatSocketUseCases";
 import {SocketContext} from "@/lib/contexts/SocketContext";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
@@ -33,6 +33,27 @@ export function useMessages(props: { chatId: string }) {
         })();
         return () => { mounted = false; };
     }, [chatId]);
+
+    const sendMessage = async (text:string) => {
+        const value = text.trim();
+        if (!value || !chatId) return;
+        try {
+            const msg : Message = {
+                id: `local-${Date.now()}`,
+                chatId:chatId,
+                text: value,
+                userId: user!.id,
+                createdAt: new Date(),
+                status: MessageStatus.Sent,
+            }
+            await sendChatMessage(socket, chatId, value,msg.id);
+            addMessage(msg);
+            // stop typing after sending
+            if (socket) await sendStopTyping(socket, chatId);
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const addMessage = useCallback((msg: MessageWithLocalId) => {
         setMessages(prev => {
@@ -114,6 +135,7 @@ export function useMessages(props: { chatId: string }) {
         loading: loading || userLoading,
         messages,
         addMessage,
+        sendMessage,
         deleteMessage,
         editMessage
     }
