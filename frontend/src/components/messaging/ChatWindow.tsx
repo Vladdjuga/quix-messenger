@@ -4,7 +4,7 @@ import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
 import { api } from "@/app/api";
 import { mapReadMessageDtos } from "@/lib/mappers/messageMapper";
 import {SocketContext} from "@/lib/contexts/SocketContext";
-import {joinChat, leaveChat, onNewMessage, sendChatMessage, deleteChatMessage, onMessageDeleted} from "@/lib/realtime/chatSocketUseCases";
+import {joinChat, leaveChat, onNewMessage, sendChatMessage, deleteChatMessage, onMessageDeleted, editChatMessage, onMessageEdited} from "@/lib/realtime/chatSocketUseCases";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
 interface ChatWindowProps {
@@ -19,6 +19,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const socket = useContext(SocketContext);
   const { user, loading: userLoading } = useCurrentUser();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
 
   function scrollToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,6 +83,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
       if (msg.chatId !== chatId) return;
       addMessage(msg);
     });
+    const offEdited = onMessageEdited(socket, (msg) => {
+      if (msg.chatId !== chatId) return;
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, text: msg.text, status: MessageStatus.Modified } : m));
+    });
     const offDeleted = onMessageDeleted(socket, ({ messageId, chatId: cid }) => {
       if (cid !== chatId) return;
       setMessages(prev => prev.filter(m => m.id !== messageId));
@@ -88,6 +94,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     return () => {
       leaveChat(socket, chatId);
       offNewMessage?.();
+      offEdited?.();
       offDeleted?.();
     };
   }, [socket, chatId, addMessage]);
@@ -123,6 +130,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     }
   };
 
+  const startEdit = useCallback((messageId: string, currentText: string) => {
+    setEditingId(messageId);
+    setEditingText(currentText);
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditingText("");
+  }, []);
+
+  const saveEdit = useCallback(async () => {
+    if (!chatId || !editingId) return;
+    const newText = editingText.trim();
+    if (!newText) return;
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: MessageStatus.Modified } : m));
+    try {
+      if (socket) {
+        await editChatMessage(socket, chatId, editingId, newText);
+      } else {
+        await fetch(`/api/messages/${encodeURIComponent(editingId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: newText }),
+        });
+      }
+    } catch (e) {
+      console.error('Failed to edit message', e);
+    } finally {
+      setEditingId(null);
+      setEditingText("");
+    }
+  }, [chatId, editingId, editingText, socket]);
+
 
 
   return (
@@ -144,15 +185,38 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
           return (
             <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'} items-center gap-2`}>
               {own && (
-                <button
-                  className="btn-ghost text-xs opacity-70 hover:opacity-100"
-                  title="Remove message"
-                  onClick={() => handleDelete(m.id)}
-                >
-                  ✕
-                </button>
+                <div className="flex gap-1">
+                  <button
+                    className="btn-ghost text-xs opacity-70 hover:opacity-100"
+                    title="Edit message"
+                    onClick={() => startEdit(m.id, m.text)}
+                  >
+                    ✎
+                  </button>
+                  <button
+                    className="btn-ghost text-xs opacity-70 hover:opacity-100"
+                    title="Remove message"
+                    onClick={() => handleDelete(m.id)}
+                  >
+                    ✕
+                  </button>
+                </div>
               )}
-              <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>{m.text}</div>
+              <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>
+                {editingId === m.id ? (
+                  <div className="flex items-end gap-2">
+                    <input
+                      className="input-primary"
+                      value={editingText}
+                      onChange={e => setEditingText(e.target.value)}
+                    />
+                    <button className="btn-primary text-xs" onClick={saveEdit}>Save</button>
+                    <button className="btn-secondary text-xs" onClick={cancelEdit}>Cancel</button>
+                  </div>
+                ) : (
+                  m.text
+                )}
+              </div>
             </div>
           );
         })}
