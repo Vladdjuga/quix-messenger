@@ -2,6 +2,7 @@ import {type Server, Socket} from "socket.io";
 import logger from "../../config/logger.js";
 import {wrapSocketHandler} from "../utils/handlerWrapper.js";
 import {onJoinChat, onLeaveChat, onTyping, onStopTyping} from "./chat/chatEvents.js";
+import { onRefreshAuth } from "./auth/authEvents.js";
 import {onMessageEdited, onMessageSent, onMessageDeleted} from "./message/messageEvents.js";
 import {addUserToOnlineSet, removeUserFromOnlineSet} from "../../usecases/redisUseCases.js";
 
@@ -46,6 +47,8 @@ export function registerEvents(io: Server) {
         socket.on('message', wrapSocketHandler(onMessageSent));
         socket.on('editMessage', wrapSocketHandler(onMessageEdited));
         socket.on('deleteMessage', wrapSocketHandler(onMessageDeleted));
+        // Auth refresh event
+        socket.on('refreshAuth', wrapSocketHandler(onRefreshAuth));
 
         socket.on('error', (error: Error) => {
             logger.error(`Socket error: ${error.message}`);

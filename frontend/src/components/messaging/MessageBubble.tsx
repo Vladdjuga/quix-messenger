@@ -94,17 +94,17 @@ const MessageBubble = (props: Props) => {
                         m.text
                     )}
                 </div>
-                {editingId !== m.id && (isModified || (own && (isSent || isDelivered))) && (
-                    <div className="text-[10px] text-muted mt-1 flex items-center gap-1">
-                        {isModified && <span>edited</span>}
-                        {own && (isSent || isDelivered) && (
-                            <>
-                                {isModified && <span>•</span>}
-                                <span title={isDelivered ? 'Delivered' : 'Sent'}>{isDelivered ? '✓✓' : '✓'}</span>
-                            </>
-                        )}
-                    </div>
-                )}
+                <div className="text-[10px] text-muted mt-1 flex items-center gap-1">
+                    <span>{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    {(isModified || (own && (isSent || isDelivered))) && <span>•</span>}
+                    {isModified && <span>edited</span>}
+                    {own && (isSent || isDelivered) && (
+                        <>
+                            {isModified && <span>•</span>}
+                            <span title={isDelivered ? 'Delivered' : 'Sent'}>{isDelivered ? '✓✓' : '✓'}</span>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     )

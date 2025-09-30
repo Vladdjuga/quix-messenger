@@ -3,6 +3,7 @@ import { getToken } from "@/app/api/token";
 import {refreshAuthTokenUseCase} from "@/lib/usecases/auth/refreshTokenUseCase";
 
 let socket: Socket | null = null;
+let isRefreshing = false;
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
@@ -17,17 +18,29 @@ export const initSocket = () => {
 
         socket.on("connect", () => console.log("Socket connected:", socket!.id));
         socket.on("disconnect", () => console.log("Socket disconnected"));
-        socket.on("connect_error", (err) => console.error("Socket connection error:", err));
-        socket.on("error", (err) => console.error("Socket connection error:", err));
+        // Before each reconnect attempt, update auth with the latest token
+        socket.io.on("reconnect_attempt", () => {
+            const latest = getToken();
+            socket!.auth = { token: latest };
+        });
+        // Intentionally omit connect_error-based refresh; rely on 'unauthorized' + 'refreshAuth'
+        socket.on("error", (err) => console.error("Socket error:", err));
+        // Custom 'unauthorized' from server acts like auth-expiring; refresh token then update socket state
         socket.on("unauthorized", async (err) =>{
-            console.error("Socket connection error:", err);
-            // Try refreshing the token
-            const token = await refreshAuthTokenUseCase();
-            if(!token) {
-                console.error("Failed to refresh token");
-                return;
+            console.warn("Socket unauthorized event:", err);
+            if (isRefreshing) return;
+            isRefreshing = true;
+            try {
+                const newToken = await refreshAuthTokenUseCase();
+                if (newToken) {
+                    // Ask server to refresh auth context without full reconnect
+                    socket!.emit('refreshAuth', { token: newToken });
+                    // Also update client-side handshake for future reconnects
+                    refreshSocketAuth(newToken);
+                }
+            } finally {
+                isRefreshing = false;
             }
-            refreshSocketAuth(token);
         });
     }
     return socket;
@@ -41,7 +54,9 @@ export const getSocket = () => {
 export const refreshSocketAuth = (newToken: string | null) => {
     if (!socket) return;
     socket.auth = { token: newToken };
+    // Reconnect attempts will include the updated auth
     if (socket.connected) {
+        // Force a reconnect to send new auth in handshake
         socket.once("disconnect", () => socket!.connect());
         socket.disconnect();
     } else {

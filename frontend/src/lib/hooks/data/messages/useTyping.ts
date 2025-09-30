@@ -31,7 +31,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
 
             setTypingUsers(prev => {
                 const next = new Set(prev);
-                prev.add(uid);
+                next.add(uid);
                 return next;
             });
             setTimeout(() => {
