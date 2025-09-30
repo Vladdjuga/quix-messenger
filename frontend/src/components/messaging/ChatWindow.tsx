@@ -44,6 +44,42 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
       } catch {}
     }
   }, [chatId, socket]);
+
+
+  const startEdit = useCallback((messageId: string, currentText: string) => {
+    setEditingId(messageId);
+    setEditingText(currentText);
+  }, []);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditingText("");
+  }, []);
+
+  const saveEdit = useCallback(async () => {
+    if (!chatId || !editingId) return;
+    const newText = editingText.trim();
+    if (!newText) return;
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: MessageStatus.Modified } : m));
+    try {
+      if (socket) {
+        await editChatMessage(socket, chatId, editingId, newText);
+      } else {
+        await fetch(`/api/messages/${encodeURIComponent(editingId)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: newText }),
+        });
+      }
+    } catch (e) {
+      console.error('Failed to edit message', e);
+    } finally {
+      setEditingId(null);
+      setEditingText("");
+    }
+  }, [chatId, editingId, editingText, socket]);
+
   const addMessage = useCallback((msg: MessageWithLocalId) => {
     setMessages(prev => {
       let exists = false;
@@ -68,9 +104,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     (async () => {
       if (!chatId) return;
       setLoading(true);
-      const resp = await api.messages.last(chatId, 50);
+      const count = 20;
+      const resp = await api.messages.last(chatId, count);
       const data = mapReadMessageDtos(resp.data);
-      if (mounted) setMessages(data);
+      if (mounted) setMessages(data.reverse()); // reverse to have oldest first
       setLoading(false);
     })();
     return () => { mounted = false; };
@@ -130,39 +167,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     }
   };
 
-  const startEdit = useCallback((messageId: string, currentText: string) => {
-    setEditingId(messageId);
-    setEditingText(currentText);
-  }, []);
-
-  const cancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditingText("");
-  }, []);
-
-  const saveEdit = useCallback(async () => {
-    if (!chatId || !editingId) return;
-    const newText = editingText.trim();
-    if (!newText) return;
-    // Optimistic update
-    setMessages(prev => prev.map(m => m.id === editingId ? { ...m, text: newText, status: MessageStatus.Modified } : m));
-    try {
-      if (socket) {
-        await editChatMessage(socket, chatId, editingId, newText);
-      } else {
-        await fetch(`/api/messages/${encodeURIComponent(editingId)}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: newText }),
-        });
-      }
-    } catch (e) {
-      console.error('Failed to edit message', e);
-    } finally {
-      setEditingId(null);
-      setEditingText("");
-    }
-  }, [chatId, editingId, editingText, socket]);
 
 
 
@@ -202,19 +206,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
                   </button>
                 </div>
               )}
-              <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>
-                {editingId === m.id ? (
-                  <div className="flex items-end gap-2">
-                    <input
-                      className="input-primary"
-                      value={editingText}
-                      onChange={e => setEditingText(e.target.value)}
-                    />
-                    <button className="btn-primary text-xs" onClick={saveEdit}>Save</button>
-                    <button className="btn-secondary text-xs" onClick={cancelEdit}>Cancel</button>
-                  </div>
-                ) : (
-                  m.text
+              <div className={`flex flex-col ${own ? 'items-end' : 'items-start'}`}>
+                <div className={`message-bubble ${own ? 'message-own' : 'message-received'}`}>
+                  {editingId === m.id ? (
+                    <div className="flex items-end gap-2">
+                      <input
+                        className="input-primary"
+                        value={editingText}
+                        onChange={e => setEditingText(e.target.value)}
+                      />
+                      <button className="btn-primary text-xs" onClick={saveEdit}>Save</button>
+                      <button className="btn-secondary text-xs" onClick={cancelEdit}>Cancel</button>
+                    </div>
+                  ) : (
+                    m.text
+                  )}
+                </div>
+                {editingId !== m.id && (m.status === MessageStatus.Modified) && (
+                  <div className="text-[10px] text-muted mt-1">edited</div>
                 )}
               </div>
             </div>
