@@ -27,7 +27,6 @@ public class CreateChatHandler:IRequestHandler<CreateChatCommand, Result<ReadCha
         {
             Id = Guid.NewGuid(),
             Title = request.ChatName,
-            IsPrivate = false,
             CreatedAt = DateTime.Now,
             ChatType = request.ChatType
         };
@@ -44,7 +43,6 @@ public class CreateChatHandler:IRequestHandler<CreateChatCommand, Result<ReadCha
         {
             Id = chat.Id,
             Title = chat.Title,
-            IsPrivate = chat.IsPrivate,
             CreatedAt = chat.CreatedAt,
             ChatType = chat.ChatType,
             IsMuted = userChat.IsMuted,

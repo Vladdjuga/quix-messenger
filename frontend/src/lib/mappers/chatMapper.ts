@@ -7,7 +7,6 @@ export function mapReadChatWithLastMessageDto(dto: ReadChatDto): ChatWithLastMes
   return {
     id: dto.id,
     title: dto.title,
-    isPrivate: dto.isPrivate,
     chatType: (dto.chatType as ChatType),
     isMuted: dto.isMuted,
     chatRole: (dto.chatRole as ChatRole),

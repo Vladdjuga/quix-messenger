@@ -32,7 +32,6 @@ public class GetChatsByUserIdHandler:IRequestHandler<GetChatsByUserIdQuery, Resu
             {
                 Id = uc.ChatId,
                 Title = uc.Chat!.Title,
-                IsPrivate = uc.Chat!.IsPrivate,
                 ChatType = uc.Chat!.ChatType,
                 IsMuted = uc.IsMuted,
                 ChatRole = uc.ChatRole,

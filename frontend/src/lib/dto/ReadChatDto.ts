@@ -3,7 +3,6 @@ import { MessageStatus } from "@/lib/types";
 export interface ReadChatDto {
   id: string;
   title: string;
-  isPrivate: boolean;
   chatType: number;
   isMuted: boolean;
   chatRole: number;

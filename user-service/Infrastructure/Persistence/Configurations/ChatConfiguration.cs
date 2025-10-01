@@ -21,8 +21,6 @@ public class ChatConfiguration: IEntityTypeConfiguration<ChatEntity>
         builder.Property(x => x.CreatedAt)
             .HasColumnType("timestamp with time zone")
             .HasDefaultValueSql("CURRENT_TIMESTAMP");
-        builder.Property(x => x.IsPrivate)
-            .HasDefaultValue(false);
         builder.Property(x => x.ChatType)
             .IsRequired()
             .HasConversion<string>();

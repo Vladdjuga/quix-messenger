@@ -8,7 +8,6 @@ public class ReadChatDto
 {
     public required Guid Id { get; init; }
     public required string Title { get; init; }
-    public required bool IsPrivate { get; init; }
     public required ChatType ChatType { get; init; } 
     public required bool IsMuted { get; init; }
     public required ChatRole ChatRole { get; init; }

@@ -44,7 +44,6 @@ public class CreateContactByUsernameHandler
             Id = Guid.NewGuid(),
             Title = "Direct chat between "+user.Username+" and "+friend.Username,
             CreatedAt = DateTime.UtcNow,
-            IsPrivate = true,
             ChatType = ChatType.Direct
         };
         await _chatRepository.AddAsync(privateChat, cancellationToken);

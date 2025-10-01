@@ -22,7 +22,6 @@ export interface MessageWithLocalId extends Message {
 export interface Chat {
   id: string;
   title: string;
-  isPrivate: boolean;
   chatType: ChatType;
   isMuted: boolean;
   chatRole: ChatRole;

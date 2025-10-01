@@ -27,7 +27,6 @@ public class MappingProfile:Profile
             .ForMember(dest => dest.IsMuted, opt => opt.MapFrom(src => src.IsMuted))
             .ForMember(dest=>dest.ChatRole,opt=>opt.MapFrom(src=>src.ChatRole))
             .ForMember(dest=>dest.CreatedAt,opt=>opt.MapFrom(src=>src.Chat.CreatedAt))
-            .ForMember(dest=>dest.IsPrivate,opt=>opt.MapFrom(src=>src.Chat.IsPrivate))
             .ForMember(dest => dest.Participants, opt => opt.MapFrom(src => src.Chat.UserChatEntities.Select(uc => uc.User)))
             .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Chat.Messages
                 .OrderByDescending(m => m.CreatedAt)

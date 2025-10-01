@@ -22,10 +22,13 @@ public class AddUserToChatHandler:IRequestHandler<AddUserToChatCommand,IResult>
     {
         if(!await _userRepository.AnyByIdAsync(request.UserId, cancellationToken))
             return Result.Failure("Failed to find user");
-        if(!await _chatRepository.AnyByIdAsync(request.ChatId, cancellationToken))
+        var chat = await _chatRepository.AnyByIdAsync(request.ChatId, cancellationToken);
+        if(!chat)
             return Result.Failure("Failed to find chat");
         if(await _userChatRepository.AnyByIdAsync(request.UserId,request.ChatId, cancellationToken))
             return Result.Failure("Failed to find user chat");
+        // Check if the chat is private and already has a user
+        
         var entity = new UserChatEntity
         {
             ChatId = request.ChatId,
