@@ -75,21 +75,16 @@ public sealed class UserRepository : IUserRepository
         CancellationToken cancellationToken,
         Guid? excludeUserId = null)
     {
-        var searchQuery = _dbSet.AsNoTracking()
-            .Where(u => string.IsNullOrEmpty(query) 
-                        || EF.Functions.Like(u.Username.ToLower(), $"%{query}%"));
-
-        // Exclude the current user from search results
-        if (excludeUserId.HasValue)
-            searchQuery = searchQuery.Where(u => u.Id != excludeUserId.Value);
-
-        // Add pagination using cursor-based approach
-        if (lastCreatedAt.HasValue)
-            searchQuery = searchQuery.Where(u => u.CreatedAt < lastCreatedAt.Value);
-
-        return await searchQuery
-            .OrderByDescending(u => u.CreatedAt)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+        var result = await (
+            from u in _dbSet.AsNoTracking()
+            join uc in _dbContext.UserChats on u.Id equals uc.UserId
+            where (string.IsNullOrEmpty(query) || EF.Functions.Like(u.Username.ToLower(), $"%{query}%"))
+                  && (!excludeUserId.HasValue || u.Id != excludeUserId.Value)
+                  && (!lastCreatedAt.HasValue || u.CreatedAt < lastCreatedAt.Value)
+            orderby u.CreatedAt descending
+            select u
+        ).Take(pageSize).ToListAsync(cancellationToken);
+        
+        return result;
     }
 }
