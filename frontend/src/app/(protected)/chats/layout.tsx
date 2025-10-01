@@ -32,6 +32,7 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
   }, []);
 
 
+
   return (
       <div className="h-[calc(100vh-80px)] flex bg-surface">
         <aside className="w-80 border-r border-default bg-surface flex flex-col">
@@ -40,8 +41,12 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
             <input
               placeholder="Search"
               className="input-primary"
-              disabled={loading}
+              disabled={true}
             />
+            {/* Search is not implemented yet */}
+
+            {/* Pop out menu */}
+
           </div>
           <div className="flex-1 overflow-y-auto chat-list">
             {loading && <div className="p-4 text-muted">Loading...</div>}
