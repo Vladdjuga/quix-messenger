@@ -12,7 +12,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
         if (!socket || !chatId) return;
 
         if (!cooldownRef.current) {
-            sendTyping(socket, chatId).catch(() => {});
+            sendTyping(socket, chatId,user?.username).catch(() => {});
             cooldownRef.current = true;
             setTimeout(() => { cooldownRef.current = false; }, 1000);
         }
@@ -21,7 +21,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
         stopTypingTimeout.current = setTimeout(() => {
             if (socket && chatId) sendStopTyping(socket, chatId).catch(() => {});
         }, 1500);
-    }, [socket, chatId]);
+    }, [socket, chatId, user?.username]);
 
     useEffect(() => {
         if (!socket || !chatId || !user) return;

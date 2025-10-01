@@ -10,7 +10,7 @@ type Props = {
 
 const MessageList : React.FC<Props> = (props:Props) => {
     const {chatId,currentUserId}=props;
-    const {messages, loading} = useMessages({chatId}); // Custom hook to fetch messages
+    const {messages, loading, deleteMessage, editMessage} = useMessages({chatId}); // Custom hook to fetch messages
     const bottomRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -34,13 +34,11 @@ const MessageList : React.FC<Props> = (props:Props) => {
     // Also scroll when loading flips to false (first load)
     useEffect(() => {
         if (!loading) scrollToBottom('auto');
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading]);
 
     useEffect(() => {
         // Initial mount
         scrollToBottom('auto');
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (
@@ -49,7 +47,14 @@ const MessageList : React.FC<Props> = (props:Props) => {
             {!loading && messages.length === 0 && <div className="text-muted">No messages yet</div>}
             {!loading && messages.map(m => {
                 return (
-                    <MessageBubble key={m.id} message={m} currentUserId={currentUserId} chatId={chatId}/>
+                    <MessageBubble
+                        key={m.id}
+                        message={m}
+                        currentUserId={currentUserId}
+                        chatId={chatId}
+                        deleteMessage={deleteMessage}
+                        editMessage={editMessage}
+                    />
                 );
             })}
             <div ref={bottomRef} />

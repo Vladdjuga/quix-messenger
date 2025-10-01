@@ -1,11 +1,12 @@
 import {Message, MessageStatus} from "@/lib/types";
 import React, {useCallback, useState} from "react";
-import {useMessages} from "@/lib/hooks/data/messages/useMessages";
 
 type Props = {
     message: Message;
     currentUserId: string;
     chatId: string;
+    editMessage: (messageId: string,text:string) => Promise<void>;
+    deleteMessage: (messageId: string) => Promise<void>;
 }
 
 const MessageBubble = (props: Props) => {
@@ -19,7 +20,7 @@ const MessageBubble = (props: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editingText, setEditingText] = useState<string>("");
 
-    const { editMessage, deleteMessage, loading } = useMessages({chatId});
+    const { editMessage, deleteMessage } = props;
 
     const handleDelete = useCallback(async () => {
         try{
@@ -52,11 +53,6 @@ const MessageBubble = (props: Props) => {
             setEditingText("");
         }
     }, [chatId, editMessage, editingId, editingText]);
-
-
-    if(loading) {
-        return <div>Loading...</div>;
-    }
 
     return (
         <div key={m.id} className={`flex ${own ? 'justify-end' : 'justify-start'} items-center gap-2`}>

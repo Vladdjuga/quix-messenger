@@ -1,7 +1,7 @@
 import RedisSingleton from "../redis.js";
 import logger from "../config/logger.js";
 
-const redis = RedisSingleton.getInstance();
+const redis = await RedisSingleton.getInstance();
 
 export async function checkIfUserIsOnline(userId: string): Promise<boolean> {
     logger.info(`Checking if user ${userId} has online status`);

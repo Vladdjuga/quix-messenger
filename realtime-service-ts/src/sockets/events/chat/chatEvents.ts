@@ -59,13 +59,13 @@ export async function onTyping(this: Socket, data: any): Promise<void> {
         socket.emit('error', { message: 'Authentication required' });
         return;
     }
-    const { chatId } = data || {};
-    if (!chatId) {
+    const { chatId,username } = data || {};
+    if (!chatId||!username) {
         socket.emit('error', { message: 'Invalid typing payload' });
         return;
     }
     // Emit to others in the room (not the sender)
-    socket.to(chatId).emit('typing', { chatId, userId: authenticatedUser.id });
+    socket.to(chatId).emit('typing', { chatId,username, userId: authenticatedUser.id });
 }
 
 export async function onStopTyping(this: Socket, data: any): Promise<void> {

@@ -8,17 +8,33 @@ class RedisSingleton {
 
     private constructor() {}
 
-    public static getInstance(): RedisClientType {
+    public static async getInstance(): Promise<RedisClientType> {
         if (!RedisSingleton.instance) {
-            RedisSingleton.instance = createClient({
-                url: REDIS_URL // default is localhost:6379
-            });
-            RedisSingleton.instance.on('error', (err) => console.error('Redis Error:', err));
-            RedisSingleton.instance.connect()
-                .then(() => console.log('Redis connected'))
-                .catch(console.error);
+            const client:RedisClientType = createClient({ url: REDIS_URL });
+            client.on('error', (err) => console.error('Redis Error:', err));
+
+            await client.connect();
+            console.log('Redis connected');
+
+            await RedisSingleton.resetOnlineUsersOnStartup(client);
+
+            RedisSingleton.instance = client;
         }
         return RedisSingleton.instance;
+    }
+    private static async resetOnlineUsersOnStartup(client: RedisClientType) {
+        const users = await client.sMembers("online_users_set");
+        const now = new Date().toISOString();
+
+        for (const userKey of users) {
+            const userId = userKey.replace("user:", "");
+            await client.hSet("user_last_seen", `user:${userId}`, now);
+        }
+
+        if (users.length > 0) {
+            await client.del("online_users_set");
+            console.log(`Reset ${users.length} online users at startup`);
+        }
     }
 }
 
