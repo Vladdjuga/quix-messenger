@@ -1,6 +1,7 @@
 import {Socket} from "socket.io";
 import logger from "../../../config/logger.js";
 import {userServiceClient} from "../../../clients/index.js";
+import { UnauthorizedError } from "../../../clients/errors.js";
 import type {User} from "../../../types/user.js";
 
 export async function onJoinChat(this: Socket, chat: string): Promise<void> {
@@ -15,11 +16,20 @@ export async function onJoinChat(this: Socket, chat: string): Promise<void> {
         return;
     }
     const token = socket.data.token as string | undefined;
-    const isInChat = token ? await userServiceClient.isUserInChat({
-        userId: authenticatedUser.id,
-        chatId: chat,
-        token
-    }) : false;
+    let isInChat = false;
+    try {
+        isInChat = token ? await userServiceClient.isUserInChat({
+            userId: authenticatedUser.id,
+            chatId: chat,
+            token
+        }) : false;
+    } catch (err) {
+        if (err instanceof UnauthorizedError) {
+            socket.emit('unauthorized', { message: 'Token expired' });
+            return;
+        }
+        throw err;
+    }
     if (!isInChat) {
         logger.warn(`User ${authenticatedUser.id} is not in chat ${chat}. Cannot join.`);
         socket.emit('error', {message: `You are not part of chat ${chat}.`});
@@ -39,11 +49,20 @@ export async function onLeaveChat(this: Socket, chat: string): Promise<void> {
         return;
     }
     const token = socket.data.token as string | undefined;
-    const isInChat = token ? await userServiceClient.isUserInChat({
-        userId: authenticatedUser.id,
-        chatId: chat,
-        token
-    }) : false;
+    let isInChat = false;
+    try {
+        isInChat = token ? await userServiceClient.isUserInChat({
+            userId: authenticatedUser.id,
+            chatId: chat,
+            token
+        }) : false;
+    } catch (err) {
+        if (err instanceof UnauthorizedError) {
+            socket.emit('unauthorized', { message: 'Token expired' });
+            return;
+        }
+        throw err;
+    }
     if (!isInChat) {
         logger.warn(`User ${authenticatedUser.id} is not in chat ${chat}. Cannot leave.`);
         socket.emit('error', {message: `You are not part of chat ${chat}.`});

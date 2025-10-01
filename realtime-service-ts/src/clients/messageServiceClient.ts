@@ -1,4 +1,5 @@
 import logger from "../config/logger.js";
+import { UnauthorizedError } from "./errors.js";
 import type {Message} from "../types/message.js";
 
 // Prefer USER_SERVICE_URL; fallback to MESSAGE_SERVICE_URL for backward compatibility
@@ -30,6 +31,10 @@ export class MessageServiceClient {
         body: JSON.stringify({ text, chatId })
       });
 
+      if (res.status === 401) {
+        logger.warn(`user-service addMessage unauthorized (401)`);
+        throw new UnauthorizedError("Token expired or unauthorized");
+      }
       if (!res.ok) {
         logger.warn(`user-service addMessage non-2xx: ${res.status} ${res.statusText}`);
         return null;
@@ -58,6 +63,10 @@ export class MessageServiceClient {
           "Accept": "application/json",
         },
       });
+      if (res.status === 401) {
+        logger.warn(`user-service deleteMessage unauthorized (401)`);
+        throw new UnauthorizedError("Token expired or unauthorized");
+      }
       if (!res.ok) {
         logger.warn(`user-service deleteMessage non-2xx: ${res.status} ${res.statusText}`);
         return false;
@@ -85,6 +94,10 @@ export class MessageServiceClient {
         },
         body: JSON.stringify({ text })
       });
+      if (res.status === 401) {
+        logger.warn(`user-service editMessage unauthorized (401)`);
+        throw new UnauthorizedError("Token expired or unauthorized");
+      }
       if (!res.ok) {
         logger.warn(`user-service editMessage non-2xx: ${res.status} ${res.statusText}`);
         return false;

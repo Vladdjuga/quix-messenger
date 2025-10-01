@@ -1,4 +1,5 @@
 import logger from "../config/logger.js";
+import { UnauthorizedError } from "./errors.js";
 
 const DEFAULT_BASE_URL = process.env.USER_SERVICE_URL || "http://user-service:7001";
 
@@ -26,6 +27,10 @@ export class UserServiceClient {
         }
       });
 
+      if (res.status === 401) {
+        logger.warn(`user-service isUserInChat unauthorized (401)`);
+        throw new UnauthorizedError("Token expired or unauthorized");
+      }
       if (!res.ok) {
         logger.warn(`user-service isUserInChat non-2xx: ${res.status} ${res.statusText}`);
         return false;

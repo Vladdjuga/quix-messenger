@@ -5,6 +5,7 @@ import {validate} from "class-validator";
 import {plainToInstance} from "class-transformer";
 import type {User} from "../../../types/user.js";
 import { NewMessageDto } from "../../../types/dto/NewMessageDto.js";
+import { UnauthorizedError } from "../../../clients/errors.js";
 import { MessageStatus } from "../../../types/grpcTypes.js";
 import {getIO} from "../../../io.js";
 
@@ -70,6 +71,11 @@ export async function onMessageSent(
             }
         });
     } catch (error) {
+        if (error instanceof UnauthorizedError) {
+            // Tell client to refresh token; client will emit refreshAuth with a new token
+            socket.emit('unauthorized', { message: 'Token expired' });
+            return;
+        }
         logger.error(`Error sending message for user ${authenticatedUser.id}:`, error);
         socket.emit('error', {message: 'Failed to send message'});
     }
@@ -115,6 +121,10 @@ export async function onMessageEdited(
             }
         });
     } catch (error) {
+        if (error instanceof UnauthorizedError) {
+            socket.emit('unauthorized', { message: 'Token expired' });
+            return;
+        }
         console.error(`Error editing message for user ${authenticatedUser.id}:`, error);
         socket.emit('error', {message: 'Failed to edit message'});
     }
@@ -151,6 +161,10 @@ export async function onMessageDeleted(
         // Inform all clients in the chat room
         getIO().to(chatId).emit('messageDeleted', { messageId, chatId, senderId: authenticatedUser.id });
     } catch (error) {
+        if (error instanceof UnauthorizedError) {
+            socket.emit('unauthorized', { message: 'Token expired' });
+            return;
+        }
         logger.error(`Error deleting message for user ${authenticatedUser.id}:`, error);
         socket.emit('error', { message: 'Failed to delete message' });
     }
