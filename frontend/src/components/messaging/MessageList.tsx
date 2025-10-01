@@ -1,16 +1,18 @@
 
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
-import {useMessages} from "@/lib/hooks/data/messages/useMessages";
 import MessageBubble from "@/components/messaging/MessageBubble";
+import {Message} from "@/lib/types";
 
 type Props = {
     chatId: string;
     currentUserId: string;
+    messages: Message[];
+    deleteMessage: (messageId: string) => Promise<void>;
+    editMessage: (messageId: string, newText: string) => Promise<void>;
 }
 
 const MessageList : React.FC<Props> = (props:Props) => {
-    const {chatId,currentUserId}=props;
-    const {messages, loading, deleteMessage, editMessage} = useMessages({chatId}); // Custom hook to fetch messages
+    const {chatId,currentUserId,messages,editMessage,deleteMessage}=props;
     const bottomRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -31,10 +33,6 @@ const MessageList : React.FC<Props> = (props:Props) => {
         const t = setTimeout(() => scrollToBottom('auto'), 0);
         return () => clearTimeout(t);
     }, [messages.length]);
-    // Also scroll when loading flips to false (first load)
-    useEffect(() => {
-        if (!loading) scrollToBottom('auto');
-    }, [loading]);
 
     useEffect(() => {
         // Initial mount
@@ -43,9 +41,8 @@ const MessageList : React.FC<Props> = (props:Props) => {
 
     return (
     <div ref={containerRef} className="flex-1 overflow-y-auto p-4 space-y-2 bg-surface">
-            {loading && <div className="text-muted">Loading...</div>}
-            {!loading && messages.length === 0 && <div className="text-muted">No messages yet</div>}
-            {!loading && messages.map(m => {
+            {messages.length === 0 && <div className="text-muted">No messages yet</div>}
+            {messages.map(m => {
                 return (
                     <MessageBubble
                         key={m.id}

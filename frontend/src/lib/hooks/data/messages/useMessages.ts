@@ -92,7 +92,7 @@ export function useMessages(props: { chatId: string }) {
             } catch {}
         }
     }, [chatId, props.chatId, socket]);
-    const editMessage = useCallback(async (text:string,messageId:string) => {
+    const editMessage = useCallback(async (messageId: string, text: string) => {
         if (!chatId || !messageId) return;
         const newText = text.trim();
         if (!newText) return;
