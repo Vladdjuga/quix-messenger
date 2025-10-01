@@ -4,7 +4,7 @@ import {onStopTyping, onTyping, sendStopTyping, sendTyping} from "@/lib/realtime
 import {Socket} from "socket.io-client";
 
 export default function useTyping(chatId: string, socket: Socket | null, user: User | null) {
-    const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+    const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map());
     const cooldownRef = useRef(false);
     const stopTypingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -26,17 +26,17 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
     useEffect(() => {
         if (!socket || !chatId || !user) return;
 
-        const offTyping = onTyping(socket, ({ chatId: cid, userId: uid }) => {
+        const offTyping = onTyping(socket, ({username, chatId: cid, userId: uid }) => {
             if (cid !== chatId || uid === user.id) return;
 
             setTypingUsers(prev => {
-                const next = new Set(prev);
-                next.add(uid);
+                const next = new Map(prev);
+                next.set(uid, username);
                 return next;
             });
             setTimeout(() => {
                 setTypingUsers(prev => {
-                    const next = new Set(prev);
+                    const next = new Map(prev);
                     next.delete(uid);
                     return next;
                 });
@@ -46,7 +46,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
         const offStopTyping = onStopTyping(socket, ({ chatId: cid, userId: uid }) => {
             if (cid !== chatId || uid === user.id) return;
             setTypingUsers(prev => {
-                const next = new Set(prev);
+                const next = new Map(prev);
                 next.delete(uid);
                 return next;
             });

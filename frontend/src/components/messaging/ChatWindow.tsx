@@ -29,7 +29,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId,headerTitle }) => {
 
   return (
     <div className="flex flex-col h-full bg-surface">
-        <ChatHeader title={headerTitle} typingUsers={Array.from(typingUsers)}/>
+        <ChatHeader title={headerTitle} typingUsers={typingUsers}/>
         <MessageList chatId={chatId!} currentUserId={user.id}/>
         <MessageInput
             onChange={handleInputChange}
