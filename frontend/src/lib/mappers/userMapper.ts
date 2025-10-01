@@ -1,4 +1,4 @@
-import { ReadUserDto } from "@/lib/dto/ReadUserDto";
+import { ReadUserDto } from "@/lib/dto/user/ReadUserDto";
 import type { User } from "@/lib/types";
 import { UserStatus } from "@/lib/types/enums";
 

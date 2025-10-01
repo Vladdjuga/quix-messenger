@@ -1,4 +1,4 @@
-import {LoginUserDto} from "@/lib/dto/LoginUserDto";
+import {LoginUserDto} from "@/lib/dto/user/LoginUserDto";
 import {api} from "@/app/api";
 import apiClient from "@/app/api/http";
 

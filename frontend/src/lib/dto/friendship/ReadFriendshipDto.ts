@@ -1,4 +1,4 @@
-import { FriendshipStatus } from "../types/enums";
+import { FriendshipStatus } from "../../types/enums";
 
 export interface ReadFriendshipDto {
     id: string;

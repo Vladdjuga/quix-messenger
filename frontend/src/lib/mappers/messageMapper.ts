@@ -1,4 +1,4 @@
-import { ReadMessageDto } from "@/lib/dto/ReadMessageDto";
+import { ReadMessageDto } from "@/lib/dto/message/ReadMessageDto";
 import { Message, MessageStatus } from "@/lib/types";
 
 export function mapReadMessageDto(dto: ReadMessageDto): Message {

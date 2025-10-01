@@ -1,12 +1,13 @@
 import apiClient from "@/app/api/http";
-import {ReadUserDto} from "@/lib/dto/ReadUserDto";
-import {ReadFriendshipDto} from "@/lib/dto/ReadFriendshipDto";
-import {RegisterUserDto} from "@/lib/dto/RegisterUserDto";
-import { ReadMessageDto } from "@/lib/dto/ReadMessageDto";
-import { ReadChatDto } from "@/lib/dto/ReadChatDto";
-import { UpdateUserDto } from "@/lib/dto/UpdateUserDto";
-import { mapReadChatWithLastMessageDtos } from "@/lib/mappers/chatMapper";
+import {ReadUserDto} from "@/lib/dto/user/ReadUserDto";
+import {ReadFriendshipDto} from "@/lib/dto/friendship/ReadFriendshipDto";
+import {RegisterUserDto} from "@/lib/dto/user/RegisterUserDto";
+import { ReadMessageDto } from "@/lib/dto/message/ReadMessageDto";
+import { ReadChatDto } from "@/lib/dto/chat/ReadChatDto";
+import { UpdateUserDto } from "@/lib/dto/user/UpdateUserDto";
+import {mapReadChatWithLastMessageDto, mapReadChatWithLastMessageDtos} from "@/lib/mappers/chatMapper";
 import { ChatWithLastMessage } from "@/lib/types";
+import {CreateChatDto} from "@/lib/dto/chat/CreateChatDto";
 
 export const api = {
     auth: {
@@ -79,6 +80,10 @@ export const api = {
             const resp = await apiClient.get<ReadChatDto[]>(`/chats`);
             return mapReadChatWithLastMessageDtos(resp.data);
         },
+        add: async (dto: CreateChatDto) => {
+            const resp = await apiClient.post<ReadChatDto>(`/chats`,{dto});
+            return mapReadChatWithLastMessageDto(resp.data);
+        }
     },
     messages: {
         // Get last N messages by chat id

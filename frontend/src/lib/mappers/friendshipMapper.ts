@@ -1,4 +1,4 @@
-import { ReadFriendshipDto } from "@/lib/dto/ReadFriendshipDto";
+import { ReadFriendshipDto } from "@/lib/dto/friendship/ReadFriendshipDto";
 import type { Friendship, User } from "@/lib/types";
 
 function dtoUserToDomain(dto: ReadFriendshipDto): User {

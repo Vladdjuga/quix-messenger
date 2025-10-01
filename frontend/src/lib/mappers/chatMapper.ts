@@ -1,4 +1,4 @@
-import { ReadChatDto } from "@/lib/dto/ReadChatDto";
+import { ReadChatDto } from "@/lib/dto/chat/ReadChatDto";
 import { ChatRole, ChatType, ChatWithLastMessage, Message } from "@/lib/types";
 import { mapReadMessageDto } from "./messageMapper";
 

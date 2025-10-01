@@ -5,7 +5,7 @@ import { api } from '@/app/api';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UpdateUserDto } from '@/lib/dto/UpdateUserDto';
+import { UpdateUserDto } from '@/lib/dto/user/UpdateUserDto';
 import { updateUserSchema, UpdateUserFormData } from '@/lib/schemas/updateUserSchema';
 import {mapReadUserDto} from "@/lib/mappers/userMapper";
 
