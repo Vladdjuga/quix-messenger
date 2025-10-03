@@ -32,22 +32,27 @@ const MessageList : React.FC<Props> = (props:Props) => {
 
     const handleScroll = async () => {
         if (!containerRef.current) return;
-        const scrollTop = containerRef.current.scrollTop;
+        const el = containerRef.current;
+        const scrollTop = el.scrollTop;
+        const scrollHeight = el.scrollHeight;
+        const clientHeight = el.clientHeight;
 
-        const threshold = 400; // px from bottom to consider "at top"
-        if (containerRef.current.scrollHeight - containerRef.current.clientHeight - scrollTop > threshold) {
-            setShowScrollDown(true);
-        }
-        else {
-            setShowScrollDown(false);
-        }
+        const distanceFromBottom = scrollHeight - clientHeight - scrollTop;
 
-        if (scrollTop === 0) { // At top
-            await loadMore(); // Load more messages
-            // Maintain scroll position after loading more
-            requestAnimationFrame(() => {
-                if (!containerRef.current) return;
-            });
+        const threshold = 400;
+        setShowScrollDown(distanceFromBottom > threshold);
+
+        if (scrollTop < 10) {
+            const previousScrollHeight = scrollHeight;
+            const loadedCount = await loadMore();
+
+            if (loadedCount > 0) {
+                requestAnimationFrame(() => {
+                    if (!containerRef.current) return;
+                    const newScrollHeight = containerRef.current.scrollHeight;
+                    containerRef.current.scrollTop = newScrollHeight - previousScrollHeight;
+                });
+            }
         }
     };
 
@@ -80,9 +85,9 @@ const MessageList : React.FC<Props> = (props:Props) => {
                 <button
                     onClick={()=>scrollToBottom()}
                     style={{
-                        position: "fixed",
-                        bottom: "120px",
-                        right: "70px",
+                        position: "sticky",
+                        bottom: "15px",
+                        right: "15px",
                         padding: "10px",
                         backgroundColor: "#007bff",
                         color: "#fff",
