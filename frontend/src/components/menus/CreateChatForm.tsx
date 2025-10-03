@@ -7,7 +7,8 @@ import {api} from "@/app/api";
 
 
 export default function CreateChatForm(props: {
-    setIsCreatingChat: (isCreating: boolean) => void
+    setIsCreatingChat: (isCreating: boolean) => void;
+    onChatCreated?: () => void;
 }) {
     const {
         register,
@@ -30,6 +31,7 @@ export default function CreateChatForm(props: {
                 }
             )
             props.setIsCreatingChat(false);
+            props.onChatCreated?.();
         }catch(error){
             console.error("Failed to create chat:", error);
         }
@@ -61,11 +63,18 @@ export default function CreateChatForm(props: {
                         {errors.chatType && <span className="text-red-500 text-sm">{errors.chatType.message}</span>}
                     </div>
                 </div>
-                <button type="submit" className="btn-sm btn-primary mt-4" onClick={
-                    () => props.setIsCreatingChat(false)
-                }>
-                    Close
-                </button>
+                <div className="flex gap-2">
+                    <button type="submit" className="btn-sm btn-primary mt-4">
+                        Create Chat
+                    </button>
+                    <button 
+                        type="button" 
+                        className="btn-sm btn-ghost mt-4" 
+                        onClick={() => props.setIsCreatingChat(false)}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </form>
         </div>
     )

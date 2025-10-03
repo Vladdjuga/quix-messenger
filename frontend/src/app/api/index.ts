@@ -81,7 +81,7 @@ export const api = {
             return mapReadChatWithLastMessageDtos(resp.data);
         },
         add: async (dto: CreateChatDto) => {
-            const resp = await apiClient.post<ReadChatDto>(`/chats`,{dto});
+            const resp = await apiClient.post<ReadChatDto>(`/chats`, dto);
             return mapReadChatWithLastMessageDto(resp.data);
         }
     },

@@ -1,9 +1,10 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { ChatWithLastMessage } from "@/lib/types";
 import { api } from "@/app/api";
 import { ChatList } from "@/components/messaging/ChatList";
 import { usePathname } from "next/navigation";
+import ChatMenuPopOut from "@/components/menus/ChatMenuPopOut";
 
 export default function ChatsLayout({ children }: { children: React.ReactNode }) {
   const [chats, setChats] = useState<ChatWithLastMessage[]>([]);
@@ -20,16 +21,21 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
     return undefined;
   }, [pathname]);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
+  const loadChats = useCallback(async () => {
     setLoading(true);
-  const list = await api.chats.list();
-  if (mounted) setChats(list as ChatWithLastMessage[]);
+    try {
+      const list = await api.chats.list();
+      setChats(list as ChatWithLastMessage[]);
+    } catch (error) {
+      console.error("Failed to load chats:", error);
+    } finally {
       setLoading(false);
-    })();
-    return () => { mounted = false; };
+    }
   }, []);
+
+  useEffect(() => {
+    loadChats();
+  }, [loadChats]);
 
 
 
@@ -45,8 +51,7 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
             />
             {/* Search is not implemented yet */}
 
-            {/* Pop out menu */}
-
+            <ChatMenuPopOut onChatCreated={loadChats} />
           </div>
           <div className="flex-1 overflow-y-auto chat-list">
             {loading && <div className="p-4 text-muted">Loading...</div>}

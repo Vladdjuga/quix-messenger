@@ -2,7 +2,9 @@ import React, {useState} from "react";
 import CreateChatForm from "@/components/menus/CreateChatForm";
 
 
-export default function ChatMenuPopOut() {
+export default function ChatMenuPopOut(props: {
+    onChatCreated?: () => void;
+}) {
     const [isOpenMenu, setIsOpenMenu] = useState(false);
     const [isCreatingChat, setIsCreatingChat] = useState(false);
 
@@ -16,7 +18,10 @@ export default function ChatMenuPopOut() {
                 </div>
             )}
             { isCreatingChat &&
-                <CreateChatForm setIsCreatingChat={setIsCreatingChat}/>
+                <CreateChatForm 
+                    setIsCreatingChat={setIsCreatingChat}
+                    onChatCreated={props.onChatCreated}
+                />
             }
 
             {/* This is a menu button */}
