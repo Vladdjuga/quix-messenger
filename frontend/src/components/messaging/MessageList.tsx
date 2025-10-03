@@ -1,7 +1,8 @@
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import MessageBubble from "@/components/messaging/MessageBubble";
 import {Message} from "@/lib/types";
+import { SCROLL_THRESHOLD_PX, SCROLL_OFFSET_AFTER_LOAD, SCROLL_SETTLE_DELAY_MS } from "@/lib/constants/pagination";
 
 type Props = {
     chatId: string;
@@ -29,30 +30,28 @@ const MessageList : React.FC<Props> = (props:Props) => {
             el.scrollTop = el.scrollHeight;
         });
     }
+    // Use layout effect to run after DOM updates, minimizing jumpiness
+    useLayoutEffect(() => {
+        // Wait a tick to ensure images/fonts/layout settle
+        const t = setTimeout(() => scrollToBottom('auto'), SCROLL_SETTLE_DELAY_MS);
+        return () => clearTimeout(t);
+    }, [messages.length]);
 
     const handleScroll = async () => {
         if (!containerRef.current) return;
-        const el = containerRef.current;
-        const scrollTop = el.scrollTop;
-        const scrollHeight = el.scrollHeight;
-        const clientHeight = el.clientHeight;
+        const scrollTop = containerRef.current.scrollTop;
 
-        const distanceFromBottom = scrollHeight - clientHeight - scrollTop;
+        if (containerRef.current.scrollHeight - containerRef.current.clientHeight - scrollTop > SCROLL_THRESHOLD_PX) {
+            setShowScrollDown(true);
+        }
 
-        const threshold = 400;
-        setShowScrollDown(distanceFromBottom > threshold);
-
-        if (scrollTop < 10) {
-            const previousScrollHeight = scrollHeight;
-            const loadedCount = await loadMore();
-
-            if (loadedCount > 0) {
-                requestAnimationFrame(() => {
-                    if (!containerRef.current) return;
-                    const newScrollHeight = containerRef.current.scrollHeight;
-                    containerRef.current.scrollTop = newScrollHeight - previousScrollHeight;
-                });
-            }
+        if (scrollTop === 0) { // At top
+            await loadMore(); // Load more messages
+            // Maintain scroll position after loading more
+            requestAnimationFrame(() => {
+                if (!containerRef.current) return;
+                containerRef.current.scrollTop = SCROLL_OFFSET_AFTER_LOAD; // Slightly offset to avoid retriggering
+            });
         }
     };
 
@@ -67,6 +66,7 @@ const MessageList : React.FC<Props> = (props:Props) => {
     return (
     <div ref={containerRef} onScroll={handleScroll}
          className="flex-1 overflow-y-auto p-4 space-y-2 bg-surface"
+            style={{ position: 'relative' }}
     >
             {messages.length === 0 && <div className="text-muted">No messages yet</div>}
             {messages.map(m => {
@@ -85,9 +85,9 @@ const MessageList : React.FC<Props> = (props:Props) => {
                 <button
                     onClick={()=>scrollToBottom()}
                     style={{
-                        position: "sticky",
-                        bottom: "15px",
-                        right: "15px",
+                        position: "absolute",
+                        bottom: "10px",
+                        right: "10px",
                         padding: "10px",
                         backgroundColor: "#007bff",
                         color: "#fff",

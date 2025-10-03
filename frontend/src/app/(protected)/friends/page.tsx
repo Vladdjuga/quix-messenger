@@ -4,12 +4,16 @@ import { useFriends } from "@/lib/hooks/data/friendship/useFriendshipLists";
 import FriendshipCard from "@/components/user/FriendshipCard";
 import LoadingSpinner from "@/components/profile/LoadingSpinner";
 import ErrorDisplay from "@/components/profile/ErrorDisplay";
-import { useState, useMemo } from "react";
+import ScrollToTopButton from "@/components/common/ScrollToTopButton";
+import { useState, useMemo, useRef } from "react";
 import { UserStatus } from "@/lib/types/enums";
+import { SCROLL_TO_TOP_THRESHOLD_PX, SCROLL_THRESHOLD_PX } from "@/lib/constants/pagination";
 
 export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { friends, loading, error, refetch, removeFriend } = useFriends();
+  const { friends, loading, error, refetch, removeFriend, hasMore, fetchMore } = useFriends();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   // Filter friends based on search query
   const filteredFriends = useMemo(() => {
@@ -22,6 +26,27 @@ export default function FriendsPage() {
     );
   }, [friends, searchQuery]);
 
+  const handleScroll = async () => {
+    if (!containerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+    // Show scroll to top button
+    if (scrollTop > SCROLL_TO_TOP_THRESHOLD_PX) {
+      setShowScrollTop(true);
+    } else {
+      setShowScrollTop(false);
+    }
+
+    // Infinite scroll: load more when near bottom (only if not filtering)
+    if (!searchQuery && scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD_PX && hasMore && !loading) {
+      await fetchMore();
+    }
+  };
+
+  const scrollToTop = () => {
+    containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (loading && friends.length === 0) {
     return <LoadingSpinner message="Loading friends..." />;
   }
@@ -31,7 +56,7 @@ export default function FriendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={containerRef} onScroll={handleScroll} className="min-h-screen bg-background overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
@@ -97,18 +122,38 @@ export default function FriendsPage() {
             </a>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredFriends.map(friend => (
-              <FriendshipCard
-                key={friend.id}
-                friendship={friend}
-                type={UserStatus.Friends}
-                onRemove={removeFriend}
-              />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {filteredFriends.map(friend => (
+                <FriendshipCard
+                  key={friend.id}
+                  friendship={friend}
+                  type={UserStatus.Friends}
+                  onRemove={removeFriend}
+                />
+              ))}
+            </div>
+
+            {/* Loading More */}
+            {loading && friends.length > 0 && (
+              <div className="flex items-center justify-center py-4">
+                <div className="w-4 h-4 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mr-2"></div>
+                <p className="text-muted text-sm">Loading more...</p>
+              </div>
+            )}
+
+            {/* End of results */}
+            {!hasMore && friends.length > 0 && !searchQuery && (
+              <div className="text-center py-4">
+                <p className="text-muted text-sm">No more friends</p>
+              </div>
+            )}
+          </>
         )}
       </div>
+
+      {/* Scroll to top button */}
+      {showScrollTop && <ScrollToTopButton onClick={scrollToTop} />}
     </div>
   );
 }

@@ -2,6 +2,9 @@
 
 import { useUserSearch } from "@/lib/hooks/data/user/useUserSearch";
 import UserCard from "@/components/user/UserCard";
+import ScrollToTopButton from "@/components/common/ScrollToTopButton";
+import { useRef, useState } from "react";
+import { SCROLL_TO_TOP_THRESHOLD_PX, SCROLL_THRESHOLD_PX } from "@/lib/constants/pagination";
 
 export default function FindPeoplePage() {
   const {
@@ -16,8 +19,32 @@ export default function FindPeoplePage() {
     removeUser
   } = useUserSearch();
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  const handleScroll = async () => {
+    if (!containerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+    // Show scroll to top button
+    if (scrollTop > SCROLL_TO_TOP_THRESHOLD_PX) {
+      setShowScrollTop(true);
+    } else {
+      setShowScrollTop(false);
+    }
+
+    // Infinite scroll: load more when near bottom
+    if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD_PX && hasMore && !loading) {
+      await fetchMore();
+    }
+  };
+
+  const scrollToTop = () => {
+    containerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={containerRef} onScroll={handleScroll} className="min-h-screen bg-background overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
@@ -82,18 +109,6 @@ export default function FindPeoplePage() {
           </div>
         )}
 
-        {/* Load More */}
-        {hasMore && !loading && (
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={fetchMore}
-              className="btn-secondary"
-            >
-              Load more
-            </button>
-          </div>
-        )}
-
         {/* Loading More */}
         {loading && results.length > 0 && (
           <div className="flex items-center justify-center py-4">
@@ -101,7 +116,17 @@ export default function FindPeoplePage() {
             <p className="text-muted text-sm">Loading more...</p>
           </div>
         )}
+
+        {/* End of results indicator */}
+        {!hasMore && results.length > 0 && (
+          <div className="text-center py-4">
+            <p className="text-muted text-sm">No more results</p>
+          </div>
+        )}
       </div>
+
+      {/* Scroll to top button */}
+      {showScrollTop && <ScrollToTopButton onClick={scrollToTop} />}
     </div>
   );
 }

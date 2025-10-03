@@ -3,6 +3,7 @@ import type { User } from "@/lib/types";
 import { api } from "@/app/api";
 import { UserStatus } from "@/lib/types/enums";
 import { mapReadUserDtos } from "@/lib/mappers/userMapper";
+import { DEFAULT_PAGE_SIZE, DEBOUNCE_DELAY_MS } from "@/lib/constants/pagination";
 
 export interface UserWithStatus {
   user: User;
@@ -10,7 +11,7 @@ export interface UserWithStatus {
   friendshipId?: string;
 }
 
-const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? 20);
+const PAGE_SIZE = Number(process.env.NEXT_PUBLIC_PAGE_SIZE ?? DEFAULT_PAGE_SIZE);
 
 export function useUserSearch() {
   const [query, setQuery] = useState("");
@@ -69,7 +70,7 @@ export function useUserSearch() {
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       fetchUsers();
-    }, 300);
+    }, DEBOUNCE_DELAY_MS);
 
     return () => clearTimeout(debounceTimer);
   }, [query, fetchUsers]);
