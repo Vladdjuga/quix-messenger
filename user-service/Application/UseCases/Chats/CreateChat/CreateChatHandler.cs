@@ -27,7 +27,7 @@ public class CreateChatHandler:IRequestHandler<CreateChatCommand, Result<ReadCha
         {
             Id = Guid.NewGuid(),
             Title = request.ChatName,
-            CreatedAt = DateTime.Now,
+            CreatedAt = DateTime.UtcNow,
             ChatType = request.ChatType
         };
         await _chatRepository.AddAsync(chat,cancellationToken);

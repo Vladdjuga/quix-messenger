@@ -1,5 +1,5 @@
 import {ChatType} from "@/lib/types";
-import React from "react";
+import React, {useState} from "react";
 import {useForm} from "react-hook-form";
 import {CreateChatFormData, createChatSchema} from "@/lib/schemas/createChatSchema";
 import {zodResolver} from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ export default function CreateChatForm(props: {
     setIsCreatingChat: (isCreating: boolean) => void;
     onChatCreated?: () => void;
 }) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const {
         register,
         handleSubmit,
@@ -17,13 +18,14 @@ export default function CreateChatForm(props: {
     } = useForm<CreateChatFormData>({
         resolver: zodResolver(createChatSchema),
         defaultValues: {
-            title: 'The Сhat Title',
-            chatType: ChatType.Direct,
+            title: '',
+            chatType: ChatType.Group,
         }
     });
 
     const onSubmit = async (data: CreateChatFormData) => {
         try{
+            setIsSubmitting(true);
             await api.chats.add(
                 {
                     title: data.title,
@@ -34,43 +36,92 @@ export default function CreateChatForm(props: {
             props.onChatCreated?.();
         }catch(error){
             console.error("Failed to create chat:", error);
+            alert("Failed to create chat. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
     return (
-        <div className="absolute top-16 left-4 bg-surface border border-default rounded shadow-lg z-10 p-4">
-            <h2 className="text-lg font-semibold mb-4">Create New Chat</h2>
-            <form className="flex flex-col" onSubmit={handleSubmit(onSubmit)}>
+        <div className="absolute top-20 left-4 bg-surface border border-default rounded-lg shadow-xl z-20 p-6 w-96">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-primary">Create New Chat</h2>
+                <button 
+                    type="button"
+                    onClick={() => props.setIsCreatingChat(false)}
+                    className="text-muted hover:text-primary transition-colors"
+                    aria-label="Close"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-control">
-                    <div className={"mb-4"}>
+                    <label className="label">
+                        <span className="label-text font-medium">Chat Title</span>
+                    </label>
+                    <input 
+                        {...register("title")} 
+                        type="text" 
+                        placeholder="Enter a name for your chat"
+                        className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                        disabled={isSubmitting}
+                    />
+                    {errors.title && (
                         <label className="label">
-                            <span className="label-text">Chat Title</span>
+                            <span className="label-text-alt text-error">{errors.title.message}</span>
                         </label>
-                        <input {...register("title")} type="text" placeholder="Enter chat title"
-                               className="input input-bordered"/>
-                        {errors.title && <span className="text-red-500 text-sm">{errors.title.message}</span>}
-                    </div>
-                    <div className={"mb-4"}>
-                        <label className="label">
-                            Select Chat type
-                        </label>
-                        <select {...register("chatType")} className="select select-bordered w-full max-w-xs">
-                            <option disabled selected>Pick one</option>
-                            <option value={ChatType.Direct}>Direct</option>
-                            <option value={ChatType.Group}>Group</option>
-                            <option value={ChatType.Channel}>Channel(not implemented yet)</option>
-                        </select>
-                        {errors.chatType && <span className="text-red-500 text-sm">{errors.chatType.message}</span>}
-                    </div>
+                    )}
                 </div>
-                <div className="flex gap-2">
-                    <button type="submit" className="btn-sm btn-primary mt-4">
-                        Create Chat
+                
+                <div className="form-control">
+                    <label className="label">
+                        <span className="label-text font-medium">Chat Type</span>
+                    </label>
+                    <select 
+                        {...register("chatType")} 
+                        className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                        disabled={isSubmitting}
+                    >
+                        <option value={ChatType.Group}>Group Chat</option>
+                        <option value={ChatType.Direct}>Direct Message</option>
+                        <option value={ChatType.Channel} disabled>Channel (Coming Soon)</option>
+                    </select>
+                    {errors.chatType && (
+                        <label className="label">
+                            <span className="label-text-alt text-error">{errors.chatType.message}</span>
+                        </label>
+                    )}
+                </div>
+
+                <div className="flex gap-3 mt-2">
+                    <button 
+                        type="submit" 
+                        className="btn btn-primary flex-1"
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Creating...
+                            </>
+                        ) : (
+                            <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                                Create Chat
+                            </>
+                        )}
                     </button>
                     <button 
                         type="button" 
-                        className="btn-sm btn-ghost mt-4" 
+                        className="btn btn-ghost flex-1" 
                         onClick={() => props.setIsCreatingChat(false)}
+                        disabled={isSubmitting}
                     >
                         Cancel
                     </button>
