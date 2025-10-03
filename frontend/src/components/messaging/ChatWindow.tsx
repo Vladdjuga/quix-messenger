@@ -18,7 +18,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId,headerTitle }) => {
   const socket = useContext(SocketContext);
 
   const { typingUsers,handleInputChange } = useTyping(chatId,socket,user);
-  const { sendMessage,messages, loading, deleteMessage, editMessage } = useMessages({chatId});
+  const { sendMessage,messages, loading, deleteMessage, editMessage, loadMore } = useMessages({chatId});
 
   if(userLoading||loading) {
     return <div className="flex-1 flex items-center justify-center">Loading...</div>;
@@ -33,6 +33,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId,headerTitle }) => {
         <MessageList
             chatId={chatId!}
             currentUserId={user.id}
+            loadMore={loadMore}
             messages={messages}
             deleteMessage={deleteMessage}
             editMessage={editMessage}

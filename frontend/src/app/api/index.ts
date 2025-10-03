@@ -90,7 +90,7 @@ export const api = {
         last: (chatId: string, count: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/last`, { params: { chatId, count } }),
         // Get paginated messages by chat id using lastCreatedAt cursor
-        paginated: (chatId: string, lastCreatedAt: string, pageSize: number = 50) =>
+        paginated: (chatId: string, lastCreatedAt: Date, pageSize: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/paginated`, { params: { chatId, lastCreatedAt, pageSize } }),
         // Delete a message by id
         delete: (messageId: string) => apiClient.delete<void>(`/messages/${encodeURIComponent(messageId)}`),

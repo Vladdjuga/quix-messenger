@@ -12,6 +12,7 @@ import {
 import {SocketContext} from "@/lib/contexts/SocketContext";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 
+const NEXT_PUBLIC_PAGE_SIZE = parseInt(process.env.NEXT_PUBLIC_PAGE_SIZE || '20', 10);
 
 export function useMessages(props: { chatId: string }) {
     const { chatId } = props;
@@ -93,7 +94,6 @@ export function useMessages(props: { chatId: string }) {
         }
     }, [chatId, props.chatId, socket]);
     const editMessage = useCallback(async (messageId: string, text: string) => {
-        if (!chatId || !messageId) return;
         const newText = text.trim();
         if (!newText) return;
         // Optimistic update: preserve existing flags and mark as modified
@@ -107,6 +107,20 @@ export function useMessages(props: { chatId: string }) {
             console.error('Failed to edit message', e);
         } 
     }, [chatId, socket]);
+
+    const loadMore = useCallback(async () => {
+        try{
+            const lastCreatedAt = messages.length > 0 ? messages[0].createdAt : new Date();
+            const resp = await api.messages.paginated(chatId,lastCreatedAt,NEXT_PUBLIC_PAGE_SIZE)
+
+            const data = mapReadMessageDtos(resp.data);
+            setMessages(prev => [...data.reverse(), ...prev]);
+            return data.length;
+        } catch(e){
+            console.error('Failed to load more messages',e);
+            return 0;
+        }
+    }, [chatId, messages]);
 
     useEffect(() => {
         if (!socket || !chatId || !user) return;
@@ -137,7 +151,8 @@ export function useMessages(props: { chatId: string }) {
         addMessage,
         sendMessage,
         deleteMessage,
-        editMessage
+        editMessage,
+        loadMore,
     }
 
 }
