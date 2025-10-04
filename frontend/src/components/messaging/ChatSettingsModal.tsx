@@ -156,21 +156,94 @@ export default function ChatSettingsModal({
                 {/* Only show for Group chats */}
                 {chatType === ChatType.Group && (
                     <>
-                        {/*Chat Avatar Section*/}
-                        <div className="mb-6" onClick={() => setAvatarOpen(true) }>
-                            {avatarUrl ? (
-                                <Image
-                                    src={avatarUrl}
-                                    alt={`${currentTitle[0].toUpperCase()}`}
-                                    className="w-32 h-32 rounded-full object-cover"
-                                    unoptimized
-                                />
+                        {/* Chat Avatar Section */}
+                        <div className="mb-8 flex flex-col items-center">
+                            <div 
+                                className={`relative group ${canEditTitle ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                                onClick={() => canEditTitle && setAvatarOpen(true)}
+                            >
+                                {/* Avatar Container */}
+                                <div className="relative w-32 h-32 rounded-full overflow-hidden bg-base-200 border-4 border-base-300 shadow-lg">
+                                    {avatarUrl ? (
+                                        <Image
+                                            src={avatarUrl}
+                                            alt={currentTitle}
+                                            width={128}
+                                            height={128}
+                                            className="w-full h-full object-cover"
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                                            <span className="text-5xl font-bold text-primary">
+                                                {currentTitle[0]?.toUpperCase() ?? '#'}
+                                            </span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Hover Overlay - Only show if user can edit */}
+                                    {canEditTitle && (
+                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                                            <div className="text-center text-white">
+                                                <svg 
+                                                    className="w-10 h-10 mx-auto mb-1" 
+                                                    fill="none" 
+                                                    stroke="currentColor" 
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round" 
+                                                        strokeWidth={2} 
+                                                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" 
+                                                    />
+                                                    <path 
+                                                        strokeLinecap="round" 
+                                                        strokeLinejoin="round" 
+                                                        strokeWidth={2} 
+                                                        d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" 
+                                                    />
+                                                </svg>
+                                                <span className="text-xs font-medium">
+                                                    {avatarUrl ? 'Change' : 'Upload'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {/* Edit Badge - Only show if user can edit */}
+                                {canEditTitle && (
+                                    <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-2 shadow-lg border-2 border-surface group-hover:scale-110 transition-transform">
+                                        <svg 
+                                            className="w-4 h-4 text-primary-content" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path 
+                                                strokeLinecap="round" 
+                                                strokeLinejoin="round" 
+                                                strokeWidth={2} 
+                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
+                                            />
+                                        </svg>
+                                    </div>
+                                )}
+                            </div>
+                            
+                            {/* Avatar Helper Text */}
+                            {canEditTitle ? (
+                                <p className="text-xs text-muted mt-3 text-center">
+                                    Click to {avatarUrl ? 'change' : 'upload'} chat avatar
+                                </p>
                             ) : (
-                                <span className="text-4xl text-muted">
-                                    {currentTitle[0].toUpperCase() ?? ''}
-                                </span>
+                                <p className="text-xs text-muted mt-3 text-center">
+                                    Only admins and moderators can change the avatar
+                                </p>
                             )}
                         </div>
+
                         {/* Title Section */}
                         <div className="mb-6">
                             <label className="label">
