@@ -9,7 +9,7 @@ import { api } from '@/app/api';
 import { useCurrentUser } from '@/lib/hooks/data/user/userHook';
 import Image from "next/image";
 import { useEffect } from 'react';
-import { getProtectedAvatarUrl } from '@/lib/utils/protectedAvatar';
+import { getProtectedUserAvatarUrl } from '@/lib/utils/protectedAvatar';
 import { formatLastSeen } from '@/lib/utils/formatLastSeen';
 import {mapReadUserDto} from "@/lib/mappers/userMapper";
 
@@ -29,7 +29,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile, onProfileUpdate 
     let revoked: string | null = null;
     (async () => {
       if (!profileId) { setAvatarSrc(null); return; }
-      const url = await getProtectedAvatarUrl(profile.id);
+      const url = await getProtectedUserAvatarUrl(profile.id);
       if (url) {
         setAvatarSrc(url);
         revoked = url; // remember to revoke on cleanup

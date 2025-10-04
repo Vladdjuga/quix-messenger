@@ -12,6 +12,7 @@ public class ReadChatDto
     public required bool IsMuted { get; init; }
     public required ChatRole ChatRole { get; init; }
     public required DateTime CreatedAt { get; init; }
+    public string? AvatarUrl { get; init; }
     public IEnumerable<ReadUserDto> Participants { get; init; } = new List<ReadUserDto>();
     public ReadMessageDto? LastMessage { get; init; }
     

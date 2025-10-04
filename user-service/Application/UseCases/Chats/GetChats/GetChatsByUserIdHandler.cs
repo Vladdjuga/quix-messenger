@@ -36,6 +36,7 @@ public class GetChatsByUserIdHandler:IRequestHandler<GetChatsByUserIdQuery, Resu
                 IsMuted = uc.IsMuted,
                 ChatRole = uc.ChatRole,
                 CreatedAt = uc.Chat!.CreatedAt,
+                AvatarUrl = uc.Chat!.AvatarUrl,
                 Participants = uc.Chat!.UserChatEntities
                     .Where(p => p.User != null)
                     .Select(p => _mapper.Map<ReadUserDto>(p.User!))

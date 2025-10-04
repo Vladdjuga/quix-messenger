@@ -5,8 +5,11 @@ import {ChatRole, ChatType} from "@/lib/types";
 import {ChatParticipantDto} from "@/lib/dto/chat/ChatManagementDto";
 import {AxiosError} from "axios";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
-import {getProtectedAvatarUrl} from "@/lib/utils/protectedAvatar";
+import {getProtectedChatAvatarUrl, getProtectedUserAvatarUrl} from "@/lib/utils/protectedAvatar";
 import ChatParticipantsList from "./ChatParticipantsList";
+import Image from "next/image";
+import {mapReadUserDto} from "@/lib/mappers/userMapper";
+import AvatarUploadModal from "@/components/profile/AvatarUploadModal";
 
 interface ChatSettingsModalProps {
     chatId: string;
@@ -18,19 +21,21 @@ interface ChatSettingsModalProps {
 }
 
 export default function ChatSettingsModal({
-    chatId,
-    chatType,
-    currentTitle,
-    currentUserRole,
-    onClose,
-    onUpdated
-}: ChatSettingsModalProps) {
-    const { user } = useCurrentUser();
+                                              chatId,
+                                              chatType,
+                                              currentTitle,
+                                              currentUserRole,
+                                              onClose,
+                                              onUpdated
+                                          }: ChatSettingsModalProps) {
+    const {user} = useCurrentUser();
     const [title, setTitle] = useState(currentTitle);
     const [participants, setParticipants] = useState<ChatParticipantDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [avatarOpen, setAvatarOpen] = useState(false);
 
     // Load participants
     useEffect(() => {
@@ -42,7 +47,7 @@ export default function ChatSettingsModal({
                     data.map(async el => {
                         return {
                             ...el,
-                            avatarUrl: (await getProtectedAvatarUrl(el.userId)) ?? undefined,
+                            avatarUrl: (await getProtectedUserAvatarUrl(el.userId)) ?? undefined,
                         };
                     })
                 );
@@ -54,8 +59,20 @@ export default function ChatSettingsModal({
                 setLoading(false);
             }
         };
-
+        const loadChatAvatar = async ()=>{
+            try{
+                setLoading(true);
+                const url = await getProtectedChatAvatarUrl(chatId);
+                setAvatarUrl(url);
+            }catch(err){
+                console.error("Failed to load chat:", err);
+                setError("Failed to load chat");
+            }finally {
+                setLoading(false);
+            }
+        }
         loadParticipants();
+        loadChatAvatar();
     }, [chatId]);
 
     const handleUpdateTitle = async () => {
@@ -67,7 +84,7 @@ export default function ChatSettingsModal({
         setError(null);
 
         try {
-            await api.chats.update({ chatId, title: title.trim() });
+            await api.chats.update({chatId, title: title.trim()});
             onUpdated?.();
             onClose();
         } catch (err) {
@@ -86,7 +103,7 @@ export default function ChatSettingsModal({
         }
 
         try {
-            await api.chats.removeUser({ chatId, userId });
+            await api.chats.removeUser({chatId, userId});
             setParticipants(prev => prev.filter(p => p.userId !== userId));
             onUpdated?.();
         } catch (err) {
@@ -101,6 +118,17 @@ export default function ChatSettingsModal({
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+            <AvatarUploadModal
+                open={avatarOpen}
+                onClose={() => setAvatarOpen(false)}
+                onUpload={async (file) => {
+                    const resp = await api.chats.uploadAvatar(chatId,file);
+                    if (!resp.data) return;
+
+                    setAvatarUrl(resp.data.avatarUrl);
+                    setAvatarOpen(false);
+                }}
+            />
             <div
                 className="bg-surface border border-default rounded-lg shadow-xl p-6 w-[600px] max-h-[700px] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
@@ -114,7 +142,8 @@ export default function ChatSettingsModal({
                         aria-label="Close"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
@@ -128,6 +157,23 @@ export default function ChatSettingsModal({
                 {/* Only show for Group chats */}
                 {chatType === ChatType.Group && (
                     <>
+                        {/*Chat Avatar Section*/}
+                        <div className="mb-6" onClick={() => setAvatarOpen(true) }>
+                            {avatarUrl ? (
+                                <Image
+                                    src={avatarUrl}
+                                    alt={`${currentTitle[0].toUpperCase()}`}
+                                    width={128}
+                                    height={128}
+                                    className="w-32 h-32 rounded-full object-cover"
+                                    unoptimized
+                                />
+                            ) : (
+                                <span className="text-4xl text-muted">
+                                    {currentTitle[0].toUpperCase() ?? ''}
+                                </span>
+                            )}
+                        </div>
                         {/* Title Section */}
                         <div className="mb-6">
                             <label className="label">

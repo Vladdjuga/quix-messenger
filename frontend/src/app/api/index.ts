@@ -99,6 +99,14 @@ export const api = {
         getParticipants: async (chatId: string): Promise<ChatParticipantDto[]> => {
             const resp = await apiClient.get<ChatParticipantDto[]>(`/chats/getChatParticipants?chatId=${chatId}`);
             return resp.data;
+        },
+        uploadAvatar: async (chatId: string, file: File) => {
+            const form = new FormData();
+            form.append('avatar', file, file.name || 'avatar');
+            form.append('chatId', chatId);
+            return apiClient.post<{ avatarUrl: string }>('/chats/uploadChatAvatar', form, {
+                headers: { /* Axios will set correct multipart boundary */ },
+            });
         }
     },
     messages: {

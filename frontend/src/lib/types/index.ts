@@ -26,6 +26,7 @@ export interface Chat {
   isMuted: boolean;
   chatRole: ChatRole;
   createdAt: Date;
+  avatarUrl?: string;
   participants?: {
     id: string;
     avatarUrl: string;

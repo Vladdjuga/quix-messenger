@@ -4,7 +4,7 @@ import type { Friendship, User } from '@/lib/types';
 import { useFriendshipActions } from '@/lib/hooks/data/profile/useFriendshipActions';
 import { UserStatus } from '@/lib/types/enums';
 import { useRouter } from 'next/navigation';
-import { getProtectedAvatarUrl } from '@/lib/utils/protectedAvatar';
+import { getProtectedUserAvatarUrl } from '@/lib/utils/protectedAvatar';
 import Image from 'next/image';
 
 // Unified person data type
@@ -58,7 +58,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
     let revoked: string | null = null;
     (async () => {
       if (!userId) { setAvatarSrc(null); return; }
-      const url = await getProtectedAvatarUrl(userId);
+      const url = await getProtectedUserAvatarUrl(userId);
       if (url) {
         setAvatarSrc(url);
         revoked = url; // remember to revoke on cleanup

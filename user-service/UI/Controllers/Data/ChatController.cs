@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using Application.Common;
+using Application.DTOs;
 using Application.DTOs.Chat;
 using Application.UseCases.Chats.AddUserToChat;
 using Application.UseCases.Chats.AnyChatById;
@@ -8,6 +9,8 @@ using Application.UseCases.Chats.GetChats;
 using Application.UseCases.Chats.GetChatParticipants;
 using Application.UseCases.Chats.RemoveUserFromChat;
 using Application.UseCases.Chats.UpdateChat;
+using Application.UseCases.Chats.UploadChatAvatar;
+using Application.UseCases.Chats.GetChatAvatar;
 using Application.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -205,6 +208,60 @@ public class ChatController:Controller
         
         _logger.LogInformation("Retrieved participants for chat {ChatId}", chatId);
         return TypedResults.Ok(result.Value);
+    }
+
+    [GetUserGuid]
+    [Authorize]
+    [HttpPost("uploadChatAvatar")]
+    public async Task<Results<Ok<string>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> UploadChatAvatar(
+        [FromForm] IFormFile avatar,
+        [FromForm] Guid chatId)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+
+        if (avatar is null || avatar.Length == 0)
+        {
+            _logger.LogWarning("No avatar file provided by user {UserGuid} for chat {ChatId}", userGuid, chatId);
+            return TypedResults.BadRequest(new ErrorResponse("No file provided"));
+        }
+
+        using var memory = new MemoryStream();
+        await avatar.CopyToAsync(memory);
+
+        var fileDto = new FileDto
+        {
+            Name = Path.GetFileName(avatar.FileName),
+            ContentType = avatar.ContentType,
+            Content = memory.ToArray()
+        };
+
+        var command = new UploadChatAvatarCommand(fileDto, chatId, userGuid);
+        _logger.LogInformation("User {UserGuid} is uploading an avatar for chat {ChatId}", userGuid, chatId);
+        var result = await _mediator.Send(command);
+
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to upload avatar for chat {ChatId}: {Error}", chatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+
+        _logger.LogInformation("Chat {ChatId} avatar uploaded successfully", chatId);
+        return TypedResults.Ok(result.Value);
+    }
+
+    [Authorize]
+    [HttpGet("getChatAvatar/{chatId:guid}")]
+    public async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetChatAvatar(Guid chatId)
+    {
+        var result = await _mediator.Send(new GetChatAvatarQuery(chatId));
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to get avatar for chat {ChatId}: {Error}", chatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+
+        var file = result.Value;
+        return TypedResults.File(file.Content, file.ContentType, file.Name);
     }
     
 }
