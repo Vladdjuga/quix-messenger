@@ -59,4 +59,18 @@ public class UserChatRepository:IUserChatRepository
     {
         return await _dbSet.AnyAsync(el => el.UserId == userId && el.ChatId == chatId, cancellationToken);
     }
+
+    public async Task DeleteAsync(UserChatEntity userChat, CancellationToken cancellationToken)
+    {
+        _dbSet.Remove(userChat);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<UserChatEntity>> GetParticipantsByChatIdAsync(Guid chatId, CancellationToken cancellationToken)
+    {
+        return await _dbSet
+            .Where(uc => uc.ChatId == chatId)
+            .Include(uc => uc.User)
+            .ToListAsync(cancellationToken);
+    }
 }

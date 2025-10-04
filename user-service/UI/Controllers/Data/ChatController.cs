@@ -5,6 +5,9 @@ using Application.UseCases.Chats.AddUserToChat;
 using Application.UseCases.Chats.AnyChatById;
 using Application.UseCases.Chats.CreateChat;
 using Application.UseCases.Chats.GetChats;
+using Application.UseCases.Chats.GetChatParticipants;
+using Application.UseCases.Chats.RemoveUserFromChat;
+using Application.UseCases.Chats.UpdateChat;
 using Application.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -124,6 +127,84 @@ public class ChatController:Controller
             userId, chatId, result.Value);
         
         return TypedResults.Ok(new ChatMembershipResponse(result.Value));
+    }
+
+    [GetUserGuid]
+    [Authorize]
+    [HttpPost("updateChat")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> UpdateChat([FromBody] UpdateChatDto updateChatDto)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+        
+        var command = new UpdateChatCommand(
+            updateChatDto.ChatId,
+            userGuid,
+            updateChatDto.Title
+        );
+        
+        _logger.LogInformation("User {UserId} updating chat {ChatId}", userGuid, updateChatDto.ChatId);
+        var result = await _mediator.Send(command);
+        
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to update chat {ChatId}: {Error}", updateChatDto.ChatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        
+        _logger.LogInformation("Chat {ChatId} updated successfully", updateChatDto.ChatId);
+        return TypedResults.Ok();
+    }
+
+    [GetUserGuid]
+    [Authorize]
+    [HttpPost("removeUserFromChat")]
+    public async Task<Results<Ok, BadRequest<ErrorResponse>>> RemoveUserFromChat([FromBody] RemoveUserFromChatDto dto)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+        
+        var command = new RemoveUserFromChatCommand(
+            dto.ChatId,
+            dto.UserId,
+            userGuid
+        );
+        
+        _logger.LogInformation("User {InitiatorId} removing user {UserId} from chat {ChatId}", 
+            userGuid, dto.UserId, dto.ChatId);
+        var result = await _mediator.Send(command);
+        
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to remove user {UserId} from chat {ChatId}: {Error}", 
+                dto.UserId, dto.ChatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        
+        _logger.LogInformation("User {UserId} removed from chat {ChatId} successfully", 
+            dto.UserId, dto.ChatId);
+        return TypedResults.Ok();
+    }
+
+    [GetUserGuid]
+    [Authorize]
+    [HttpGet("getChatParticipants")]
+    public async Task<Results<Ok<IEnumerable<ChatParticipantDto>>, BadRequest<ErrorResponse>>> GetChatParticipants(
+        [FromQuery] Guid chatId)
+    {
+        var userGuid = HttpContext.GetUserGuid();
+        
+        var query = new GetChatParticipantsQuery(chatId, userGuid);
+        
+        _logger.LogInformation("User {UserId} getting participants for chat {ChatId}", userGuid, chatId);
+        var result = await _mediator.Send(query);
+        
+        if (result.IsFailure)
+        {
+            _logger.LogError("Failed to get participants for chat {ChatId}: {Error}", chatId, result.Error);
+            return ErrorResult.Create(result.Error);
+        }
+        
+        _logger.LogInformation("Retrieved participants for chat {ChatId}", chatId);
+        return TypedResults.Ok(result.Value);
     }
     
 }

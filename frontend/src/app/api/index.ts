@@ -9,6 +9,7 @@ import {mapReadChatWithLastMessageDto, mapReadChatWithLastMessageDtos} from "@/l
 import { ChatWithLastMessage } from "@/lib/types";
 import {CreateChatDto} from "@/lib/dto/chat/CreateChatDto";
 import {AddUserToChatDto} from "@/lib/dto/chat/AddUserToChatDto";
+import { UpdateChatDto, RemoveUserFromChatDto, ChatParticipantDto } from "@/lib/dto/chat/ChatManagementDto";
 
 export const api = {
     auth: {
@@ -87,6 +88,18 @@ export const api = {
         },
         addUser: async (dto: AddUserToChatDto) => {
             const resp = await apiClient.post(`/chats/addUserToChat`, dto);
+            return resp.data;
+        },
+        update: async (dto: UpdateChatDto) => {
+            const resp = await apiClient.post(`/chats/updateChat`, dto);
+            return resp.data;
+        },
+        removeUser: async (dto: RemoveUserFromChatDto) => {
+            const resp = await apiClient.post(`/chats/removeUserFromChat`, dto);
+            return resp.data;
+        },
+        getParticipants: async (chatId: string): Promise<ChatParticipantDto[]> => {
+            const resp = await apiClient.get<ChatParticipantDto[]>(`/chats/getChatParticipants?chatId=${chatId}`);
             return resp.data;
         }
     },

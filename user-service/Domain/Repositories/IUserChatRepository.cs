@@ -10,4 +10,6 @@ public interface IUserChatRepository
     Task<IEnumerable<UserChatEntity>> GetChatsByUserIdAsync(Guid userId, bool includeChat,
         CancellationToken cancellationToken);
     Task<bool> AnyByIdAsync(Guid userId,Guid chatId, CancellationToken cancellationToken);
+    Task DeleteAsync(UserChatEntity userChat, CancellationToken cancellationToken);
+    Task<IEnumerable<UserChatEntity>> GetParticipantsByChatIdAsync(Guid chatId, CancellationToken cancellationToken);
 }
