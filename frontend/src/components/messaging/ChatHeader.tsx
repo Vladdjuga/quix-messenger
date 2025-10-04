@@ -12,8 +12,7 @@ type Props = {
 
 const ChatHeader : React.FC<Props> = (props:Props)=>{
     const canAddUsers = props.chatType === ChatType.Group && 
-                        props.chatRole !== undefined && 
-                        props.chatRole <= ChatRole.Moderator;
+                        props.chatRole !== undefined;
     const canAccessSettings = props.chatType === ChatType.Group;
     
     return (

@@ -89,8 +89,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
                 chatId={chatId}
                 chatType={chatInfo.chatType}
                 onClose={() => setShowAddUserModal(false)}
-                onUserAdded={() => {
-                    refreshChatInfo();
+                onUserAdded={async () => {
+                    await refreshChatInfo();
                     console.log("User added to chat");
                 }}
             />
@@ -103,8 +103,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
                 currentTitle={chatInfo.title}
                 currentUserRole={chatInfo.chatRole}
                 onClose={() => setShowSettingsModal(false)}
-                onUpdated={() => {
-                    refreshChatInfo();
+                onUpdated={async () => {
+                    await refreshChatInfo();
                 }}
             />
         )}

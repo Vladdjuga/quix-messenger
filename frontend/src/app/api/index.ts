@@ -17,8 +17,6 @@ export const api = {
             apiClient.post('/auth/login', {identity, password}),
         register: (dto: RegisterUserDto) =>
             apiClient.post('/auth/register', dto),
-        refreshToken: () =>
-            apiClient.post('/auth/refresh'),
         logout: () => apiClient.post('/auth/logout'),
     },
     user: {
@@ -91,7 +89,7 @@ export const api = {
             return resp.data;
         },
         update: async (dto: UpdateChatDto) => {
-            const resp = await apiClient.post(`/chats/updateChat`, dto);
+            const resp = await apiClient.patch(`/chats/updateChat`, dto);
             return resp.data;
         },
         removeUser: async (dto: RemoveUserFromChatDto) => {

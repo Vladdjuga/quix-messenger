@@ -1,10 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { api } from "@/app/api";
-import { ChatType, ChatRole } from "@/lib/types";
-import { ChatParticipantDto } from "@/lib/dto/chat/ChatManagementDto";
-import { AxiosError } from "axios";
-import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
+import React, {useEffect, useState} from "react";
+import {api} from "@/app/api";
+import {ChatRole, ChatType} from "@/lib/types";
+import {ChatParticipantDto} from "@/lib/dto/chat/ChatManagementDto";
+import {AxiosError} from "axios";
+import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
+import {getProtectedAvatarUrl} from "@/lib/utils/protectedAvatar";
+import ChatParticipantsList from "./ChatParticipantsList";
 
 interface ChatSettingsModalProps {
     chatId: string;
@@ -36,7 +38,15 @@ export default function ChatSettingsModal({
             try {
                 setLoading(true);
                 const data = await api.chats.getParticipants(chatId);
-                setParticipants(data);
+                const mappedData = await Promise.all(
+                    data.map(async el => {
+                        return {
+                            ...el,
+                            avatarUrl: (await getProtectedAvatarUrl(el.userId)) ?? undefined,
+                        };
+                    })
+                );
+                setParticipants(mappedData);
             } catch (err) {
                 console.error("Failed to load participants:", err);
                 setError("Failed to load participants");
@@ -87,39 +97,7 @@ export default function ChatSettingsModal({
         }
     };
 
-    const canManageChat = currentUserRole <= ChatRole.Moderator;
-    const canEditTitle = canManageChat;
-
-    const getRoleBadgeColor = (role: ChatRole) => {
-        switch (role) {
-            case ChatRole.Admin:
-                return "badge-error";
-            case ChatRole.Moderator:
-                return "badge-warning";
-            default:
-                return "badge-ghost";
-        }
-    };
-
-    const getRoleLabel = (role: ChatRole) => {
-        switch (role) {
-            case ChatRole.Admin:
-                return "Admin";
-            case ChatRole.Moderator:
-                return "Moderator";
-            default:
-                return "Member";
-        }
-    };
-
-    const canKickParticipant = (participantRole: ChatRole, participantId: string) => {
-        // Can't kick yourself
-        if (participantId === user?.id) return false;
-        // Must be admin or moderator
-        if (currentUserRole > ChatRole.Moderator) return false;
-        // Can only kick users with lower rank
-        return currentUserRole < participantRole;
-    };
+    const canEditTitle = currentUserRole <= ChatRole.Moderator;
 
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
@@ -191,72 +169,13 @@ export default function ChatSettingsModal({
                         </div>
 
                         {/* Participants Section */}
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <label className="label">
-                                    <span className="label-text font-medium">
-                                        Participants ({participants.length})
-                                    </span>
-                                </label>
-                            </div>
-
-                            {loading ? (
-                                <div className="flex items-center justify-center py-8">
-                                    <span className="loading loading-spinner loading-lg"></span>
-                                </div>
-                            ) : (
-                                <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                    {participants.map((participant) => (
-                                        <div
-                                            key={participant.userId}
-                                            className="flex items-center gap-3 p-3 bg-surface-elevated rounded-lg border border-default hover:border-primary/30 transition-colors"
-                                        >
-                                            {/* Avatar */}
-                                            <div className="avatar placeholder">
-                                                <div className="bg-neutral text-neutral-content rounded-full w-10">
-                                                    {participant.avatarUrl ? (
-                                                        <img src={participant.avatarUrl} alt={participant.username} />
-                                                    ) : (
-                                                        <span className="text-sm">
-                                                            {participant.username.substring(0, 2).toUpperCase()}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* User Info */}
-                                            <div className="flex-1">
-                                                <div className="font-medium text-primary">
-                                                    {participant.username}
-                                                    {participant.userId === user?.id && (
-                                                        <span className="text-xs text-muted ml-1">(You)</span>
-                                                    )}
-                                                </div>
-                                                <div className="text-xs text-muted">{participant.email}</div>
-                                            </div>
-
-                                            {/* Role Badge */}
-                                            <div className={`badge ${getRoleBadgeColor(participant.chatRole)}`}>
-                                                {getRoleLabel(participant.chatRole)}
-                                            </div>
-
-                                            {/* Actions */}
-                                            {canKickParticipant(participant.chatRole, participant.userId) && (
-                                                <button
-                                                    onClick={() => handleKickUser(participant.userId, participant.username)}
-                                                    className="btn btn-ghost btn-sm text-error hover:bg-error/10"
-                                                    title="Remove from chat"
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                    </svg>
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                        <ChatParticipantsList
+                            participants={participants}
+                            currentUserId={user?.id}
+                            currentUserRole={currentUserRole}
+                            loading={loading}
+                            onKickUser={handleKickUser}
+                        />
                     </>
                 )}
 
