@@ -80,7 +80,7 @@ export default function ChatParticipantsList({
                             <div className="bg-neutral text-neutral-content rounded-full w-10">
                                 {participant.avatarUrl ? (
                                     <Image
-                                        className="w-32 h-32 rounded-full object-cover"
+                                        className="w-10 h-10 rounded-full object-cover"
                                         unoptimized
                                         src={participant.avatarUrl}
                                         alt={participant.username}

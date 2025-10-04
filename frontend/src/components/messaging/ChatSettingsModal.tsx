@@ -116,22 +116,25 @@ export default function ChatSettingsModal({
     const canEditTitle = currentUserRole <= ChatRole.Moderator;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-            <AvatarUploadModal
-                open={avatarOpen}
-                onClose={() => setAvatarOpen(false)}
-                onUpload={async (file) => {
-                    const resp = await api.chats.uploadAvatar(chatId,file);
-                    if (!resp.data) return;
+        <>
+            <div className="relative z-[60]">
+                <AvatarUploadModal
+                    open={avatarOpen}
+                    onClose={() => setAvatarOpen(false)}
+                    onUpload={async (file) => {
+                        const resp = await api.chats.uploadAvatar(chatId,file);
+                        if (!resp.data) return;
 
-                    setAvatarUrl(resp.data.avatarUrl);
-                    setAvatarOpen(false);
-                }}
-            />
-            <div
-                className="bg-surface border border-default rounded-lg shadow-xl p-6 w-[600px] max-h-[700px] overflow-y-auto"
-                onClick={(e) => e.stopPropagation()}
-            >
+                        setAvatarUrl(resp.data.avatarUrl);
+                        setAvatarOpen(false);
+                    }}
+                />
+            </div>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
+                <div
+                    className="bg-surface border border-default rounded-lg shadow-xl p-6 w-[600px] max-h-[700px] overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                >
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-primary">Chat Settings</h2>
                     <button
@@ -168,8 +171,6 @@ export default function ChatSettingsModal({
                                         <Image
                                             src={avatarUrl}
                                             alt={currentTitle}
-                                            width={128}
-                                            height={128}
                                             className="w-full h-full object-cover"
                                             unoptimized
                                         />
@@ -306,5 +307,6 @@ export default function ChatSettingsModal({
                 </div>
             </div>
         </div>
+        </>
     );
 }
