@@ -63,10 +63,10 @@ public class UploadChatAvatarHandler : IRequestHandler<UploadChatAvatarCommand, 
             var fileUrl = await _fileService.SaveFileAsync(
                 newFileName,
                 request.File.Content,
-                null!,
+                "chats",
                 cancellationToken);
 
-            chat.AvatarUrl = fileUrl;
+            chat.AvatarUrl = Path.Combine("chats", fileUrl);
             await _chatRepository.UpdateAsync(chat, cancellationToken);
 
             return Result<string>.Success(fileUrl);

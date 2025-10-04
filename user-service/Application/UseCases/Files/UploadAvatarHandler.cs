@@ -36,13 +36,13 @@ public class UploadAvatarHandler: IRequestHandler<UploadAvatarCommand, Result<st
             var fileUrl = await _fileService.SaveFileAsync(
                 newFileName,
                 request.File.Content,
-                null!,
+                "users",
                 cancellationToken);
             
             var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
             if (user is null)
                 return Result<string>.Failure("User not found");
-            user.AvatarUrl = fileUrl;
+            user.AvatarUrl = Path.Combine("users", fileUrl);
             await _userRepository.UpdateAsync(user, cancellationToken);
             
             return Result<string>.Success(fileUrl);

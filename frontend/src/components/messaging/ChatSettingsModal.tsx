@@ -8,7 +8,6 @@ import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 import {getProtectedChatAvatarUrl, getProtectedUserAvatarUrl} from "@/lib/utils/protectedAvatar";
 import ChatParticipantsList from "./ChatParticipantsList";
 import Image from "next/image";
-import {mapReadUserDto} from "@/lib/mappers/userMapper";
 import AvatarUploadModal from "@/components/profile/AvatarUploadModal";
 
 interface ChatSettingsModalProps {
@@ -163,8 +162,6 @@ export default function ChatSettingsModal({
                                 <Image
                                     src={avatarUrl}
                                     alt={`${currentTitle[0].toUpperCase()}`}
-                                    width={128}
-                                    height={128}
                                     className="w-32 h-32 rounded-full object-cover"
                                     unoptimized
                                 />
