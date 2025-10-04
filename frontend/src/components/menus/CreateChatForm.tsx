@@ -45,7 +45,7 @@ export default function CreateChatForm(props: {
     return (
         <div className="absolute top-20 left-4 bg-surface border border-default rounded-lg shadow-xl z-20 p-6 w-96">
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-primary">Create New Chat</h2>
+                <h2 className="text-xl font-bold text-primary">Create Group Chat</h2>
                 <button 
                     type="button"
                     onClick={() => props.setIsCreatingChat(false)}
@@ -61,12 +61,12 @@ export default function CreateChatForm(props: {
             <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
                 <div className="form-control">
                     <label className="label">
-                        <span className="label-text font-medium">Chat Title</span>
+                        <span className="label-text font-medium">Group Name</span>
                     </label>
                     <input 
                         {...register("title")} 
                         type="text" 
-                        placeholder="Enter a name for your chat"
+                        placeholder="e.g., Team Project, Study Group"
                         className="input input-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary"
                         disabled={isSubmitting}
                     />
@@ -87,7 +87,6 @@ export default function CreateChatForm(props: {
                         disabled={isSubmitting}
                     >
                         <option value={ChatType.Group}>Group Chat</option>
-                        <option value={ChatType.Direct}>Direct Message</option>
                         <option value={ChatType.Channel} disabled>Channel (Coming Soon)</option>
                     </select>
                     {errors.chatType && (
@@ -95,6 +94,11 @@ export default function CreateChatForm(props: {
                             <span className="label-text-alt text-error">{errors.chatType.message}</span>
                         </label>
                     )}
+                    <label className="label">
+                        <span className="label-text-alt text-muted">
+                            💡 Direct chats are created automatically when you become friends
+                        </span>
+                    </label>
                 </div>
 
                 <div className="flex gap-3 mt-2">
@@ -113,7 +117,7 @@ export default function CreateChatForm(props: {
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                 </svg>
-                                Create Chat
+                                Create Group
                             </>
                         )}
                     </button>

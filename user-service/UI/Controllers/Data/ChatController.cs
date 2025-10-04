@@ -75,13 +75,17 @@ public class ChatController:Controller
         return TypedResults.Ok(result.Value);
     }
 
+    [GetUserGuid]
     [Authorize]
     [HttpPost("addUserToChat")]
     public async Task<Results<Ok, BadRequest<ErrorResponse>>> AddUserToChat([FromBody] AddUserToChatDto addUserToChatDto)
     {
+        var userGuid = HttpContext.GetUserGuid();
+        
         var command = new AddUserToChatCommand(
             addUserToChatDto.ChatId,
             addUserToChatDto.UserId,
+            userGuid,
             addUserToChatDto.ChatRole
         );
         _logger.LogInformation("Adding user {UserId} to chat {ChatId}",

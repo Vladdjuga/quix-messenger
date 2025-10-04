@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Domain.Enums;
+using FluentValidation;
 
 namespace Application.UseCases.Chats.CreateChat;
 
@@ -12,5 +13,9 @@ public class CreateChatCommandValidator:AbstractValidator<CreateChatCommand>
             .MaximumLength(150)
             .WithMessage("Chat name cannot exceed 150 characters")
             .Matches(@"^[a-zA-Z0-9_\-\.]+$");
+        
+        RuleFor(x => x.ChatType)
+            .NotEqual(ChatType.Direct)
+            .WithMessage("Direct chats cannot be created manually. They are automatically created when accepting a friend request.");
     }
 }
