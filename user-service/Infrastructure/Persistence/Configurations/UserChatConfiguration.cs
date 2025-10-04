@@ -22,7 +22,6 @@ public class UserChatConfiguration:IEntityTypeConfiguration<UserChatEntity>
         builder.Property(o => o.IsMuted)
             .HasDefaultValue(false);
         builder.Property(o => o.ChatRole)
-            .HasConversion<string>()
-            .HasDefaultValue(ChatRole.User);
+            .HasConversion<int>();
     }
 }

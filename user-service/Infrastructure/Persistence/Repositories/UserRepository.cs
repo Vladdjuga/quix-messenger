@@ -77,7 +77,6 @@ public sealed class UserRepository : IUserRepository
     {
         var result = await (
             from u in _dbSet.AsNoTracking()
-            join uc in _dbContext.UserChats on u.Id equals uc.UserId
             where (string.IsNullOrEmpty(query) || EF.Functions.Like(u.Username.ToLower(), $"%{query}%"))
                   && (!excludeUserId.HasValue || u.Id != excludeUserId.Value)
                   && (!lastCreatedAt.HasValue || u.CreatedAt < lastCreatedAt.Value)

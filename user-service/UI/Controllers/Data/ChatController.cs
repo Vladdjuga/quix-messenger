@@ -131,7 +131,7 @@ public class ChatController:Controller
 
     [GetUserGuid]
     [Authorize]
-    [HttpPost("updateChat")]
+    [HttpPatch("updateChat")]
     public async Task<Results<Ok, BadRequest<ErrorResponse>>> UpdateChat([FromBody] UpdateChatDto updateChatDto)
     {
         var userGuid = HttpContext.GetUserGuid();
