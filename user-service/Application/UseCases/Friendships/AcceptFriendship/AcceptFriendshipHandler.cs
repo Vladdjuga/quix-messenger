@@ -57,6 +57,7 @@ public class AcceptFriendshipHandler
         {
             Id = Guid.NewGuid(),
             Title = $"Direct chat between {user.Username} and {sender.Username}",
+            AvatarUrl = null, // Default avatar can be set later
             CreatedAt = DateTime.UtcNow,
             ChatType = ChatType.Direct
         };

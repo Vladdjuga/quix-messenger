@@ -5,7 +5,7 @@ import { ChatType, ChatWithLastMessage } from "@/lib/types";
 import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePolling";
 import { formatLastSeen } from "@/lib/utils/formatLastSeen";
 import Image from "next/image";
-import {getProtectedUserAvatarUrl} from "@/lib/utils/protectedAvatar";
+import {getProtectedChatAvatarUrl, getProtectedUserAvatarUrl} from "@/lib/utils/protectedAvatar";
 
 interface Props {
   chat: ChatWithLastMessage;
@@ -53,14 +53,17 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
   useEffect(() => {
     (async () => {
       if (!otherUserId) { setAvatarSrc(null); return; }
-      const url = await getProtectedUserAvatarUrl(otherUserId);
+      const url = chat.chatType === ChatType.Direct && otherUserId
+         ? await getProtectedUserAvatarUrl(otherUserId)
+          : await getProtectedChatAvatarUrl(chat.id);
+
       if (url) {
         setAvatarSrc(url);
       } else {
         setAvatarSrc(null);
       }
     })();
-  }, [otherUserId]);
+  }, [chat.chatType, chat.id, otherUserId]);
 
   const initials = useMemo(() => {
     const name = (chat.chatType === ChatType.Direct ? otherUser?.username : chat.title) || "?";

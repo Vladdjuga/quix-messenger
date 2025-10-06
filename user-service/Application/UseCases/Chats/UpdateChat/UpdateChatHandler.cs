@@ -44,7 +44,8 @@ public class UpdateChatHandler : IRequestHandler<UpdateChatCommand, IResult>
             Id = chat.Id,
             Title = request.Title,
             ChatType = chat.ChatType,
-            CreatedAt = chat.CreatedAt
+            CreatedAt = chat.CreatedAt,
+            AvatarUrl = chat.AvatarUrl
         };
 
         await _chatRepository.UpdateAsync(updatedChat, cancellationToken);

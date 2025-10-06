@@ -6,7 +6,7 @@ import {plainToInstance} from "class-transformer";
 import type {User} from "../../../types/user.js";
 import { NewMessageDto } from "../../../types/dto/NewMessageDto.js";
 import { UnauthorizedError } from "../../../clients/errors.js";
-import { MessageStatus } from "../../../types/grpcTypes.js";
+import { MessageStatus } from "../../../types/enum.js";
 import {getIO} from "../../../io.js";
 
 export async function onMessageSent(

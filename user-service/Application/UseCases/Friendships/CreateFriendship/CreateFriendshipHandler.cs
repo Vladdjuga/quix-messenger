@@ -40,6 +40,7 @@ public class CreateFriendshipHandler:IRequestHandler<CreateFriendshipCommand,Res
         {
             Id = Guid.NewGuid(),
             Title = "Direct chat between "+user.Username+" and "+friend.Username,
+            AvatarUrl = null, // Default avatar for direct chats
             CreatedAt = DateTime.UtcNow,
             ChatType = ChatType.Direct
         };
