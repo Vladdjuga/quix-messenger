@@ -52,7 +52,6 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
 
   useEffect(() => {
     (async () => {
-      if (!otherUserId) { setAvatarSrc(null); return; }
       const url = chat.chatType === ChatType.Direct && otherUserId
          ? await getProtectedUserAvatarUrl(otherUserId)
           : await getProtectedChatAvatarUrl(chat.id);

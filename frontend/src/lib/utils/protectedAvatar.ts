@@ -29,6 +29,10 @@ export async function getProtectedChatAvatarUrl(chatId: string): Promise<string 
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return null;
+
+    //Avatar may be null
+    if (res.status === 204) return null;
+
     const blob = await res.blob();
     return URL.createObjectURL(blob);
   } catch {

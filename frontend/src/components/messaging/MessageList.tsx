@@ -1,8 +1,8 @@
 
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef} from 'react';
 import MessageBubble from "@/components/messaging/MessageBubble";
 import {Message} from "@/lib/types";
-import { SCROLL_THRESHOLD_PX, SCROLL_OFFSET_AFTER_LOAD, SCROLL_SETTLE_DELAY_MS } from "@/lib/constants/pagination";
+import { SCROLL_OFFSET_AFTER_LOAD, SCROLL_SETTLE_DELAY_MS } from "@/lib/constants/pagination";
 
 type Props = {
     chatId: string;
@@ -17,7 +17,6 @@ const MessageList : React.FC<Props> = (props:Props) => {
     const {chatId,currentUserId,messages,editMessage,deleteMessage,loadMore}=props;
     const bottomRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [showScrollDown, setShowScrollDown] = useState(false);
 
     function scrollToBottom(behavior: ScrollBehavior = 'auto') {
         const el = containerRef.current;
@@ -41,10 +40,6 @@ const MessageList : React.FC<Props> = (props:Props) => {
         if (!containerRef.current) return;
         const scrollTop = containerRef.current.scrollTop;
 
-        if (containerRef.current.scrollHeight - containerRef.current.clientHeight - scrollTop > SCROLL_THRESHOLD_PX) {
-            setShowScrollDown(true);
-        }
-
         if (scrollTop === 0) { // At top
             await loadMore(); // Load more messages
             // Maintain scroll position after loading more
@@ -66,7 +61,6 @@ const MessageList : React.FC<Props> = (props:Props) => {
     return (
     <div ref={containerRef} onScroll={handleScroll}
          className="flex-1 overflow-y-auto p-4 space-y-2 bg-surface"
-            style={{ position: 'relative' }}
     >
             {messages.length === 0 && <div className="text-muted">No messages yet</div>}
             {messages.map(m => {
@@ -81,24 +75,6 @@ const MessageList : React.FC<Props> = (props:Props) => {
                     />
                 );
             })}
-            {showScrollDown && (
-                <button
-                    onClick={()=>scrollToBottom()}
-                    style={{
-                        position: "absolute",
-                        bottom: "10px",
-                        right: "10px",
-                        padding: "10px",
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                    }}
-                >
-                    ↓
-                </button>
-            )}
             <div ref={bottomRef} />
         </div>
     )
