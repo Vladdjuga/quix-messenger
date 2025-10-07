@@ -51,6 +51,12 @@ public static class DependencyInjection
             return new AvatarStorageService(fileStorageOptions.AvatarStoragePath, "");
         });
         
+        services.AddSingleton<IMessageAttachmentStorageService>(sp =>
+        {
+            var fileStorageOptions = sp.GetRequiredService<IOptionsSnapshot<FileStorageOptions>>().Value;
+            return new MessageAttachmentStorageService(fileStorageOptions.AvatarStoragePath, "messages");
+        });
+        
         services.AddScoped<AvatarMigrationService>();
         
         services.Configure<UserDefaultsOptions>(
@@ -70,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IFriendshipRepository,FriendshipRepository>();
         services.AddScoped<IUserChatRepository,UserChatRepository>();
         services.AddScoped<IMessageRepository,MessageRepository>();
+        services.AddScoped<IMessageAttachmentRepository,MessageAttachmentRepository>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();

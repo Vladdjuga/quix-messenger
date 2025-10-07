@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.UseCases.Chats.GetChatAvatar;
 
-public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<FileDto>>
+public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<FileDto?>>
 {
     private readonly IChatRepository _chatRepository;
     private readonly IAvatarStorageService _avatarStorage;
@@ -22,16 +22,16 @@ public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<F
         _userDefaults = userDefaults;
     }
 
-    public async Task<Result<FileDto>> Handle(GetChatAvatarQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FileDto?>> Handle(GetChatAvatarQuery request, CancellationToken cancellationToken)
     {
         var chat = await _chatRepository.GetByIdAsync(request.ChatId, cancellationToken);
         if (chat is null)
-            return Result<FileDto>.Failure("Chat not found");
-
-        var path = chat.AvatarUrl?.TrimStart('/') ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(path))
-            return Result<FileDto>.Failure("Chat avatar not set");
-
+            return Result<FileDto?>.Failure("Chat not found");
+        
+        if (chat.AvatarUrl is null)
+            return Result<FileDto?>.Success(null); // No avatar set. It's a valid case.
+        
+        var path = chat.AvatarUrl.TrimStart('/');
         try
         {
             await using var stream = await _avatarStorage.GetFileAsync(path, cancellationToken);
@@ -48,11 +48,11 @@ public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<F
                 Content = bytes
             };
 
-            return Result<FileDto>.Success(file);
+            return Result<FileDto?>.Success(file);
         }
         catch (Exception ex)
         {
-            return Result<FileDto>.Failure($"Failed to read chat avatar: {ex.Message}");
+            return Result<FileDto?>.Failure($"Failed to read chat avatar: {ex.Message}");
         }
     }
 }

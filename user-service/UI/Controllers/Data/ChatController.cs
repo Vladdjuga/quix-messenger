@@ -1,4 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
 using Application.Common;
 using Application.DTOs;
 using Application.DTOs.Chat;
@@ -11,7 +10,6 @@ using Application.UseCases.Chats.RemoveUserFromChat;
 using Application.UseCases.Chats.UpdateChat;
 using Application.UseCases.Chats.UploadChatAvatar;
 using Application.UseCases.Chats.GetChatAvatar;
-using Application.Utilities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -214,7 +212,7 @@ public class ChatController:Controller
     [Authorize]
     [HttpPost("uploadChatAvatar")]
     public async Task<Results<Ok<string>, BadRequest<ErrorResponse>, UnauthorizedHttpResult>> UploadChatAvatar(
-        [FromForm] IFormFile avatar,
+        [FromForm] IFormFile? avatar,
         [FromForm] Guid chatId)
     {
         var userGuid = HttpContext.GetUserGuid();
@@ -251,7 +249,12 @@ public class ChatController:Controller
 
     [Authorize]
     [HttpGet("getChatAvatar/{chatId:guid}")]
-    public async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetChatAvatar(Guid chatId)
+    public async Task<Results<FileContentHttpResult,
+        NotFound,
+        UnauthorizedHttpResult,
+        BadRequest<ErrorResponse>,
+        NoContent
+    >> GetChatAvatar(Guid chatId)
     {
         var result = await _mediator.Send(new GetChatAvatarQuery(chatId));
         if (result.IsFailure)
@@ -259,8 +262,11 @@ public class ChatController:Controller
             _logger.LogError("Failed to get avatar for chat {ChatId}: {Error}", chatId, result.Error);
             return ErrorResult.Create(result.Error);
         }
-
+        _logger.LogInformation("Retrieved avatar for chat {ChatId}", chatId);
         var file = result.Value;
+        if (file is null)
+            return TypedResults.NoContent();
+        
         return TypedResults.File(file.Content, file.ContentType, file.Name);
     }
     

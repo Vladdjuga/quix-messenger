@@ -17,7 +17,8 @@ namespace Infrastructure.Persistence.Contexts
         public DbSet<UserChatEntity> UserChats { get; set; }
         public DbSet<FriendshipEntity> Friendships { get; set; }
         public DbSet<UserSessionEntity> UserSessions { get; set; }
-    public DbSet<MessageEntity> Messages { get; set; }
+        public DbSet<MessageEntity> Messages { get; set; }
+        public DbSet<MessageAttachmentEntity> MessageAttachments { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);

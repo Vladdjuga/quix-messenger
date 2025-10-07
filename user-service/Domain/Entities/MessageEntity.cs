@@ -12,6 +12,8 @@ public class MessageEntity
     public virtual UserEntity? User { get; init; }
 
     public required string Text { get; set; }
+    public virtual ICollection<MessageAttachmentEntity> Attachments { get; init; } = new List<MessageAttachmentEntity>();
     public required DateTime CreatedAt { get; init; }
     public required MessageStatus Status { get; set; }
 }
+

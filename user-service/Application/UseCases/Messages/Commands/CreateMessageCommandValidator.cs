@@ -7,7 +7,7 @@ public class CreateMessageCommandValidator : AbstractValidator<CreateMessageComm
     public CreateMessageCommandValidator()
     {
         RuleFor(x => x.Text)
-            .NotEmpty()
+            //.NotEmpty() // Allow empty messages (e.g., for attachments)
             .MaximumLength(500);
         RuleFor(x => x.ChatId)
             .NotEmpty();

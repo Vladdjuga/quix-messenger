@@ -36,6 +36,11 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(x => x.Attachments)
+            .WithOne(a => a.Message)
+            .HasForeignKey(a => a.MessageId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(x => new { x.ChatId, x.CreatedAt }).HasDatabaseName("ix_messages_chatid_sentat");
         builder.HasIndex(x => new { x.UserId, x.CreatedAt }).HasDatabaseName("ix_messages_userid_sentat");
     }
