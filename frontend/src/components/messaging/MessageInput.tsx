@@ -3,7 +3,7 @@ import FileUploader from "@/components/inputs/FileUploader";
 
 type Props = {
     placeholder: string,
-    onSend: (text: string) => void;
+    onSend: (text: string,attachments:File[]) => void;
     onChange: () => void;
 }
 
@@ -18,7 +18,7 @@ const MessageInput: React.FC<Props> = (props: Props) => {
     const handleSendMessage = () => {
         if (text.trim()) {
             setText("");
-            props.onSend(text);
+            props.onSend(text,attachedFiles);
         }
     }
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

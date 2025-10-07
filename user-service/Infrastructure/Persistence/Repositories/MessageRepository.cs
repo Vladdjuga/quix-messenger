@@ -31,6 +31,7 @@ public class MessageRepository : IMessageRepository
     public async Task<IEnumerable<MessageEntity>> GetMessagesAsync()
     {
         return await _dbSet.AsNoTracking()
+            .Include(m => m.Attachments.Where(a => !a.IsDeleted))
             .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
     }
@@ -38,6 +39,7 @@ public class MessageRepository : IMessageRepository
     public async Task<IEnumerable<MessageEntity>> GetMessagesByChatIdAsync(Guid chatId)
     {
         return await _dbSet.AsNoTracking()
+            .Include(m => m.Attachments.Where(a => !a.IsDeleted))
             .Where(m => m.ChatId == chatId)
             .OrderByDescending(m => m.CreatedAt)
             .ToListAsync();
@@ -45,7 +47,9 @@ public class MessageRepository : IMessageRepository
 
     public async Task<IEnumerable<MessageEntity>> GetMessagesAsync(Guid chatId, int count, CancellationToken cancellationToken)
     {
-        var query = await _dbSet.Where(m => m.ChatId == chatId)
+        var query = await _dbSet
+            .Include(m => m.Attachments.Where(a => !a.IsDeleted))
+            .Where(m => m.ChatId == chatId)
             .OrderByDescending(m => m.CreatedAt)
             .Take(count)
             .ToListAsync(cancellationToken);
@@ -54,7 +58,9 @@ public class MessageRepository : IMessageRepository
 
     public async Task<IEnumerable<MessageEntity>> GetMessagesPaginatedAsync(Guid chatId, DateTime lastCreatedAt, int pageSize, CancellationToken cancellationToken)
     {
-        var query = await _dbSet.Where(m => m.ChatId == chatId)
+        var query = await _dbSet
+            .Include(m => m.Attachments.Where(a => !a.IsDeleted))
+            .Where(m => m.ChatId == chatId)
             .Where(m => m.CreatedAt < lastCreatedAt)
             .OrderByDescending(m => m.CreatedAt)
             .Take(pageSize)
@@ -64,7 +70,9 @@ public class MessageRepository : IMessageRepository
 
     public async Task<MessageEntity?> GetByIdAsync(Guid messageId, CancellationToken cancellationToken)
     {
-        return await _dbSet.FirstOrDefaultAsync(m => m.Id == messageId, cancellationToken);
+        return await _dbSet
+            .Include(m => m.Attachments.Where(a => !a.IsDeleted))
+            .FirstOrDefaultAsync(m => m.Id == messageId, cancellationToken);
     }
 
     public async Task DeleteAsync(MessageEntity entity, CancellationToken cancellationToken)

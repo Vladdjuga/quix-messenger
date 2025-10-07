@@ -10,4 +10,5 @@ public class ReadMessageDto
     public required Guid UserId { get; set; }
     public required Guid ChatId { get; set; }
     public required MessageStatus Status { get; set; }
+    public IEnumerable<MessageAttachmentDto>? Attachments { get; set; }
 }

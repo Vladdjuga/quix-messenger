@@ -3,6 +3,7 @@ import {ReadUserDto} from "@/lib/dto/user/ReadUserDto";
 import {ReadFriendshipDto} from "@/lib/dto/friendship/ReadFriendshipDto";
 import {RegisterUserDto} from "@/lib/dto/user/RegisterUserDto";
 import { ReadMessageDto } from "@/lib/dto/message/ReadMessageDto";
+import { MessageAttachmentDto } from "@/lib/dto/message/MessageAttachmentDto";
 import { ReadChatDto } from "@/lib/dto/chat/ReadChatDto";
 import { UpdateUserDto } from "@/lib/dto/user/UpdateUserDto";
 import {mapReadChatWithLastMessageDto, mapReadChatWithLastMessageDtos} from "@/lib/mappers/chatMapper";
@@ -118,6 +119,42 @@ export const api = {
             apiClient.get<ReadMessageDto[]>(`/messages/paginated`, { params: { chatId, lastCreatedAt, pageSize } }),
         // Delete a message by id
         delete: (messageId: string) => apiClient.delete<void>(`/messages/${encodeURIComponent(messageId)}`),
+    },
+    attachments: {
+        upload: async (messageId: string, chatId: string, files: File[]): Promise<MessageAttachmentDto[]> => {
+            const form = new FormData();
+            files.forEach((file) => form.append('files', file));
+            form.append('messageId', messageId);
+            form.append('chatId', chatId);
+            
+            const response = await apiClient.post<MessageAttachmentDto[]>(
+                '/attachments/upload', 
+                form,
+                {
+                    headers: { /* Axios will set correct multipart boundary */ },
+                }
+            );
+            return response.data;
+        },
+        getByMessage: async (messageId: string): Promise<MessageAttachmentDto[]> => {
+            const response = await apiClient.get<MessageAttachmentDto[]>(
+                `/attachments/message/${encodeURIComponent(messageId)}`
+            );
+            return response.data;
+        },
+        download: async (attachmentId: string): Promise<Blob> => {
+            const response = await apiClient.get(
+                `/attachments/download/${encodeURIComponent(attachmentId)}`,
+                {
+                    responseType: 'blob', // Important for binary data
+                }
+            );
+            return response.data;
+        },
+        getDownloadUrl: (attachmentId: string): string => {
+            // Assuming apiClient has a baseURL configured
+            return `/api/attachments/download/${encodeURIComponent(attachmentId)}`;
+        },
     },
     realtime: {
         // Check if a user is online right now via proxy to realtime-service

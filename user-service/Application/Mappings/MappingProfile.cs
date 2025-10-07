@@ -34,8 +34,17 @@ public class MappingProfile:Profile
         
         // Note: FriendshipEntity -> ReadFriendshipDto mapping has been removed
         // All friendship mappings are now done manually for better control and clarity
-
+        
+        // Attachments
+        CreateMap<MessageAttachmentEntity, MessageAttachmentDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FileName))
+            .ForMember(dest => dest.ContentType, opt => opt.MapFrom(src => src.MimeType))
+            .ForMember(dest => dest.Size, opt => opt.MapFrom(src => src.FileSize))
+            .ForMember(dest=>dest.Url ,opt=>opt.MapFrom(src=>src.FileUrl));
+        
         // Messages
-        CreateMap<MessageEntity, ReadMessageDto>();
+        CreateMap<MessageEntity, ReadMessageDto>()
+            .ForMember(dest => dest.Attachments, opt => opt.MapFrom(src => src.Attachments));
     }
 }
