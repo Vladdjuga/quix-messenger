@@ -180,14 +180,12 @@ public class UserController : Controller
             _logger.LogWarning("No avatar file provided by user {UserGuid}", userGuid);
             return TypedResults.BadRequest(new ErrorResponse("No file provided"));
         }
-        using var memory = new MemoryStream();
-        await avatar.CopyToAsync(memory);
 
-        var fileDto = new FileDto
+        var fileDto = new FileStreamDto()
         {
             Name = Path.GetFileName(avatar.FileName),
             ContentType = avatar.ContentType,
-            Content= memory.ToArray()
+            Content= avatar.OpenReadStream()
         };
         var command = new UploadAvatarCommand(fileDto, userGuid);
         _logger.LogInformation("User {UserGuid} is uploading an avatar", userGuid);
@@ -207,7 +205,7 @@ public class UserController : Controller
     /// </summary>
     [Authorize]
     [HttpGet("getAvatar/{userId:guid}")]
-    public async Task<Results<FileContentHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetAvatar(Guid userId)
+    public async Task<Results<FileStreamHttpResult, NotFound, UnauthorizedHttpResult, BadRequest<ErrorResponse>>> GetAvatar(Guid userId)
     {
         var result = await _mediator.Send(new GetAvatarQuery(userId));
         if (result.IsFailure)

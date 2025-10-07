@@ -4,4 +4,5 @@ using MediatR;
 
 namespace Application.UseCases.Files;
 
-public record UploadAvatarCommand(FileDto File, Guid UserId) : IRequest<Result<string>>;
+// Uses a stream to handle large files efficiently
+public record UploadAvatarCommand(FileStreamDto File, Guid UserId) : IRequest<Result<string>>;

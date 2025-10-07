@@ -4,4 +4,4 @@ using MediatR;
 
 namespace Application.UseCases.Files;
 
-public record GetAvatarQuery(Guid UserId) : IRequest<Result<FileDto>>;
+public record GetAvatarQuery(Guid UserId) : IRequest<Result<FileStreamDto>>;

@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Application.UseCases.Files;
 
-public class GetAvatarHandler : IRequestHandler<GetAvatarQuery, Result<FileDto>>
+public class GetAvatarHandler : IRequestHandler<GetAvatarQuery, Result<FileStreamDto>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IAvatarStorageService _avatarStorage;
@@ -19,37 +19,34 @@ public class GetAvatarHandler : IRequestHandler<GetAvatarQuery, Result<FileDto>>
         _userDefaults = userDefaults;
     }
 
-    public async Task<Result<FileDto>> Handle(GetAvatarQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FileStreamDto>> Handle(GetAvatarQuery request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.UserId, cancellationToken);
         if (user is null)
-            return Result<FileDto>.Failure("User not found");
+            return Result<FileStreamDto>.Failure("User not found");
 
         var path = user.AvatarUrl?.TrimStart('/') ?? string.Empty;
         if (string.IsNullOrWhiteSpace(path))
-            return Result<FileDto>.Failure("Avatar not set");
+            return Result<FileStreamDto>.Failure("Avatar not set");
 
         try
         {
-            await using var stream = await _avatarStorage.GetFileAsync(path, cancellationToken);
-            await using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms, cancellationToken);
-            var bytes = ms.ToArray();
+            var stream= await _avatarStorage.GetFileStreamAsync(path, cancellationToken);
 
             var ext = Path.GetExtension(path).ToLowerInvariant();
             var contentType = _userDefaults.AvatarContentTypes.GetValueOrDefault(ext, "application/octet-stream");
-            var file = new FileDto
+            var file = new FileStreamDto
             {
                 Name = Path.GetFileName(path),
                 ContentType = contentType,
-                Content = bytes
+                Content = stream
             };
 
-            return Result<FileDto>.Success(file);
+            return Result<FileStreamDto>.Success(file);
         }
         catch (Exception ex)
         {
-            return Result<FileDto>.Failure($"Failed to read avatar: {ex.Message}");
+            return Result<FileStreamDto>.Failure($"Failed to read avatar: {ex.Message}");
         }
     }
 }

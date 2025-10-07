@@ -6,13 +6,13 @@ using MediatR;
 
 namespace Application.UseCases.Chats.GetChatAvatar;
 
-public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<FileDto?>>
+public class GetChatAvatarStreamHandler : IRequestHandler<GetChatAvatarStreamQuery, Result<FileStreamDto?>>
 {
     private readonly IChatRepository _chatRepository;
     private readonly IAvatarStorageService _avatarStorage;
     private readonly IUserDefaults _userDefaults;
 
-    public GetChatAvatarHandler(
+    public GetChatAvatarStreamHandler(
         IChatRepository chatRepository,
         IAvatarStorageService avatarStorage,
         IUserDefaults userDefaults)
@@ -22,34 +22,43 @@ public class GetChatAvatarHandler : IRequestHandler<GetChatAvatarQuery, Result<F
         _userDefaults = userDefaults;
     }
 
-    public async Task<Result<FileDto?>> Handle(GetChatAvatarQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FileStreamDto?>> Handle(GetChatAvatarStreamQuery request, CancellationToken cancellationToken)
     {
         var chat = await _chatRepository.GetByIdAsync(request.ChatId, cancellationToken);
         if (chat is null)
-            return Result<FileDto?>.Failure("Chat not found");
+            return Result<FileStreamDto?>.Failure("Chat not found");
         
         if (chat.AvatarUrl is null)
-            return Result<FileDto?>.Success(null); // No avatar set. It's a valid case.
+            return Result<FileStreamDto?>.Success(null); // No avatar set. It's a valid case.
         
         var path = chat.AvatarUrl.TrimStart('/');
+        
         try
         {
-            var bytes = await _avatarStorage.GetFileAsync(path, cancellationToken);
+            // Check if file exists before opening stream
+            var exists = await _avatarStorage.FileExistsAsync(path, cancellationToken);
+            if (!exists)
+                return Result<FileStreamDto?>.Failure("Avatar file not found");
+
+            // Get file stream - no memory allocation for file content
+            var stream = await _avatarStorage.GetFileStreamAsync(path, cancellationToken);
 
             var ext = Path.GetExtension(path).ToLowerInvariant();
             var contentType = _userDefaults.AvatarContentTypes.GetValueOrDefault(ext, "application/octet-stream");
-            var file = new FileDto
+            
+            var file = new FileStreamDto
             {
                 Name = Path.GetFileName(path),
                 ContentType = contentType,
-                Content = bytes
+                Content = stream,
+                ContentLength = stream.CanSeek ? stream.Length : null
             };
 
-            return Result<FileDto?>.Success(file);
+            return Result<FileStreamDto?>.Success(file);
         }
         catch (Exception ex)
         {
-            return Result<FileDto?>.Failure($"Failed to read chat avatar: {ex.Message}");
+            return Result<FileStreamDto?>.Failure($"Failed to read chat avatar: {ex.Message}");
         }
     }
 }

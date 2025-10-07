@@ -223,17 +223,18 @@ public class ChatController:Controller
             return TypedResults.BadRequest(new ErrorResponse("No file provided"));
         }
 
-        using var memory = new MemoryStream();
-        await avatar.CopyToAsync(memory);
-
-        var fileDto = new FileDto
+        // Stream-based approach - no memory allocation for file content
+        var fileName = Path.GetFileName(avatar.FileName);
+        var openReadStream = avatar.OpenReadStream();
+        await using var fileStreamDto = new FileStreamDto
         {
-            Name = Path.GetFileName(avatar.FileName),
+            Name = fileName,
             ContentType = avatar.ContentType,
-            Content = memory.ToArray()
+            Content = openReadStream
         };
+        fileStreamDto.ContentLength = avatar.Length;
 
-        var command = new UploadChatAvatarCommand(fileDto, chatId, userGuid);
+        var command = new UploadChatAvatarStreamCommand(fileStreamDto, chatId, userGuid);
         _logger.LogInformation("User {UserGuid} is uploading an avatar for chat {ChatId}", userGuid, chatId);
         var result = await _mediator.Send(command);
 
@@ -249,14 +250,15 @@ public class ChatController:Controller
 
     [Authorize]
     [HttpGet("getChatAvatar/{chatId:guid}")]
-    public async Task<Results<FileContentHttpResult,
+    public async Task<Results<FileStreamHttpResult,
         NotFound,
         UnauthorizedHttpResult,
         BadRequest<ErrorResponse>,
         NoContent
     >> GetChatAvatar(Guid chatId)
     {
-        var result = await _mediator.Send(new GetChatAvatarQuery(chatId));
+        // Use stream-based query for memory efficiency
+        var result = await _mediator.Send(new GetChatAvatarStreamQuery(chatId));
         if (result.IsFailure)
         {
             _logger.LogError("Failed to get avatar for chat {ChatId}: {Error}", chatId, result.Error);
@@ -267,7 +269,8 @@ public class ChatController:Controller
         if (file is null)
             return TypedResults.NoContent();
         
-        return TypedResults.File(file.Content, file.ContentType, file.Name);
+        // Stream the file directly - no memory allocation
+        return TypedResults.Stream(file.Content, file.ContentType, file.Name, enableRangeProcessing: true);
     }
     
 }
