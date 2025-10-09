@@ -108,7 +108,7 @@ public class FriendshipController:Controller
     public async Task<Results<Ok<IEnumerable<ReadFriendshipDto>>, 
         BadRequest<ErrorResponse>,UnauthorizedHttpResult>> SearchFriendships(
         [FromQuery] string query,
-    [FromQuery] int? pageSize,
+        [FromQuery] int? pageSize,
         [FromQuery] DateTime? lastCreatedAt)
     {
         var userGuid = HttpContext.GetUserGuid();

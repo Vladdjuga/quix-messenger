@@ -1,5 +1,6 @@
 import {Message, MessageStatus} from "@/lib/types";
 import React, {useCallback, useState} from "react";
+import AttachmentPreview from "@/components/messaging/AttachmentPreview";
 
 type Props = {
     message: Message;
@@ -87,7 +88,19 @@ const MessageBubble = (props: Props) => {
                             <button className="btn-secondary text-xs" onClick={cancelEdit}>Cancel</button>
                         </div>
                     ) : (
-                        m.text
+                        <>
+                            {m.text && <div className="mb-2">{m.text}</div>}
+                            {m.attachments && m.attachments.length > 0 && (
+                                <div className="flex flex-col gap-2 mt-2">
+                                    {m.attachments.map((attachment) => (
+                                        <AttachmentPreview 
+                                            key={attachment.id} 
+                                            attachment={attachment} 
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
                 <div className="text-[10px] text-muted mt-1 flex items-center gap-1">

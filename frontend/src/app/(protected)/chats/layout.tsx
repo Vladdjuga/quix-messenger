@@ -31,11 +31,12 @@ export default function ChatsLayout({ children }: { children: React.ReactNode })
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // Empty deps is fine - this function doesn't depend on any external state
 
   useEffect(() => {
     loadChats();
-  }, [loadChats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount, not when loadChats changes
 
 
 

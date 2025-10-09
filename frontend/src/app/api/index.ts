@@ -74,6 +74,14 @@ export const api = {
                 {params: {pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
             );
         },
+
+        // Search friendships with query
+        searchFriendships: (query: string, pageSize: number = 20, lastCreatedAt?: string) => {
+            return apiClient.get<ReadFriendshipDto[]>(
+                `/friendship/searchFriendships`,
+                {params: {query: query, pageSize: pageSize, lastCreatedAt: lastCreatedAt}}
+            );
+        },
     },
     chats: {
         // Next API routes proxy to user-service. Returns domain chats for the current user.

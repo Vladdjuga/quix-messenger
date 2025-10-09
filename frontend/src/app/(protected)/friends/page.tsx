@@ -5,7 +5,7 @@ import FriendshipCard from "@/components/user/FriendshipCard";
 import LoadingSpinner from "@/components/profile/LoadingSpinner";
 import ErrorDisplay from "@/components/profile/ErrorDisplay";
 import ScrollToTopButton from "@/components/common/ScrollToTopButton";
-import { useState, useMemo, useRef } from "react";
+import { useState, useRef } from "react";
 import { UserStatus } from "@/lib/types/enums";
 import { SCROLL_TO_TOP_THRESHOLD_PX, SCROLL_THRESHOLD_PX } from "@/lib/constants/pagination";
 
@@ -16,19 +16,9 @@ import FriendSearchInput from "@/components/searching/friends/FriendsSearchInput
 
 export default function FriendsPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { friends, loading, error, refetch, removeFriend, hasMore, fetchMore } = useFriends();
+  const { friends, loading, error, refetch, removeFriend, hasMore, fetchMore } = useFriends(searchQuery);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
-
-  // filter logic
-  const filteredFriends = useMemo(() => {
-    if (!searchQuery.trim()) return friends;
-    const query = searchQuery.toLowerCase();
-    return friends.filter(friend =>
-        friend.user.username.toLowerCase().includes(query) ||
-        friend.user.email.toLowerCase().includes(query)
-    );
-  }, [friends, searchQuery]);
 
   // scroll handler
   const handleScroll = async () => {
@@ -37,7 +27,7 @@ export default function FriendsPage() {
 
     setShowScrollTop(scrollTop > SCROLL_TO_TOP_THRESHOLD_PX);
 
-    if (!searchQuery && scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD_PX && hasMore && !loading) {
+    if (scrollHeight - scrollTop - clientHeight < SCROLL_THRESHOLD_PX && hasMore && !loading) {
       await fetchMore();
     }
   };
@@ -83,7 +73,7 @@ export default function FriendsPage() {
           )}
 
           {/* Content */}
-          {filteredFriends.length === 0 && !loading ? (
+          {friends.length === 0 && !loading ? (
               <EmptyState
                   icon={
                     <svg className="w-8 h-8 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +91,7 @@ export default function FriendsPage() {
           ) : (
               <>
                 <div className="space-y-3">
-                  {filteredFriends.map(friend => (
+                  {friends.map(friend => (
                       <FriendshipCard
                           key={friend.id}
                           friendship={friend}
