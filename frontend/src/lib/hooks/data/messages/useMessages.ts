@@ -51,7 +51,10 @@ export function useMessages(props: { chatId: string }) {
 
     const sendMessage = async (text: string, attachments: File[]) => {
         const value = text.trim();
-        if (!value || !chatId) return;
+        // Allow sending if there's text OR attachments
+        const hasAttachments = attachments && attachments.length > 0;
+        if ((!value && !hasAttachments) || !chatId) return;
+        
         try {
             const localId = `local-${Date.now()}-${Math.random().toString(36).substring(7)}`;
             const msg: Message = {
@@ -65,7 +68,7 @@ export function useMessages(props: { chatId: string }) {
             };
             
             // If there are attachments, store them for upload after we get the real message ID
-            if (attachments && attachments.length > 0) {
+            if (hasAttachments) {
                 pendingUploadsRef.current.set(localId, { localId, files: attachments });
                 // Show pending attachments in UI with placeholder data
                 msg.attachments = attachments.map((file, index) => ({
