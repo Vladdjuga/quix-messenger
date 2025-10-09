@@ -39,3 +39,21 @@ export async function getProtectedChatAvatarUrl(chatId: string): Promise<string 
     return null;
     }
 }
+
+/**
+ * Utility to fetch and create a blob URL for a protected attachment image
+ */
+export async function getProtectedAttachmentImageUrl(attachmentId: string): Promise<string | null> {
+  try {
+    const token = getToken();
+    if (!token) return null;
+    const res = await fetch(`/api/attachments/download/${encodeURIComponent(attachmentId)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  } catch {
+    return null;
+  }
+}

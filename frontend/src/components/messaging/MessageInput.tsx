@@ -20,6 +20,7 @@ const MessageInput: React.FC<Props> = (props: Props) => {
             setText("");
             props.onSend(text,attachedFiles);
         }
+        setAttachedFiles([]);
     }
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);
@@ -49,7 +50,7 @@ const MessageInput: React.FC<Props> = (props: Props) => {
                 }}
                 className="flex-1 resize-none input-primary"
             />
-            <button onClick={handleSendMessage} disabled={!text.trim()} className="btn-primary disabled:opacity-50">
+            <button onClick={handleSendMessage} disabled={!text.trim()&&!(attachedFiles.length>0)} className="btn-primary disabled:opacity-50">
                 Send
             </button>
             {attachedFiles.length > 0 && (
@@ -57,7 +58,7 @@ const MessageInput: React.FC<Props> = (props: Props) => {
                     {attachedFiles.map((file) => (
                         <div
                             key={file.name}
-                            className="flex items-center gap-2 border rounded px-2 py-1 text-sm bg-gray-50"
+                            className="flex items-center gap-2 border rounded px-2 py-1 text-sm bg-gray-100"
                         >
                             <span className="truncate max-w-[120px]">{file.name}</span>
                             <button

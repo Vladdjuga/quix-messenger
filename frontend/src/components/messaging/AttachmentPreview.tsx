@@ -1,12 +1,24 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { MessageAttachment } from '@/lib/types';
 import Image from "next/image";
+import {getProtectedAttachmentImageUrl} from "@/lib/utils/protectedAvatar";
 
 type Props = {
     attachment: MessageAttachment;
 };
 
 const AttachmentPreview = ({ attachment }: Props) => {
+    const [protectedUrl, setProtectedUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+        (async () => {
+            const url = await getProtectedAttachmentImageUrl(attachment.id);
+            if (isMounted) setProtectedUrl(url);
+        })();
+        return () => { isMounted = false; };
+    }, [attachment.id]);
+
     const isImage = attachment.contentType.startsWith('image/');
     const isVideo = attachment.contentType.startsWith('video/');
     const isAudio = attachment.contentType.startsWith('audio/');
@@ -34,7 +46,9 @@ const AttachmentPreview = ({ attachment }: Props) => {
     const handleDownload = (e: React.MouseEvent) => {
         e.preventDefault();
         const link = document.createElement('a');
-        link.href = attachment.url;
+        if (protectedUrl != null) {
+            link.href = protectedUrl;
+        }
         link.download = attachment.name;
         link.target = '_blank';
         document.body.appendChild(link);
@@ -57,6 +71,18 @@ const AttachmentPreview = ({ attachment }: Props) => {
 
     // Image preview
     if (isImage) {
+        if(!protectedUrl) {
+            return (
+                <div className="flex items-center gap-2 p-2 rounded bg-red-100 dark:bg-red-800">
+                    <span className="text-2xl">❌</span>
+                    <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{attachment.name}</div>
+                        <div className="text-xs text-red-600 dark:text-red-400">Failed to load image</div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
             <div className="group relative">
                 <a 
@@ -66,7 +92,7 @@ const AttachmentPreview = ({ attachment }: Props) => {
                     className="block rounded-lg overflow-hidden max-w-xs"
                 >
                     <Image
-                        src={attachment.url} 
+                        src={protectedUrl}
                         alt={attachment.name}
                         className="w-full h-auto max-h-64 object-cover hover:opacity-90 transition-opacity"
                         loading="lazy"

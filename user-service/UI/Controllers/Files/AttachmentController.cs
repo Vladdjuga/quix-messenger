@@ -9,7 +9,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using UI.Attributes;
 using UI.Common;
+using UI.Utilities;
 
 namespace UI.Controllers.Files;
 
@@ -101,6 +103,7 @@ public class AttachmentController : Controller
     /// </summary>
     /// <returns>File stream with range support</returns>
     [Authorize]
+    [GetUserGuid]
     [HttpGet("download/{attachmentId:guid}")]
     public async Task<Results<
             FileStreamHttpResult,
@@ -110,7 +113,7 @@ public class AttachmentController : Controller
         >
     > DownloadAttachment(Guid attachmentId)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userId = HttpContext.GetUserGuid();
         var query = new DownloadAttachmentQuery(attachmentId, userId);
         var result = await _mediator.Send(query);
 
