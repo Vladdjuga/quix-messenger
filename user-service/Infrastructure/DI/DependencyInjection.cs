@@ -79,8 +79,10 @@ public static class DependencyInjection
         services.AddScoped<IMessageRepository,MessageRepository>();
         services.AddScoped<IMessageAttachmentRepository,MessageAttachmentRepository>();
         
-        // HTTP Client for realtime-service communication
-        services.AddHttpClient("RealtimeService");
+        // Kafka Producer
+        services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+        
+        // Notification Service (uses Kafka)
         services.AddScoped<INotificationService, RealtimeNotificationService>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();

@@ -6,6 +6,10 @@ const router = Router();
 
 /**
  * POST /api/broadcast/newMessage
+ * @deprecated This HTTP endpoint is deprecated. Messages are now broadcast via Kafka consumer.
+ * The backend publishes to Kafka topic 'messenger.events.newMessage' and this service consumes it.
+ * This endpoint is kept for backward compatibility during migration.
+ * 
  * Receives new message from user-service and broadcasts via WebSocket
  */
 router.post('/newMessage', (req, res): void => {
