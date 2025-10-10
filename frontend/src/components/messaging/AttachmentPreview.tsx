@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { MessageAttachment } from '@/lib/types';
 import Image from "next/image";
-import {getProtectedAttachmentImageUrl} from "@/lib/utils/protectedAvatar";
+import {getProtectedAttachmentBlobUrl} from "@/lib/utils/protectedAvatar";
 
 type Props = {
     attachment: MessageAttachment;
@@ -13,7 +13,7 @@ const AttachmentPreview = ({ attachment }: Props) => {
     useEffect(() => {
         let isMounted = true;
         (async () => {
-            const url = await getProtectedAttachmentImageUrl(attachment.id);
+            const url = await getProtectedAttachmentBlobUrl(attachment.id);
             if (isMounted) setProtectedUrl(url);
         })();
         return () => { isMounted = false; };

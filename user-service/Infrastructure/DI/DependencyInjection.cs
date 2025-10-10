@@ -3,6 +3,7 @@ using Application.Auth;
 using Application.Behaviors;
 using Application.DTOs.User;
 using Application.Interfaces;
+using Application.Interfaces.Notification;
 using Application.Interfaces.Security;
 using Application.Mappings;
 using Application.Services;
@@ -77,6 +78,10 @@ public static class DependencyInjection
         services.AddScoped<IUserChatRepository,UserChatRepository>();
         services.AddScoped<IMessageRepository,MessageRepository>();
         services.AddScoped<IMessageAttachmentRepository,MessageAttachmentRepository>();
+        
+        // HTTP Client for realtime-service communication
+        services.AddHttpClient("RealtimeService");
+        services.AddScoped<INotificationService, RealtimeNotificationService>();
         
         services.AddTransient<IStringHasher, Pbkdf2StringHasher>();
         services.AddTransient<IJwtProvider, JwtProvider>();

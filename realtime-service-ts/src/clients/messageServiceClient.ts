@@ -1,6 +1,5 @@
 import logger from "../config/logger.js";
 import { UnauthorizedError } from "./errors.js";
-import type {Message} from "../types/message.js";
 
 // Prefer USER_SERVICE_URL; fallback to MESSAGE_SERVICE_URL for backward compatibility
 const DEFAULT_BASE_URL = process.env.USER_SERVICE_URL || process.env.MESSAGE_SERVICE_URL || "http://user-service:7001";
@@ -12,42 +11,8 @@ export class MessageServiceClient {
     this.baseUrl = baseUrl.replace(/\/$/, "");
   }
 
-  /**
-   * Calls user-service REST endpoint to add a message.
-   * POST /api/Messages
-   */
-  async addMessage(params: { text: string; chatId: string; userId: string; token: string }): Promise<Message | null> {
-    const { text, chatId, token } = params; // userId is derived from JWT on server
-    const url = `${this.baseUrl}/api/Messages`;
-
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text, chatId })
-      });
-
-      if (res.status === 401) {
-        logger.warn(`user-service addMessage unauthorized (401)`);
-        throw new UnauthorizedError("Token expired or unauthorized");
-      }
-      if (!res.ok) {
-        logger.warn(`user-service addMessage non-2xx: ${res.status} ${res.statusText}`);
-        return null;
-      }
-
-      const dto = (await res.json()) as Message | null;
-      if (!dto) return null;
-      return dto;
-    } catch (err) {
-      logger.error(`user-service addMessage failed: ${err instanceof Error ? err.message : String(err)}`);
-      return null;
-    }
-  }
+  // NOTE: addMessage has been removed - messages are now sent via HTTP to backend
+  // Backend creates message + attachments atomically, then broadcasts via realtime-service
 
   /**
    * DELETE /api/Messages/{messageId}

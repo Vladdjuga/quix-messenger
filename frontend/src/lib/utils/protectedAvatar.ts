@@ -43,7 +43,7 @@ export async function getProtectedChatAvatarUrl(chatId: string): Promise<string 
 /**
  * Utility to fetch and create a blob URL for a protected attachment image
  */
-export async function getProtectedAttachmentImageUrl(attachmentId: string): Promise<string | null> {
+export async function getProtectedAttachmentBlobUrl(attachmentId: string): Promise<string | null> {
   try {
     const token = getToken();
     if (!token) return null;

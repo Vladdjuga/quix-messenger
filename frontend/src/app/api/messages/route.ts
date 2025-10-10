@@ -1,6 +1,14 @@
-import { NextResponse } from 'next/server';
+import { proxy } from '@/lib/proxy';
 
-export async function POST() {
-  // Message sending is handled via WebSocket only.
-  return NextResponse.json({ message: 'Send messages via WebSocket only' }, { status: 405 });
+export async function POST(req: Request) {
+  // Accept FormData with text, chatId, and optional attachments
+  // Forward to backend which will create message + upload attachments atomically
+  return proxy(
+    req,
+    process.env.NEXT_PUBLIC_USER_SERVICE_URL!,
+    '/Messages',
+    {
+      method: 'POST',
+    }
+  );
 }

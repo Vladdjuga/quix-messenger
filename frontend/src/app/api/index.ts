@@ -119,6 +119,21 @@ export const api = {
         }
     },
     messages: {
+        // Create a new message with optional attachments
+        create: async (text: string, chatId: string, attachments?: File[]): Promise<ReadMessageDto> => {
+            const form = new FormData();
+            form.append('text', text);
+            form.append('chatId', chatId);
+            
+            if (attachments && attachments.length > 0) {
+                attachments.forEach((file) => form.append('attachments', file));
+            }
+            
+            const response = await apiClient.post<ReadMessageDto>('/messages', form, {
+                headers: { /* Axios will set correct multipart boundary */ },
+            });
+            return response.data;
+        },
         // Get last N messages by chat id
         last: (chatId: string, count: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/last`, { params: { chatId, count } }),

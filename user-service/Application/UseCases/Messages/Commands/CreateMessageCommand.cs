@@ -21,8 +21,9 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
     }
     public async Task<Result<ReadMessageDto>> Handle(CreateMessageCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Text) || request.ChatId == Guid.Empty || request.UserId == Guid.Empty)
-            return Result<ReadMessageDto>.Failure("Invalid message text");
+        // Allow empty text if attachments will be added
+        if (request.ChatId == Guid.Empty || request.UserId == Guid.Empty)
+            return Result<ReadMessageDto>.Failure("Invalid chat or user ID");
             
         // Membership check: ensure user belongs to the chat
         var membership = await _userChatRepository.GetByUserAndChatAsync(request.UserId,
@@ -32,7 +33,7 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
         var message = new MessageEntity
         {
             ChatId = request.ChatId,
-            Text = request.Text,
+            Text = request.Text ?? string.Empty, // Allow empty text for attachment-only messages
             UserId = request.UserId,
             CreatedAt = DateTime.UtcNow,
             // When message reaches backend, we consider it Sent and Delivered
@@ -46,7 +47,8 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
             Text = message.Text,
             UserId = message.UserId,
             CreatedAt = message.CreatedAt,
-            Status = message.Status
+            Status = message.Status,
+            Attachments = new List<MessageAttachmentDto>() // Will be populated after upload if needed
         };
         return Result<ReadMessageDto>.Success(dto);
     }

@@ -1,7 +1,12 @@
 using Application.Common;
+using Application.DTOs;
 using Application.DTOs.Message;
+using Application.Interfaces;
+using Application.Interfaces.Notification;
+using Application.UseCases.Attachments;
 using Application.UseCases.Messages.Commands;
 using Application.UseCases.Messages.Queries;
+using Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,11 +24,16 @@ public class MessagesController : Controller
 {
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
+    private readonly INotificationService _realtimeNotification;
 
-    public MessagesController(IMediator mediator, ILogger<MessagesController> logger)
+    public MessagesController(
+        IMediator mediator, 
+        ILogger<MessagesController> logger,
+        INotificationService realtimeNotification)
     {
         _mediator = mediator;
         _logger = logger;
+        _realtimeNotification = realtimeNotification;
     }
 
     // POST api/messages
@@ -31,19 +41,55 @@ public class MessagesController : Controller
     [GetUserGuid]
     [HttpPost]
     public async Task<Results<Ok<ReadMessageDto>, BadRequest<ErrorResponse>>> Create(
-        [FromBody] CreateMessageDto dto)
+        [FromForm] string text,
+        [FromForm] Guid chatId,
+        [FromForm] IFormFileCollection? attachments)
     {
         var userId = HttpContext.GetUserGuid();
-        var command = new CreateMessageCommand(dto.Text, userId, dto.ChatId);
-        _logger.LogInformation("User {UserId} sending message to chat {ChatId}", userId, dto.ChatId);
+        var command = new CreateMessageCommand(text, userId, chatId);
+        _logger.LogInformation("User {UserId} sending message to chat {ChatId} with {AttachmentCount} attachments", 
+            userId, chatId, attachments?.Count ?? 0);
+        
         var result = await _mediator.Send(command);
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to send message by user {UserId} to chat {ChatId}: {Error}", userId, dto.ChatId, result.Error);
+            _logger.LogError("Failed to send message by user {UserId} to chat {ChatId}: {Error}", userId, chatId, result.Error);
             return ErrorResult.Create(result.Error);
         }
-        _logger.LogInformation("User {UserId} sent message {MessageId} to chat {ChatId}", userId, result.Value, dto.ChatId);
-        return TypedResults.Ok(result.Value);
+        
+        var messageDto = result.Value;
+        
+        // Upload attachments if present
+        if (attachments is { Count: > 0 })
+        {
+        
+            var fileDtos = attachments.Where(file => file.Length > 0)
+                .Select(file => new FileStreamDto
+                {
+                    Name = file.FileName,
+                    ContentType = file.ContentType,
+                    Content = file.OpenReadStream()
+                }).ToList();
+            
+            var uploadCommand = new UploadAttachmentsCommand(
+                MessageId: messageDto.Id,
+                ChatId: chatId,
+                Files: fileDtos
+            );
+            
+            var uploadResult = await _mediator.Send(uploadCommand);
+            if (uploadResult.IsFailure)
+                _logger.LogError("Failed to upload attachments for message {MessageId}: {Error}", messageDto.Id, uploadResult.Error);
+            else
+                messageDto.Attachments = uploadResult.Value;
+        }
+        
+        _logger.LogInformation("User {UserId} sent message {MessageId} to chat {ChatId}", userId, messageDto.Id, chatId);
+        
+        // Broadcast to realtime-service for WebSocket delivery
+        await _realtimeNotification.BroadcastNewMessageAsync(messageDto);
+        
+        return TypedResults.Ok(messageDto);
     }
 
     // GET api/messages?chatId=&userId=&count=

@@ -1,5 +1,6 @@
 import type {UUID} from "node:crypto";
-import {IsString, IsDate, IsDefined, IsUUID} from 'class-validator';
+import {IsString, IsDate, IsDefined, IsUUID, IsArray, IsOptional} from 'class-validator';
+import type {MessageAttachmentDto} from './dto/MessageAttachmentDto.js';
 
 export class Message{
 
@@ -31,13 +32,19 @@ export class Message{
     @IsString()
     localId?:string;
 
+    // Optional attachments array
+    @IsOptional()
+    @IsArray()
+    attachments?: MessageAttachmentDto[];
+
     constructor(
         id: UUID,
         createdAt: Date,
         text: string,
         userId: UUID,
         chatId: UUID,
-        status: number
+        status: number,
+        attachments?: MessageAttachmentDto[]
     ) {
         this.id = id;
         this.createdAt = createdAt;
@@ -45,5 +52,8 @@ export class Message{
         this.userId = userId;
         this.chatId = chatId;
         this.status = status;
+        if (attachments !== undefined) {
+            this.attachments = attachments;
+        }
     }
 }

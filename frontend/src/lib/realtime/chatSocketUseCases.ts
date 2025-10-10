@@ -1,5 +1,5 @@
 import {Socket} from 'socket.io-client';
-import {MessageStatus, MessageWithLocalId} from '@/lib/types';
+import {MessageStatus, MessageWithLocalId, MessageAttachment} from '@/lib/types';
 
 export type NewMessagePayload = {
     senderId: string;
@@ -11,6 +11,7 @@ export type NewMessagePayload = {
         userId?: string;
         status?: number;
         localId?: string;
+        attachments?: MessageAttachment[];
     }
 };
 
@@ -22,11 +23,6 @@ export async function joinChat(socket: Socket | null, chatId: string): Promise<v
 export async function leaveChat(socket: Socket | null, chatId: string): Promise<void> {
     if (!socket) return;
     socket.emit('leaveChat', chatId);
-}
-
-export async function sendChatMessage(socket: Socket | null, chatId: string, text: string, localId: string): Promise<void> {
-    if (!socket) throw new Error('Socket not connected');
-    socket.emit('message', {chatId, text, localId});
 }
 
 export async function deleteChatMessage(socket: Socket | null, chatId: string, messageId: string): Promise<void> {
@@ -58,6 +54,7 @@ export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLo
                 createdAt: msgPayload.createdAt ? new Date(msgPayload.createdAt) : new Date(),
                 status: (msgPayload.status as MessageStatus) ?? MessageStatus.Delivered,
                 localId: msgPayload.localId,
+                attachments: msgPayload.attachments ?? [],
             };
 
             handler(msg);

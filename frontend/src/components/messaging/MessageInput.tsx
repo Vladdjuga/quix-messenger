@@ -17,10 +17,10 @@ const MessageInput: React.FC<Props> = (props: Props) => {
 
     const handleSendMessage = () => {
         if (text.trim()) {
-            setText("");
             props.onSend(text,attachedFiles);
+            setText("");
+            setAttachedFiles([]);
         }
-        setAttachedFiles([]);
     }
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setText(e.target.value);

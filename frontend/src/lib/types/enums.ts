@@ -15,7 +15,8 @@ export enum MessageStatus {
     Read = 1,
     Sent = 2,
     Delivered = 4,
-    Modified = 8
+    Modified = 8,
+    Sending = 16  // Optimistic UI state (not persisted to backend)
 }
 
 export enum FriendshipStatus {
