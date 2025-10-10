@@ -2,60 +2,67 @@ import { getIO } from '../../io.js';
 import logger from '../../config/logger.js';
 
 interface MessageAttachmentDto {
-    id: string;
-    name: string;
-    contentType: string;
-    size: number;
-    url: string;
+    Id: string;
+    Name: string;
+    ContentType: string;
+    Size: number;
+    Url: string;
 }
 
 interface BroadcastMessageDto {
-    id: string;
-    chatId: string;
-    text: string;
-    userId: string;
-    createdAt: string;
-    status: number;
-    attachments: MessageAttachmentDto[];
+    Id: string;
+    ChatId: string;
+    Text: string;
+    UserId: string;
+    CreatedAt: string;
+    Status: number;
+    Attachments: MessageAttachmentDto[];
 }
 
 interface BroadcastMessagePayload {
-    chatId: string;
-    message: BroadcastMessageDto;
+    ChatId: string;
+    Message: BroadcastMessageDto;
 }
 
 /**
  * Handle new message events from Kafka
+ * Note: C# backend sends PascalCase, so we use PascalCase in interface
  */
 export async function handleNewMessageEvent(payload: BroadcastMessagePayload): Promise<void> {
     try {
-        const { chatId, message } = payload;
+        const { ChatId, Message } = payload;
 
-        if (!chatId || !message) {
-            logger.warn('Invalid new message payload received from Kafka:', payload);
+        if (!ChatId || !Message) {
+            logger.warn(`Invalid new message payload received from Kafka: ${JSON.stringify(payload)}`);
             return;
         }
 
         logger.info(
-            `Broadcasting new message via WebSocket: messageId=${message.id}, chatId=${chatId}, userId=${message.userId}`
+            `Broadcasting new message via WebSocket: messageId=${Message.Id}, chatId=${ChatId}, userId=${Message.UserId}`
         );
 
         // Emit to Socket.io room (all clients in this chat)
         const io = getIO();
-        io.to(chatId).emit('newMessage', {
-            senderId: message.userId,
+        io.to(ChatId).emit('newMessage', {
+            senderId: Message.UserId,
             message: {
-                id: message.id,
-                chatId: message.chatId,
-                text: message.text,
-                userId: message.userId,
-                createdAt: message.createdAt,
-                status: message.status,
-                attachments: message.attachments || [],
+                id: Message.Id,
+                chatId: Message.ChatId,
+                text: Message.Text,
+                userId: Message.UserId,
+                createdAt: Message.CreatedAt,
+                status: Message.Status,
+                attachments: Message.Attachments?.map(att => ({
+                    id: att.Id,
+                    name: att.Name,
+                    contentType: att.ContentType,
+                    size: att.Size,
+                    url: att.Url,
+                })) || [],
             },
         });
 
-        logger.info(`Successfully broadcast message ${message.id} to chat ${chatId}`);
+        logger.info(`Successfully broadcast message ${Message.Id} to chat ${ChatId}`);
     } catch (error) {
         logger.error('Error handling new message event from Kafka:', error);
         // Don't throw - let Kafka consumer continue

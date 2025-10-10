@@ -1,7 +1,5 @@
-import {Kafka, type Consumer, type EachMessagePayload, CompressionCodecs, CompressionTypes} from 'kafkajs';
+import {Kafka, type Consumer, type EachMessagePayload} from 'kafkajs';
 import logger from '../config/logger.js';
-
-CompressionCodecs[CompressionTypes.Snappy] = SnappyCodec
 
 export class KafkaConsumerService {
     private kafka: Kafka;
