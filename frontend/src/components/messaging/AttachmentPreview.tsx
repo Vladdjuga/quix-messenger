@@ -112,6 +112,17 @@ const AttachmentPreview = ({ attachment }: Props) => {
 
     // Video preview
     if (isVideo) {
+        if(!protectedUrl) {
+            return (
+                <div className="flex items-center gap-2 p-2 rounded bg-red-100 dark:bg-red-800">
+                    <span className="text-2xl">❌</span>
+                    <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{attachment.name}</div>
+                        <div className="text-xs text-red-600 dark:text-red-400">Failed to load video</div>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="rounded-lg overflow-hidden max-w-xs">
                 <video 
@@ -119,7 +130,7 @@ const AttachmentPreview = ({ attachment }: Props) => {
                     className="w-full h-auto max-h-64"
                     preload="metadata"
                 >
-                    <source src={attachment.url} type={attachment.contentType} />
+                    <source src={protectedUrl} type={attachment.contentType} />
                     Your browser does not support the video tag.
                 </video>
                 <div className="mt-1 text-xs text-muted truncate">{attachment.name}</div>
@@ -129,6 +140,17 @@ const AttachmentPreview = ({ attachment }: Props) => {
 
     // Audio preview
     if (isAudio) {
+        if(!protectedUrl) {
+            return (
+                <div className="flex items-center gap-2 p-2 rounded bg-red-100 dark:bg-red-800">
+                    <span className="text-2xl">❌</span>
+                    <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{attachment.name}</div>
+                        <div className="text-xs text-red-600 dark:text-red-400">Failed to load audio</div>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="flex flex-col gap-2 p-2 rounded bg-gray-100 dark:bg-gray-800">
                 <div className="flex items-center gap-2">
@@ -139,7 +161,7 @@ const AttachmentPreview = ({ attachment }: Props) => {
                     </div>
                 </div>
                 <audio controls className="w-full">
-                    <source src={attachment.url} type={attachment.contentType} />
+                    <source src={protectedUrl} type={attachment.contentType} />
                     Your browser does not support the audio element.
                 </audio>
             </div>
