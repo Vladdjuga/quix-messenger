@@ -20,7 +20,20 @@ export const UserContext = createContext<UserContextType>({
 });
 
 export const UserProvider = ({children}: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(() => {
+        // Try to load cached user from sessionStorage on initial mount
+        if (typeof window !== "undefined") {
+            const cached = sessionStorage.getItem("currentUser");
+            if (cached) {
+                try {
+                    return JSON.parse(cached) as User;
+                } catch {
+                    sessionStorage.removeItem("currentUser");
+                }
+            }
+        }
+        return null;
+    });
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -32,29 +45,46 @@ export const UserProvider = ({children}: { children: React.ReactNode }) => {
                 if (!token) {
                     setIsLoading(false);
                     setIsAuthenticated(false);
+                    sessionStorage.removeItem("currentUser");
+                    return;
+                }
+
+                // If we already have cached user, skip the API call
+                if (user) {
+                    setIsAuthenticated(true);
+                    setIsLoading(false);
                     return;
                 }
 
                 const currentUser = await getCurrentUserUseCase();
                 setUser(currentUser);
                 setIsAuthenticated(true);
+                // Cache user in sessionStorage for this browser tab
+                sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
             } catch (err) {
                 console.error("Failed to fetch user", err);
                 setUser(null);
                 setIsAuthenticated(false);
-                // Remove invalid token
+                // Remove invalid token and cache
                 localStorage.removeItem("jwt");
+                sessionStorage.removeItem("currentUser");
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadUser();
-    }, []);
+    }, [user]);
 
     const handleSetUser = (newUser: User | null) => {
         setUser(newUser);
         setIsAuthenticated(!!newUser);
+        // Update cache when user changes (e.g., profile edit)
+        if (newUser) {
+            sessionStorage.setItem("currentUser", JSON.stringify(newUser));
+        } else {
+            sessionStorage.removeItem("currentUser");
+        }
     };
 
     const contextValue = {
