@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Interfaces;
 using Confluent.Kafka;
+using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -14,7 +15,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
     public KafkaProducerService(IConfiguration configuration, ILogger<KafkaProducerService> logger)
     {
         _logger = logger;
-        
+
         var config = new ProducerConfig
         {
             BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "kafka:9092",
@@ -52,7 +53,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
                 Value = messageJson,
                 Headers = new Headers
                 {
-                    { "content-type", System.Text.Encoding.UTF8.GetBytes("application/json") },
+                    { "content-type", "application/json"u8.ToArray() },
                     { "timestamp", BitConverter.GetBytes(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()) }
                 }
             };

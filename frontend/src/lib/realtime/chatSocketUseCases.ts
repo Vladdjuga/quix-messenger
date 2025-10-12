@@ -25,16 +25,6 @@ export async function leaveChat(socket: Socket | null, chatId: string): Promise<
     socket.emit('leaveChat', chatId);
 }
 
-export async function deleteChatMessage(socket: Socket | null, chatId: string, messageId: string): Promise<void> {
-    if (!socket) throw new Error('Socket not connected');
-    socket.emit('deleteMessage', {chatId, messageId});
-}
-
-export async function editChatMessage(socket: Socket | null, chatId: string, messageId: string, text: string): Promise<void> {
-    if (!socket) throw new Error('Socket not connected');
-    socket.emit('editMessage', {chatId, messageId, text});
-}
-
 export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLocalId) => void) {
     if (!socket) return () => {
     };

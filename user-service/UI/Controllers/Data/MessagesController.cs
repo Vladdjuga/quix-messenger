@@ -24,16 +24,13 @@ public class MessagesController : Controller
 {
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
-    private readonly INotificationService _realtimeNotification;
 
     public MessagesController(
         IMediator mediator, 
-        ILogger<MessagesController> logger,
-        INotificationService realtimeNotification)
+        ILogger<MessagesController> logger)
     {
         _mediator = mediator;
         _logger = logger;
-        _realtimeNotification = realtimeNotification;
     }
 
     // POST api/messages
@@ -85,9 +82,6 @@ public class MessagesController : Controller
         }
         
         _logger.LogInformation("User {UserId} sent message {MessageId} to chat {ChatId}", userId, messageDto.Id, chatId);
-        
-        // Broadcast to realtime-service for WebSocket delivery
-        await _realtimeNotification.BroadcastNewMessageAsync(messageDto);
         
         return TypedResults.Ok(messageDto);
     }

@@ -3,8 +3,6 @@ import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
 import {api} from "@/app/api";
 import {mapReadMessageDtos} from "@/lib/mappers/messageMapper";
 import {
-    deleteChatMessage,
-    editChatMessage,
     joinChat,
     leaveChat,
     onMessageDeleted,
@@ -110,11 +108,7 @@ export function useMessages(props: { chatId: string }) {
         // Optimistically remove the message
         setMessages(prev => prev.filter(m => m.id !== messageId));
         try {
-            if (socket) {
-                await deleteChatMessage(socket, chatId, messageId);
-            } else {
-                await api.messages.delete(messageId);
-            }
+            await api.messages.delete(messageId);
         } catch (e) {
             console.error('Failed to delete message', e);
             try {
@@ -123,7 +117,7 @@ export function useMessages(props: { chatId: string }) {
                 setMessages(data);
             } catch {}
         }
-    }, [chatId, props.chatId, socket]);
+    }, [chatId, props.chatId]);
     const editMessage = useCallback(async (messageId: string, text: string) => {
         const newText = text.trim();
         if (!newText) return;
@@ -131,13 +125,11 @@ export function useMessages(props: { chatId: string }) {
         setMessages(prev => prev.map(m => m.id === messageId ? 
             { ...m, text: newText, status: (m.status | MessageStatus.Modified) } : m));
         try {
-            if (socket) {
-                await editChatMessage(socket, chatId, messageId, newText);
-            }
+            await api.messages.edit(messageId, text);
         } catch (e) {
             console.error('Failed to edit message', e);
         } 
-    }, [chatId, socket]);
+    }, []);
 
     const loadMore = useCallback(async () => {
         try{

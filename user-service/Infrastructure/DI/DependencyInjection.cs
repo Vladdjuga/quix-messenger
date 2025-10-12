@@ -81,6 +81,9 @@ public static class DependencyInjection
         
         // Kafka Producer
         services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
+        services.Configure<KafkaTopicsOptions>(
+            configuration.GetSection(KafkaTopicsOptions.SectionName)
+        );
         
         // Notification Service (uses Kafka)
         services.AddScoped<INotificationService, RealtimeNotificationService>();

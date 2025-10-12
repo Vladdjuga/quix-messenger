@@ -134,6 +134,10 @@ export const api = {
             });
             return response.data;
         },
+        // Edit an existing message
+        edit: async (messageId: string, text: string): Promise<void> => {
+            await apiClient.patch(`/messages/${encodeURIComponent(messageId)}`, { text });
+        },
         // Get last N messages by chat id
         last: (chatId: string, count: number = 50) =>
             apiClient.get<ReadMessageDto[]>(`/messages/last`, { params: { chatId, count } }),

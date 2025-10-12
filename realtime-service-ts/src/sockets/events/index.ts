@@ -3,7 +3,6 @@ import logger from "../../config/logger.js";
 import {wrapSocketHandler} from "../utils/handlerWrapper.js";
 import {onJoinChat, onLeaveChat, onTyping, onStopTyping} from "./chat/chatEvents.js";
 import { onRefreshAuth } from "./auth/authEvents.js";
-import {onMessageEdited, onMessageDeleted} from "./message/messageEvents.js";
 import {addUserToOnlineSet, removeUserFromOnlineSet} from "../../usecases/redisUseCases.js";
 
 export function registerEvents(io: Server) {
@@ -44,10 +43,8 @@ export function registerEvents(io: Server) {
         socket.on('stopTyping', wrapSocketHandler(onStopTyping));
 
         // Message events
-        // NOTE: 'message' event removed - messages now sent via HTTP to backend
-        // Backend broadcasts complete messages via /api/broadcast/newMessage
-        socket.on('editMessage', wrapSocketHandler(onMessageEdited));
-        socket.on('deleteMessage', wrapSocketHandler(onMessageDeleted));
+        // NOTE : Handlers for message events were removed.
+
         // Auth refresh event
         socket.on('refreshAuth', wrapSocketHandler(onRefreshAuth));
 
