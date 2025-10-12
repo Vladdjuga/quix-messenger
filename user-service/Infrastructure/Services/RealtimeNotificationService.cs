@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Application.Interfaces.Notification;
 using Infrastructure.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
 
@@ -15,11 +16,11 @@ public class RealtimeNotificationService : INotificationService
     public RealtimeNotificationService(
         IKafkaProducerService kafkaProducer,
         ILogger<RealtimeNotificationService> logger,
-        KafkaTopicsOptions kafkaTopics)
+        IOptions<KafkaTopicsOptions> kafkaTopics)
     {
         _kafkaProducer = kafkaProducer;
         _logger = logger;
-        _kafkaTopics = kafkaTopics;
+        _kafkaTopics = kafkaTopics.Value;
     }
 
     private async Task BroadcastAsync(IBroadcastPayload payload, string topic, CancellationToken cancellationToken)
