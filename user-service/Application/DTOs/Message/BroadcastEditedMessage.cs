@@ -2,10 +2,12 @@ using Application.Interfaces;
 
 namespace Application.DTOs.Message;
 
-public class EditedMessagePayload:IBroadcastPayload
+public class EditedMessagePayload : IBroadcastPayload
 {
     public required string SenderId { get; set; }
-    public required BroadcastEditedMessage Message;
+    public required BroadcastEditedMessage Message { get; set; }
+    
+    // Methods are not serialized by System.Text.Json
     public string GetEventType() => "Edited Message";
     public string GetPartitionKey() => Message.ChatId;
     public Dictionary<string, object> GetLogMetadata() => new()

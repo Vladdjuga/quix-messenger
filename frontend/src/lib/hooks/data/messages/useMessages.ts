@@ -27,8 +27,7 @@ export function useMessages(props: { chatId: string }) {
         (async () => {
             if (!chatId) return;
             setLoading(true);
-            const count = 20;
-            const resp = await api.messages.last(chatId, count);
+            const resp = await api.messages.last(chatId, NEXT_PUBLIC_PAGE_SIZE);
             const data = mapReadMessageDtos(resp.data);
             if (mounted) setMessages(data.reverse());
             setLoading(false);
@@ -112,7 +111,7 @@ export function useMessages(props: { chatId: string }) {
         } catch (e) {
             console.error('Failed to delete message', e);
             try {
-                const resp = await api.messages.last(chatId, 50);
+                const resp = await api.messages.last(chatId, NEXT_PUBLIC_PAGE_SIZE);
                 const data = mapReadMessageDtos(resp.data);
                 setMessages(data);
             } catch {}

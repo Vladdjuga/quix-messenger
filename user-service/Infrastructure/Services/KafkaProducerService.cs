@@ -4,6 +4,7 @@ using Confluent.Kafka;
 using Infrastructure.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
 
@@ -11,10 +12,13 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 {
     private readonly IProducer<string, string> _producer;
     private readonly ILogger<KafkaProducerService> _logger;
+    private readonly DefaultJsonSerializerOptions _jsonOptions;
 
-    public KafkaProducerService(IConfiguration configuration, ILogger<KafkaProducerService> logger)
+    public KafkaProducerService(IConfiguration configuration, ILogger<KafkaProducerService> logger,
+        IOptions<DefaultJsonSerializerOptions> jsonOptions)
     {
         _logger = logger;
+        _jsonOptions = jsonOptions.Value;
 
         var config = new ProducerConfig
         {
@@ -42,10 +46,14 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
     }
 
     public async Task PublishAsync<T>(string topic, string key, T message, CancellationToken cancellationToken = default)
+        where T : notnull
     {
         try
         {
-            var messageJson = JsonSerializer.Serialize(message);
+            var messageJson = JsonSerializer.Serialize(message,message.GetType(), _jsonOptions.Options);
+            
+            // Log the serialized payload for debugging
+            _logger.LogDebug("Serialized Kafka message: {Json}", messageJson);
             
             var kafkaMessage = new Message<string, string>
             {

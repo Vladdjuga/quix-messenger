@@ -3,39 +3,39 @@ import {getIO} from "../../io.js";
 
 
 interface EditedMessageDto{
-    Id:string;
-    Text:string;
-    ChatId:string;
-    Status:number;
+    id:string;
+    text:string;
+    chatId:string;
+    status:number;
 }
 
 interface EditedMessagePayload{
-    SenderId:string;
-    Message:EditedMessageDto;
+    senderId:string;
+    message:EditedMessageDto;
 }
 
 export async function handleEditedMessageEvent(payload:EditedMessagePayload){
     try{
-        const { SenderId, Message } = payload;
+        const { senderId, message } = payload;
 
-        if (!SenderId || !Message) {
+        if (!senderId || !message) {
             logger.warn(`Invalid new message payload received from Kafka: ${JSON.stringify(payload)}`);
             return;
         }
 
         logger.info(
-            `Broadcasting new message via WebSocket: messageId=${Message.Id}, senderId=${SenderId}`
+            `Broadcasting new message via WebSocket: messageId=${message.id}, senderId=${senderId}`
         );
-        getIO().to(Message.ChatId).emit('messageEdited', {
-            senderId: SenderId,
+        getIO().to(message.chatId).emit('messageEdited', {
+            senderId: senderId,
             message: {
-                id: Message.Id,
-                chatId:Message.ChatId,
-                text:Message.Text,
-                status: Message.Status
+                id: message.id,
+                chatId:message.chatId,
+                text:message.text,
+                status: message.status
             }
         });
-        logger.info(`Successfully broadcast message edited ${Message.Id} to chat ${Message.ChatId}`);
+        logger.info(`Successfully broadcast message edited ${message.id} to chat ${message.chatId}`);
     } catch (error) {
         logger.error('Error handling new message event from Kafka:', error);
         // Don't throw - let Kafka consumer continue

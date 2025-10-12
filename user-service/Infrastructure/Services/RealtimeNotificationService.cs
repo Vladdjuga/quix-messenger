@@ -57,7 +57,7 @@ public class RealtimeNotificationService : INotificationService
                 message.Text,
                 message.UserId,
                 message.CreatedAt,
-                message.Status,
+                (int)message.Status,
                 message.Attachments ?? new List<MessageAttachmentDto>()
             )
         };

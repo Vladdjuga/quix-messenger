@@ -1,4 +1,6 @@
-﻿using Application;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Application;
 using Application.Auth;
 using Application.Behaviors;
 using Application.DTOs.User;
@@ -84,6 +86,13 @@ public static class DependencyInjection
         services.Configure<KafkaTopicsOptions>(
             configuration.GetSection(KafkaTopicsOptions.SectionName)
         );
+        
+        services.Configure<DefaultJsonSerializerOptions>(options =>
+        {
+            options.Options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            options.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.Options.Converters.Add(new JsonStringEnumConverter());
+        });
         
         // Notification Service (uses Kafka)
         services.AddScoped<INotificationService, RealtimeNotificationService>();
