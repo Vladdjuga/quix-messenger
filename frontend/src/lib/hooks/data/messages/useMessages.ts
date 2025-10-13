@@ -1,7 +1,7 @@
 import {useCallback, useContext, useEffect, useState} from "react";
-import {Message, MessageStatus, MessageWithLocalId} from "@/lib/types";
+import {Message, MessageStatus} from "@/lib/types";
 import {api} from "@/app/api";
-import {mapReadMessageDtos} from "@/lib/mappers/messageMapper";
+import {mapReadMessageDto, mapReadMessageDtos} from "@/lib/mappers/messageMapper";
 import {
     joinChat,
     leaveChat,
@@ -68,11 +68,22 @@ export function useMessages(props: { chatId: string }) {
             addMessage(optimisticMessage);
             
             // Send to backend (creates message + uploads attachments atomically)
-            await api.messages.create(value, chatId, hasAttachments ? attachments : undefined);
+            const dto = await api.messages.create(value, chatId, hasAttachments ? attachments : undefined);
+            const actualMessage = mapReadMessageDto(dto);
             
-            // Remove optimistic message (real one will come via WebSocket)
-            setMessages(prev => prev.filter(m => m.id !== tempId));
-            
+            // Replace optimistic with actual - handles race condition with WebSocket
+            setMessages(prev => {
+                // Remove the temporary message
+                const filtered = prev.filter(m => m.id !== tempId);
+                
+                // Check if WebSocket already added the real message
+                const hasRealMessage = filtered.some(m => m.id === actualMessage.id);
+                
+                // If WebSocket beat us, just return filtered (real message already there)
+                // Otherwise, add the real message
+                return hasRealMessage ? filtered : [...filtered, actualMessage];
+            });
+
             // stop typing after sending
             if (socket) await sendStopTyping(socket, chatId);
         } catch (e) {
@@ -83,25 +94,19 @@ export function useMessages(props: { chatId: string }) {
         }
     };
 
-    const addMessage = useCallback((msg: MessageWithLocalId) => {
+    const addMessage = useCallback((msg: Message) => {
         setMessages(prev => {
-            let exists = false;
-
-            const newMessages = prev.map(m => {
-                if ((msg.localId && m.id === msg.localId) || m.id === msg.id) {
-                    exists = true;
-                    return { ...m, ...msg };
-                }
-                return m;
-            });
-
-            if (!exists) {
-                return [...prev, msg];
+            // Check if message already exists (prevents WebSocket duplicates)
+            const exists = prev.some(m => m.id === msg.id);
+            if (exists) {
+                // Update existing message (in case of status change, etc.)
+                return prev.map(m => m.id === msg.id ? { ...m, ...msg } : m);
             }
-            return newMessages;
+            // Add new message
+            return [...prev, msg];
         });
-    }, [setMessages]);
-    
+    }, []);
+
     const deleteMessage = useCallback(async (messageId: string) => {
         if (!props.chatId) return;
         // Optimistically remove the message
@@ -113,7 +118,7 @@ export function useMessages(props: { chatId: string }) {
             try {
                 const resp = await api.messages.last(chatId, NEXT_PUBLIC_PAGE_SIZE);
                 const data = mapReadMessageDtos(resp.data);
-                setMessages(data);
+                setMessages(data.reverse());
             } catch {}
         }
     }, [chatId, props.chatId]);

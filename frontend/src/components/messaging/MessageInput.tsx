@@ -16,8 +16,9 @@ const MessageInput: React.FC<Props> = (props: Props) => {
     };
 
     const handleSendMessage = () => {
-        if (text.trim()) {
-            props.onSend(text,attachedFiles);
+        // Allow sending if there's text OR attachments
+        if (text.trim() || attachedFiles.length > 0) {
+            props.onSend(text, attachedFiles);
             setText("");
             setAttachedFiles([]);
         }

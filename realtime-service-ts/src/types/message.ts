@@ -28,10 +28,6 @@ export class Message{
     @IsString()
     status:number;
 
-    // Optional local ID to track messages before backend assigns real ID
-    @IsString()
-    localId?:string;
-
     // Optional attachments array
     @IsOptional()
     @IsArray()

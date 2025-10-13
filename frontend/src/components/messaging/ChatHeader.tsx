@@ -1,30 +1,105 @@
-import React from 'react';
-import { ChatType, ChatRole } from '@/lib/types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ChatType, ChatRole, Participant } from '@/lib/types';
+import { useUserPresencePolling } from '@/lib/hooks/data/user/useUserPresencePolling';
+import { formatLastSeen } from '@/lib/utils/formatLastSeen';
+import Image from 'next/image';
+import { getProtectedUserAvatarUrl } from '@/lib/utils/protectedAvatar';
 
 type Props = {
     title?: string;
     typingUsers: Map<string, string>;
     chatType?: ChatType;
     chatRole?: ChatRole;
+    participants?: Participant[];
+    currentUserId?: string;
     onAddUserClick?: () => void;
     onSettingsClick?: () => void;
 }
 
 const ChatHeader : React.FC<Props> = (props:Props)=>{
+    // Determine other user in direct chat
+    const otherUser = useMemo(() => {
+        if (props.chatType !== ChatType.Direct) return null;
+        const others = (props.participants ?? []).filter(u => u.id !== props.currentUserId);
+        return others.length > 0 ? others[0] : null;
+    }, [props.chatType, props.participants, props.currentUserId]);
+
+    const otherUserId = otherUser?.id ?? null;
+    
+    // Poll for online status (only for direct chats)
+    const { isOnline, lastSeenAt } = useUserPresencePolling(otherUserId, { intervalMs: 10000 });
+
+    // Avatar state for direct chats
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (otherUser?.id) {
+            getProtectedUserAvatarUrl(otherUser.id).then(setAvatarUrl);
+        } else {
+            setAvatarUrl(null);
+        }
+    }, [otherUser?.id]);
+
     const canAddUsers = props.chatType === ChatType.Group && 
                         props.chatRole !== undefined;
     const canAccessSettings = props.chatType === ChatType.Group;
     
+    // For direct chats, display other user's name
+    const displayTitle = otherUser 
+        ? `${otherUser.firstName} ${otherUser.lastName}`.trim() || otherUser.username 
+        : props.title || 'Chat';
+
+    // For direct chats, show online status
+    const statusText = otherUser 
+        ? (isOnline ? 'Active now' : (lastSeenAt ? formatLastSeen(lastSeenAt) : null))
+        : null;
+    
     return (
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold">{props.title || 'Chat'}</h2>
-            <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-500">
-                    {props.typingUsers.size > 0 && (
-                        <span>{[...props.typingUsers.values()].join(', ')} {props.typingUsers.size === 1 ? 'is' : 'are'} typing...</span>
+            <div className="flex items-center gap-3 min-w-0">
+                {/* Avatar for direct chats */}
+                {otherUser && (
+                    <div className="relative flex-shrink-0">
+                        {avatarUrl ? (
+                            <Image 
+                                src={avatarUrl} 
+                                alt={otherUser.username}
+                                width={48}
+                                height={48}
+                                className="rounded-full object-cover"
+                                unoptimized
+                            />
+                        ) : (
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center">
+                                <span className="text-white font-semibold text-lg">
+                                    {otherUser.firstName?.[0] || otherUser.username[0].toUpperCase()}
+                                </span>
+                            </div>
+                        )}
+                        {/* Online indicator */}
+                        {isOnline && (
+                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full" />
+                        )}
+                    </div>
+                )}
+
+                {/* Title and status */}
+                <div className="min-w-0">
+                    <h2 className="text-lg font-semibold">{displayTitle}</h2>
+                    {props.typingUsers.size > 0 ? (
+                        <div className="text-sm text-gray-500 italic">
+                            <span>{[...props.typingUsers.values()].join(', ')} {props.typingUsers.size === 1 ? 'is' : 'are'} typing...</span>
+                        </div>
+                    ) : statusText && (
+                        <div className="text-sm text-gray-500">
+                            {statusText}
+                        </div>
                     )}
                 </div>
-                <div className="flex gap-2">
+            </div>
+
+            {/* Right section - Action buttons */}
+            <div className="flex gap-2">
                     {canAddUsers && props.onAddUserClick && (
                         <button
                             onClick={props.onAddUserClick}
@@ -51,7 +126,6 @@ const ChatHeader : React.FC<Props> = (props:Props)=>{
                         </button>
                     )}
                 </div>
-            </div>
         </div>
     );
 }

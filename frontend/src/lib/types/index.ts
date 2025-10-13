@@ -21,9 +21,16 @@ export interface Message {
     attachments?: MessageAttachment[];
 }
 
-// Extended message type with optional localId for optimistic UI updates
-export interface MessageWithLocalId extends Message {
-    localId?: string; // Optional local ID for optimistic UI updates
+// Participant type used in chats
+export interface Participant {
+    id: string;
+    avatarUrl: string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    createdAt: Date;
 }
 
 // (Removed legacy CreateMessageRequest interface)
@@ -37,16 +44,7 @@ export interface Chat {
     chatRole: ChatRole;
     createdAt: Date;
     avatarUrl?: string;
-    participants?: {
-        id: string;
-        avatarUrl: string;
-        username: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        dateOfBirth: Date;
-        createdAt: Date;
-    }[];
+    participants?: Participant[];
 }
 
 // Extended types for UI

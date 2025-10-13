@@ -68,6 +68,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
             typingUsers={typingUsers}
             chatType={chatInfo?.chatType}
             chatRole={chatInfo?.chatRole}
+            participants={chatInfo?.participants}
+            currentUserId={user.id}
             onAddUserClick={() => setShowAddUserModal(true)}
             onSettingsClick={() => setShowSettingsModal(true)}
         />
@@ -76,6 +78,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
             currentUserId={user.id}
             loadMore={loadMore}
             messages={messages}
+            participants={chatInfo?.participants}
             deleteMessage={deleteMessage}
             editMessage={editMessage}
         />

@@ -1,5 +1,5 @@
 import {Socket} from 'socket.io-client';
-import {MessageStatus, MessageWithLocalId, MessageAttachment} from '@/lib/types';
+import {MessageStatus, Message, MessageAttachment} from '@/lib/types';
 
 export type NewMessagePayload = {
     senderId: string;
@@ -10,7 +10,6 @@ export type NewMessagePayload = {
         createdAt?: string | Date;
         userId?: string;
         status?: number;
-        localId?: string;
         attachments?: MessageAttachment[];
     }
 };
@@ -25,7 +24,7 @@ export async function leaveChat(socket: Socket | null, chatId: string): Promise<
     socket.emit('leaveChat', chatId);
 }
 
-export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLocalId) => void) {
+export function onNewMessage(socket: Socket | null, handler: (msg: Message) => void) {
     if (!socket) return () => {
     };
 
@@ -36,14 +35,13 @@ export function onNewMessage(socket: Socket | null, handler: (msg: MessageWithLo
 
             const msgPayload = obj.message;
 
-            const msg: MessageWithLocalId = {
+            const msg: Message = {
                 id: msgPayload.id,
                 chatId: msgPayload.chatId,
                 text: msgPayload.text,
                 userId: msgPayload.userId ?? 'unknown',
                 createdAt: msgPayload.createdAt ? new Date(msgPayload.createdAt) : new Date(),
                 status: (msgPayload.status as MessageStatus) ?? MessageStatus.Delivered,
-                localId: msgPayload.localId,
                 attachments: msgPayload.attachments ?? [],
             };
 
@@ -78,7 +76,7 @@ export function onMessageDeleted(socket: Socket | null, handler: (payload: {
     return () => socket.off('messageDeleted', listener);
 }
 
-export function onMessageEdited(socket: Socket | null, handler: (msg: MessageWithLocalId) => void) {
+export function onMessageEdited(socket: Socket | null, handler: (msg: Message) => void) {
     if (!socket) return () => {
     };
     const listener = (payload: unknown) => {
@@ -86,7 +84,7 @@ export function onMessageEdited(socket: Socket | null, handler: (msg: MessageWit
             const obj = payload as Partial<NewMessagePayload> | undefined;
             if (!obj?.message) return;
             const msgPayload = obj.message;
-            const msg: MessageWithLocalId = {
+            const msg: Message = {
                 id: msgPayload.id,
                 chatId: msgPayload.chatId,
                 text: msgPayload.text,

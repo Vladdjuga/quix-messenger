@@ -1,20 +1,21 @@
 
 import React, {useEffect, useLayoutEffect, useRef} from 'react';
 import MessageBubble from "@/components/messaging/MessageBubble";
-import {Message} from "@/lib/types";
+import {Message, Participant} from "@/lib/types";
 import { SCROLL_OFFSET_AFTER_LOAD, SCROLL_SETTLE_DELAY_MS } from "@/lib/constants/pagination";
 
 type Props = {
     chatId: string;
     currentUserId: string;
     messages: Message[];
+    participants?: Participant[];
     deleteMessage: (messageId: string) => Promise<void>;
     editMessage: (messageId: string, newText: string) => Promise<void>;
     loadMore: () => Promise<number>;
 }
 
 const MessageList : React.FC<Props> = (props:Props) => {
-    const {chatId,currentUserId,messages,editMessage,deleteMessage,loadMore}=props;
+    const {chatId,currentUserId,messages,participants,editMessage,deleteMessage,loadMore}=props;
     const bottomRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -64,12 +65,14 @@ const MessageList : React.FC<Props> = (props:Props) => {
     >
             {messages.length === 0 && <div className="text-muted">No messages yet</div>}
             {messages.map(m => {
+                const sender = participants?.find(p => p.id === m.userId);
                 return (
                     <MessageBubble
                         key={m.id}
                         message={m}
                         currentUserId={currentUserId}
                         chatId={chatId}
+                        sender={sender}
                         deleteMessage={deleteMessage}
                         editMessage={editMessage}
                     />
