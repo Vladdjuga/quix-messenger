@@ -73,14 +73,8 @@ export function useMessages(props: { chatId: string }) {
             
             // Replace optimistic with actual - handles race condition with WebSocket
             setMessages(prev => {
-                // Remove the temporary message
                 const filtered = prev.filter(m => m.id !== tempId);
-                
-                // Check if WebSocket already added the real message
                 const hasRealMessage = filtered.some(m => m.id === actualMessage.id);
-                
-                // If WebSocket beat us, just return filtered (real message already there)
-                // Otherwise, add the real message
                 return hasRealMessage ? filtered : [...filtered, actualMessage];
             });
 

@@ -14,6 +14,9 @@ const AttachmentPreview = ({ attachment }: Props) => {
     useEffect(() => {
         let isMounted = true;
         (async () => {
+            // if the attachment is pending dont download the blob yet.
+            // causes errors
+            if (attachment.id.startsWith('pending-')) return;
             const url = await getProtectedAttachmentBlobUrl(attachment.id);
             if (isMounted) setProtectedUrl(url);
         })();

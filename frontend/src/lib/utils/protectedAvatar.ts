@@ -4,24 +4,24 @@ import {getToken} from '@/app/api/token';
 const CACHE_TTL = 5 * 60_000;
 
 type CacheEntry = {
-    url: string | null;
+    dataUrl: string | null;
     timestamp: number;
 };
 
 type GlobalCacheType = {
-    blobCache: Map<string, CacheEntry>;
+    dataUrlCache: Map<string, CacheEntry>;
     inflightRequests: Map<string, Promise<string | null>>;
 };
 
 // Global singleton cache to persist across hot module reloads
-const globalCache = ((globalThis as unknown) as Record<string, GlobalCacheType>).__BLOB_CACHE__ ?? {
-    blobCache: new Map<string, CacheEntry>(),
+const globalCache = ((globalThis as unknown) as Record<string, GlobalCacheType>).__DATA_URL_CACHE__ ?? {
+    dataUrlCache: new Map<string, CacheEntry>(),
     inflightRequests: new Map<string, Promise<string | null>>(),
 };
 
-((globalThis as unknown) as Record<string, GlobalCacheType>).__BLOB_CACHE__ = globalCache;
+((globalThis as unknown) as Record<string, GlobalCacheType>).__DATA_URL_CACHE__ = globalCache;
 
-export const blobCache = globalCache.blobCache;
+export const dataUrlCache = globalCache.dataUrlCache;
 export const inflightRequests = globalCache.inflightRequests;
 
 /**
@@ -29,7 +29,7 @@ export const inflightRequests = globalCache.inflightRequests;
  */
 function log(...args: unknown[]) {
     if (process.env.NODE_ENV === 'development') {
-        console.log('[Blob Cache]', ...args);
+        console.log('[Data URL Cache]', ...args);
     }
 }
 
@@ -37,37 +37,30 @@ function log(...args: unknown[]) {
  * Cache null value helper
  */
 function cacheNull(key: string): null {
-    blobCache.set(key, {url: null, timestamp: Date.now()});
+    dataUrlCache.set(key, {dataUrl: null, timestamp: Date.now()});
     return null;
 }
 
 /**
- * Revoke a cached blob URL and remove it from cache
+ * Remove a cached data URL from cache
  */
-export function revokeBlobUrl(key: string) {
-    const entry = blobCache.get(key);
-    if (entry?.url) {
-        URL.revokeObjectURL(entry.url);
-    }
-    blobCache.delete(key);
+export function removeDataUrl(key: string) {
+    dataUrlCache.delete(key);
     inflightRequests.delete(key);
 }
 
 /**
- * Clear all cached blob URLs
+ * Clear all cached data URLs
  */
-export function clearBlobCache() {
-    blobCache.forEach((entry: CacheEntry) => {
-        if (entry.url) URL.revokeObjectURL(entry.url);
-    });
-    blobCache.clear();
+export function clearDataUrlCache() {
+    dataUrlCache.clear();
     inflightRequests.clear();
 }
 
 /**
- * Universal utility to fetch and create a blob URL for protected resources
+ * Universal utility to fetch and create a data URL for protected resources
  */
-async function getProtectedBlobUrl(
+async function getProtectedDataUrl(
     type: 'user' | 'chat' | 'attachment',
     id: string,
     endpoint: string,
@@ -75,16 +68,15 @@ async function getProtectedBlobUrl(
     const cacheKey = `${type}:${id}`;
 
     // Check cache with TTL
-    const cachedEntry = blobCache.get(cacheKey);
+    const cachedEntry = dataUrlCache.get(cacheKey);
     if (cachedEntry && Date.now() - cachedEntry.timestamp < CACHE_TTL) {
         log('HIT', cacheKey);
-        return cachedEntry.url;
+        return cachedEntry.dataUrl;
     }
 
     // Remove stale entry if exists
     if (cachedEntry) {
-        if (cachedEntry.url) URL.revokeObjectURL(cachedEntry.url);
-        blobCache.delete(cacheKey);
+        dataUrlCache.delete(cacheKey);
     }
 
     // Check for in-flight request
@@ -107,14 +99,21 @@ async function getProtectedBlobUrl(
             if (res.status === 204 || !res.ok) return cacheNull(cacheKey);
 
             const blob = await res.blob();
-            const url = URL.createObjectURL(blob);
+            
+            // Convert blob to data URL
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
 
-            blobCache.set(cacheKey, {url, timestamp: Date.now()});
-            log('STORED', cacheKey, `- total cached: ${blobCache.size}`);
+            dataUrlCache.set(cacheKey, {dataUrl, timestamp: Date.now()});
+            log('STORED', cacheKey, `- total cached: ${dataUrlCache.size}`);
 
-            return url;
+            return dataUrl;
         } catch (err) {
-            console.error(`[Blob Cache] ERROR fetching ${cacheKey}`, err);
+            console.error(`[Data URL Cache] ERROR fetching ${cacheKey}`, err);
             return cacheNull(cacheKey);
         } finally {
             inflightRequests.delete(cacheKey);
@@ -126,19 +125,19 @@ async function getProtectedBlobUrl(
 }
 
 /**
- * Fetch protected user avatar
+ * Fetch protected user avatar as data URL
  */
 export const getProtectedUserAvatarUrl = (userId: string) =>
-    getProtectedBlobUrl('user', userId, `/api/user/avatar/get/${encodeURIComponent(userId)}`);
+    getProtectedDataUrl('user', userId, `/api/user/avatar/get/${encodeURIComponent(userId)}`);
 
 /**
- * Fetch protected chat avatar
+ * Fetch protected chat avatar as data URL
  */
 export const getProtectedChatAvatarUrl = (chatId: string) =>
-    getProtectedBlobUrl('chat', chatId, `/api/chats/getChatAvatar/${encodeURIComponent(chatId)}`);
+    getProtectedDataUrl('chat', chatId, `/api/chats/getChatAvatar/${encodeURIComponent(chatId)}`);
 
 /**
- * Fetch protected attachment
+ * Fetch protected attachment as data URL
  */
 export const getProtectedAttachmentBlobUrl = (attachmentId: string) =>
-    getProtectedBlobUrl('attachment', attachmentId, `/api/attachments/download/${encodeURIComponent(attachmentId)}`);
+    getProtectedDataUrl('attachment', attachmentId, `/api/attachments/download/${encodeURIComponent(attachmentId)}`);
