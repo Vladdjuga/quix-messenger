@@ -6,38 +6,73 @@ A modern, full-stack real-time messaging application built with a microservices 
 
 ### Services Architecture
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│     Frontend    │    │  Realtime-TS    │    │  User Service   │
-│   (Next.js)     │◄──►│   (Node.js)     │◄──►│   (.NET Core)   │
-│   Port: 3000    │    │   Port: 8081    │    │   Port: 6001    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 ▼
-                    ┌─────────────────┐    ┌─────────────────┐
-                    │     Redis       │    │   PostgreSQL    │
-                    │   (Cache)       │    │   (Database)    │
-                    │   Port: 6379    │    │   Port: 5432    │
-                    └─────────────────┘    └─────────────────┘
+┌─────────────────┐
+│     Frontend    │
+│   (Next.js)     │
+│   Port: 3000    │
+└────────┬────────┘
+         │ HTTP (BFF Pattern)
+         ├──────────────┐
+         │              │ WebSocket
+         ▼              ▼
+┌─────────────────┐    ┌─────────────────┐
+│  User Service   │    │  Realtime-TS    │
+│  (.NET Core)    │◄──►│   (Node.js)     │
+│   Port: 6001    │    │   Port: 8081    │
+└────────┬────────┘    └────────┬────────┘
+         │                      │
+         │ Kafka Publish        │ Kafka Consume
+         │                      │
+         ▼                      ▼
+    ┌─────────────────────────────────┐
+    │           Kafka                 │
+    │  (Event Streaming)              │
+    │  Port: 9092                     │
+    │  Topic: messenger.events.       │
+    │         newMessage              │
+    └─────────────────────────────────┘
+         │                      │
+         ▼                      ▼
+┌─────────────────┐    ┌─────────────────┐
+│   PostgreSQL    │    │     Redis       │
+│  (Persistence)  │    │   (Presence)    │
+│   Port: 5432    │    │   Port: 6379    │
+└─────────────────┘    └─────────────────┘
 ```
 
 ### 📦 Services (in this repo)
 - **`frontend`** — Next.js 15 app with BFF pattern (TypeScript, React 19, Tailwind CSS 4)
-- **`realtime-service-ts`** — WebSocket gateway for real-time messaging (Express.js 4.18, Socket.io 4.8, Redis)
-- **`user-service`** — ASP.NET Core service for authentication, user profiles, and friendships (PostgreSQL, EF Core)
+  - Client-side React application with Server Components
+  - API routes acting as BFF proxy layer
+  - WebSocket client for real-time features
+- **`realtime-service-ts`** — WebSocket gateway and Kafka consumer (Express.js 4.18, Socket.io 4.8, KafkaJS 2.2)
+  - Real-time message delivery via Socket.IO rooms
+  - Kafka consumer for `messenger.events.newMessage` topic
+  - User presence tracking with Redis
+  - Typing indicators broadcast
+- **`user-service`** — ASP.NET Core service (PostgreSQL, EF Core 9, KafkaFlow)
+  - Authentication with JWT (access + refresh tokens)
+  - User profiles and friendship management
+  - Message persistence to PostgreSQL
+  - Kafka producer for new messages
 
-### 🗄️ Data Stores
-- **PostgreSQL** — Primary database for user data, friendships, messages
-- **Redis** — Real-time user presence, session management, and caching
-- **File System** — Avatar storage with configurable paths
+### 🗄️ Infrastructure
+- **PostgreSQL 16** — Primary database for users, friendships, messages, chats
+- **Redis 7** — Ephemeral data for online presence (Sets + Hashes), last seen timestamps
+- **Apache Kafka 3.8.1** — Event streaming for message broadcasting (3 partitions)
+- **Kafka UI** — Web interface for monitoring topics (Port: 8080)
+- **PgAdmin 4** — Database management UI (Port: 5050)
+- **File System** — Avatar storage with Docker volumes
 
 ## ⚙️ Tech Stack
 
 ### Backend Services
-- **ASP.NET Core 9** — User service with Entity Framework Core
+- **ASP.NET Core 9** — User service with Entity Framework Core, Kafka producer
 - **Express.js 4.18** — TypeScript-based realtime service with Node.js 18
-- **PostgreSQL 16** — Primary database
-- **Redis 7** — Cache and real-time data store
+- **PostgreSQL 16** — Primary database for persistent data
+- **Redis 7** — In-memory store for ephemeral presence data
+- **Apache Kafka 3.8.1 (KRaft mode)** — Event streaming without Zookeeper
+- **KafkaJS 2.2.4** — Node.js Kafka client for consuming message events
 
 ### Frontend
 - **Next.js 15** — React-based frontend with App Router
@@ -71,7 +106,7 @@ The frontend implements a Backend-For-Frontend (BFF) pattern using Next.js API r
 - **JWT Authentication**: Bearer token-based auth with automatic refresh
 - **CORS Handling**: Proper cross-origin resource sharing
 
-### Authentication Flow
+### Authentication Flow (Hybrid JWT)
 ```mermaid
 sequenceDiagram
     participant UI as Frontend UI
@@ -80,18 +115,47 @@ sequenceDiagram
     participant RT as Realtime Service
     
     UI->>BFF: Login Request
-    BFF->>Auth: Validate Credentials
-    Auth->>BFF: JWT Tokens
-    BFF->>UI: Set Cookies + Response
-    UI->>RT: WebSocket Connect (JWT)
+    BFF->>Auth: POST /Auth/login
+    Auth->>BFF: Access Token + Refresh Token (HttpOnly Cookie)
+    BFF->>UI: Access Token (localStorage) + Set-Cookie
+    UI->>RT: WebSocket Connect (Bearer Token)
     RT->>Auth: Verify JWT
+    Auth->>RT: User Data
+    RT->>UI: Connection Established
 ```
 
-### Real-time Communication
-- **Socket.io Client**: Token-based authentication for WebSocket connections
-- **Automatic Reconnection**: Handles connection drops and token refresh
-- **Presence Tracking**: Real-time user online/offline status and last seen timestamps
-- **Message Flow**: Real-time message delivery with offline support
+### Real-time Communication & Event Streaming
+
+#### Message Flow (Kafka-based)
+```mermaid
+sequenceDiagram
+    participant U1 as User 1 (Sender)
+    participant US as User Service
+    participant K as Kafka
+    participant RT as Realtime Service
+    participant U2 as User 2 (Recipient)
+    
+    U1->>US: POST /Message/send
+    US->>PostgreSQL: Save Message
+    US->>K: Publish to messenger.events.newMessage
+    K->>RT: Consumer receives event
+    RT->>U2: Emit via Socket.IO to room
+    U2->>UI: Display new message
+```
+
+#### Socket.IO Features
+- **Token-based Authentication**: Bearer JWT for WebSocket handshake
+- **Automatic Reconnection**: Built-in retry logic with exponential backoff
+- **Room-based Broadcasting**: Each chat has a dedicated Socket.IO room
+- **Typing Indicators**: Real-time `onTyping`/`onStopTyping` events
+- **Presence Tracking**: Online/offline status with 10-second polling + Redis Sets
+
+#### Kafka Integration
+- **Producer**: User service publishes messages to `messenger.events.newMessage`
+- **Consumer**: Realtime service consumes events and broadcasts via WebSocket
+- **Consumer Group**: `realtime-service-group` for horizontal scaling
+- **Partitions**: 3 partitions for parallel processing
+- **Benefits**: Decoupling, message durability, at-least-once delivery
 
 ### Key Frontend Paths
 ```
@@ -112,29 +176,36 @@ src/
 
 ## 🚀 Features
 
-### ✅ Implemented
-- **Authentication** — Login/logout/register with JWT tokens and automatic refresh
-- **User Profiles** — Profile viewing, editing, avatar upload with file storage
-- **Friendships** — Send/accept/reject friend requests, friend lists
-- **Real-time Messaging** — WebSocket-based chat with Socket.io
-- **User Presence** — Online/offline status and "last seen" timestamps
-- **Message History** — Persistent message storage with pagination
-- **File Uploads** — Avatar storage with configurable paths and default asset migration
-- **Containerization** — Full Docker Compose setup for development and deployment
-- **Input Validation** — Comprehensive validation with Zod schemas
-- **Error Handling** — Centralized error handling and logging
+### ✅ Implemented & Working
+- **Authentication** — JWT hybrid approach (access token in localStorage, refresh token in HttpOnly cookies)
+- **Automatic Token Refresh** — Axios interceptors handle token expiry transparently
+- **User Profiles** — View, edit profile, avatar upload, password change
+- **Friendships** — Send/accept/reject friend requests, friend lists, sent requests
+- **Real-time Messaging** — Kafka event streaming + Socket.IO delivery
+- **Group Chats** — Multi-user conversations with ChatType enum (Direct/Group)
+- **Typing Indicators** — Real-time typing status broadcast via Socket.IO
+- **User Presence** — Online/offline status via Redis Sets, "last seen" via Redis Hashes, 10-second polling
+- **Message History** — Persistent PostgreSQL storage with cursor-based pagination
+- **User Search** — Search users by username/email with pagination
+- **Friend Search** — Search within friend list
+- **File Sharing** — Attachment uploads with preview, file type icons, size display
+- **Protected Resources** — Data URL caching (5-min TTL) for avatars in SPA context
+- **Containerization** — Full Docker Compose with all services (includes Kafka UI, PgAdmin)
+- **Input Validation** — Zod schemas on frontend, FluentValidation on backend
+- **Error Handling** — Winston logging (realtime service), Serilog (user service)
+- **BFF Pattern** — Next.js API routes as proxy layer, eliminates CORS issues
 
 ### 🔄 In Progress
-- **Message Read Status** — Read receipts and message status indicators
-- **Group Chats** — Multi-user conversations
-- **Push Notifications** — Browser push notifications for new messages
+- **Message Read Status** — Read receipts and delivery indicators (✓✓ checkmarks)
 
-### 📋 Roadmap
-- **File Sharing** — Image/document sharing in conversations
+### 📋 Planned Features
+- **Push Notifications** — Browser push notifications for new messages
 - **Voice/Video Calls** — WebRTC-based calling features
 - **Mobile App** — React Native mobile application
 - **Admin Dashboard** — User and system management interface
-- **Performance Optimization** — Caching strategies and database optimization
+- **Advanced Caching** — Redis caching for message history and user data
+- **Message Reactions** — Emoji reactions to messages
+- **Media Gallery** — Shared photos/videos gallery per chat
 
 ## 🔧 Setup & Development
 
@@ -163,6 +234,8 @@ make down
 - **Realtime Service**: http://localhost:8081
 - **PostgreSQL**: localhost:5432
 - **Redis**: localhost:6379
+- **Kafka**: localhost:9092
+- **Kafka UI**: http://localhost:8080
 - **PgAdmin**: http://localhost:5050
 
 ### Local Development (Frontend only)
@@ -208,6 +281,9 @@ JWT_SECRET=a-string-secret-at-least-256-bits-long
 PORT=8080
 USER_SERVICE_URL=http://user-service:7001
 REDIS_URL=redis://redis:6379
+KAFKA_BROKERS=kafka:9092
+KAFKA_GROUP_ID=realtime-service-group
+KAFKA_NEW_MESSAGE_TOPIC=messenger.events.newMessage
 ```
 
 ### User Service Configuration
@@ -291,11 +367,15 @@ Login Request → BFF Route → User Service → JWT Tokens → Set-Cookie → U
 WebSocket Connect → Socket.io → JWT Verification → User Online Status → Redis Cache
 ```
 
-### 3. Real-time Message Flow
+### 3. Real-time Message Flow (Kafka-based)
 ```
-UI Message Send → Socket.io Client → Realtime Service → Message Validation → User Service
-                              ↓
-Room Broadcast ← Socket.io Server ← Message Storage ← Database Update ← Service Response
+UI Message Send → HTTP POST → User Service → Validate & Save → PostgreSQL
+                                     ↓
+                              Publish to Kafka Topic
+                                     ↓
+                      Kafka Consumer (Realtime Service)
+                                     ↓
+                      Socket.IO Room Broadcast → Recipients
 ```
 
 ### 4. Error Handling Flow
@@ -351,16 +431,22 @@ open http://localhost:3000
 ## 📈 Performance & Scalability
 
 ### Current Architecture Benefits
-- **Microservices**: Independent scaling of user management and real-time features
-- **Redis Caching**: Fast user presence and session data
-- **Connection Pooling**: Efficient database connections with EF Core
-- **BFF Pattern**: Reduced client complexity and improved security
+- **Event-Driven Architecture**: Kafka decouples message production from delivery
+- **Horizontal Scalability**: Kafka consumer groups enable multiple realtime service instances
+- **Message Durability**: Kafka retains messages even if consumers are offline
+- **Redis for Ephemeral Data**: Sub-millisecond O(1) operations for presence tracking
+- **PostgreSQL for Persistence**: ACID compliance for critical user/message data
+- **Microservices**: Independent deployment and scaling of services
+- **BFF Pattern**: Single API surface for frontend, improved security boundary
+- **Socket.IO Rooms**: Efficient targeted message delivery to specific chats
 
-### Optimization Opportunities
-- **CDN Integration**: Static asset delivery optimization
-- **Database Indexing**: Query performance improvements
-- **Message Queuing**: Async processing for high-volume operations
-- **Horizontal Scaling**: Load balancing across service instances
+### Architectural Decisions & Trade-offs
+- **Kafka vs Direct WebSocket**: Chose Kafka for resilience, scalability, and decoupling (9/10 worth it)
+- **Redis Sets for Presence**: Chose Redis over Kafka for <1ms latency on presence checks (9/10 worth it)
+- **Hybrid JWT Storage**: Access token in localStorage (Socket.IO compatibility) + refresh token in HttpOnly cookies
+- **Data URL Caching**: Solves blob URL invalidation on SPA navigation, 5-min TTL (7/10 worth it)
+- **10s Polling for Presence**: Simpler than Kafka-based presence, adequate for <10K users (4/10 worth switching to Kafka)
+- **KRaft Kafka**: No Zookeeper dependency, simplified deployment
 
 ## 🤝 Contributing
 
@@ -388,22 +474,25 @@ Follow the project's emoji-based commit convention:
 ## 🔒 Security Features
 
 ### Authentication & Authorization
-- **JWT Tokens**: Secure token-based authentication
-- **Automatic Refresh**: Seamless token renewal
-- **HTTPS Ready**: Production-ready SSL configuration
-- **CORS Protection**: Configured cross-origin policies
+- **Hybrid JWT Strategy**: Access tokens (localStorage, 15min expiry) + Refresh tokens (HttpOnly cookies, 7 days)
+- **Automatic Token Refresh**: Axios interceptors handle expiry without user interruption
+- **WebSocket Authentication**: Bearer token verification on Socket.IO handshake
+- **Password Hashing**: ASP.NET Core Identity with secure hashing (PBKDF2)
+- **HTTPS Ready**: Production-ready configuration for SSL/TLS
 
-### Input Validation
-- **Runtime Validation**: Zod schemas for API inputs
+### Input Validation & Sanitization
+- **Runtime Validation**: Zod schemas (frontend), FluentValidation (backend)
 - **SQL Injection Protection**: EF Core parameterized queries
-- **XSS Protection**: React's built-in sanitization
-- **File Upload Security**: Type and size validation
+- **XSS Protection**: React's built-in JSX escaping
+- **File Upload Security**: MIME type validation, size limits (5MB for avatars)
+- **CORS Configuration**: Controlled cross-origin policies
 
 ### Data Protection  
-- **Password Hashing**: Secure password storage
-- **Session Management**: Redis-based session handling
-- **Private File Access**: Protected avatar serving
-- **Environment Secrets**: Secure configuration management
+- **Session Management**: Redis-based user sessions with TTL
+- **Protected File Access**: Avatar serving through authenticated endpoints
+- **Environment Secrets**: Docker secrets for production, .env for development
+- **JWT Secret**: Minimum 256-bit secret key requirement
+- **Rate Limiting**: Ready for implementation with Express middleware
 
 ## � Support & Community
 
@@ -424,11 +513,16 @@ The project welcomes contributions in areas like:
 
 ## 📊 Project Stats
 
-- **Languages**: TypeScript (65%), C# (30%), Others (5%)
-- **Services**: 3 main services + 2 databases
-- **API Endpoints**: 25+ REST endpoints + WebSocket events
-- **Frontend Pages**: 15+ pages with responsive design
-- **Docker Images**: 3 custom services + 3 infrastructure
+- **Architecture**: Event-driven microservices with Kafka
+- **Services**: 3 main services + 5 infrastructure components
+- **Primary Languages**: TypeScript (Frontend + Realtime), C# (User Service)
+- **Databases**: PostgreSQL (persistence), Redis (ephemeral state)
+- **Message Queue**: Apache Kafka 3.8.1 (KRaft mode, 3 partitions)
+- **API Endpoints**: 25+ REST endpoints + 10+ WebSocket events
+- **Frontend Pages**: 15+ responsive pages (auth, chats, friends, profile)
+- **Docker Services**: 8 containers (frontend, user-service, realtime-service-ts, postgres, redis, kafka, kafka-ui, pgadmin)
+- **Real-time Features**: WebSocket connections, typing indicators, presence tracking
+- **Authentication**: Hybrid JWT (localStorage + HttpOnly cookies)
 
 ---
 
