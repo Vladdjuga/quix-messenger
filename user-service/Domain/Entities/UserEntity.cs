@@ -17,8 +17,8 @@ namespace Domain.Entities
         public required string LastName { get; init; }
         public required DateTime DateOfBirth { get; init; }
         public required DateTime CreatedAt { get; init; }
-        public virtual IEnumerable<UserChatEntity>? UserChatEntities { get; init; }
-        public virtual IEnumerable<FriendshipEntity>? Friendships { get; init; }
-        public virtual IEnumerable<UserSessionEntity>? Sessions { get; init; }
+        public IEnumerable<UserChatEntity>? UserChatEntities { get; init; }
+        public IEnumerable<FriendshipEntity>? Friendships { get; init; }
+        public IEnumerable<UserSessionEntity>? Sessions { get; init; }
     }
 }

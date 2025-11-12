@@ -19,11 +19,7 @@ namespace Infrastructure.Persistence.Contexts
         public DbSet<UserSessionEntity> UserSessions { get; set; }
         public DbSet<MessageEntity> Messages { get; set; }
         public DbSet<MessageAttachmentEntity> MessageAttachments { get; set; }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseLazyLoadingProxies();
-        }
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

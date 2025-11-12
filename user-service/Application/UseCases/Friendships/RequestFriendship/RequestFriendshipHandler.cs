@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Friendships.RequestFriendship;
 
@@ -52,12 +51,11 @@ public class RequestFriendshipHandler
 
         await _friendshipRepository.AddAsync(pending, cancellationToken);
 
-        var loadedFriendship = await _friendshipRepository.GetByIdAsync(
+        var loadedFriendship = await _friendshipRepository.GetByIdWithNavigationAsync(
             pending.Id,
-            cancellationToken,
-            include => include.Include(x => x.Friend).Include(x => x.User));
+            cancellationToken);
 
-        if(loadedFriendship.Friend is null)
+        if(loadedFriendship?.Friend is null)
             return Result<ReadFriendshipDto>.Failure("Failed to load created friendship");
         // Map manually - return the friend's information
         var dto = loadedFriendship.MapToDto(loadedFriendship.Friend);

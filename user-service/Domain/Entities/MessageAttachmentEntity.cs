@@ -4,7 +4,7 @@ public class MessageAttachmentEntity
 {
     public Guid Id { get; init; }
     public required Guid MessageId { get; init; }
-    public virtual MessageEntity? Message { get; init; }
+    public MessageEntity? Message { get; init; }
     public required string FileUrl { get; set; }
     public required string FileName { get; set; }
     public required long FileSize { get; set; }

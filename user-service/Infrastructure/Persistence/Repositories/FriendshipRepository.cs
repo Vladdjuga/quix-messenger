@@ -80,6 +80,16 @@ public class FriendshipRepository:IFriendshipRepository
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
+    public async Task<FriendshipEntity?> GetFriendshipWithUsersAsync(Guid userId, Guid friendId, CancellationToken cancellationToken)
+    {
+        return await _dbSet.Where(el =>
+                (el.UserId == userId && el.FriendId == friendId) ||
+                (el.UserId == friendId && el.FriendId == userId))
+            .Include(el => el.Friend)
+            .Include(el => el.User)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task AddAsync(FriendshipEntity friendshipEntity, CancellationToken cancellationToken)
     {
         await _dbSet.AddAsync(friendshipEntity, cancellationToken);

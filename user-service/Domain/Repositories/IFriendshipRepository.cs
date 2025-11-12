@@ -11,9 +11,7 @@ public interface IFriendshipRepository
         CancellationToken cancellationToken);
     Task<FriendshipEntity?> GetFriendshipAsync(Guid userId, Guid friendId,
         CancellationToken cancellationToken);
-    Task<FriendshipEntity?> GetFriendshipAsync(Guid userId, Guid friendId,
-        CancellationToken cancellationToken,
-        Func<IQueryable<FriendshipEntity>, IQueryable<FriendshipEntity>>? include);
+    Task<FriendshipEntity?> GetFriendshipWithUsersAsync(Guid userId, Guid friendId, CancellationToken cancellationToken);
     Task AddAsync(FriendshipEntity friendshipEntity, CancellationToken cancellationToken);
     Task UpdateAsync(FriendshipEntity friendshipEntity, CancellationToken cancellationToken);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);

@@ -3,7 +3,6 @@ using Application.DTOs.Friendship;
 using Application.Mappings;
 using Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Friendships.GetFriendship;
 
@@ -18,10 +17,8 @@ public class GetFriendshipHandler:IRequestHandler<GetFriendshipQuery,Result<Read
 
     public async Task<Result<ReadFriendshipDto>> Handle(GetFriendshipQuery request, CancellationToken cancellationToken)
     {
-        var friendship=await _friendshipRepository.GetFriendshipAsync(request.UserId,request.FriendId,
-            cancellationToken,
-            include=>include.Include(x=>x.Friend).Include(x=>x.User));
-        
+        var friendship = await _friendshipRepository.GetFriendshipWithUsersAsync(request.UserId, request.FriendId, cancellationToken);
+
         if (friendship is null)
             return Result<ReadFriendshipDto>.Failure("User contact not found");
 

@@ -5,7 +5,6 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.UseCases.Friendships.CreateFriendship;
 
@@ -16,8 +15,11 @@ public class CreateFriendshipHandler:IRequestHandler<CreateFriendshipCommand,Res
     private readonly IUserChatRepository _userChatRepository;
     private readonly IFriendshipRepository _friendshipRepository;
 
-    public CreateFriendshipHandler(IChatRepository chatRepository, IUserRepository userRepository,
-        IFriendshipRepository friendshipRepository, IUserChatRepository userChatRepository)
+    public CreateFriendshipHandler(
+        IChatRepository chatRepository, 
+        IUserRepository userRepository,
+        IFriendshipRepository friendshipRepository, 
+        IUserChatRepository userChatRepository)
     {
         _chatRepository = chatRepository;
         _userRepository = userRepository;
@@ -71,12 +73,10 @@ public class CreateFriendshipHandler:IRequestHandler<CreateFriendshipCommand,Res
             PrivateChatId = privateChat.Id
         };
         await _friendshipRepository.AddAsync(friendshipEntity, cancellationToken);
-        var loadedFriendship = await _friendshipRepository.GetByIdAsync(friendshipEntity.Id, cancellationToken, 
-            include => include
-                .Include(x => x.Friend)
-                .Include(x => x.User)
-        );
-        if(loadedFriendship.Friend is null)
+        
+        var loadedFriendship = await _friendshipRepository.GetByIdWithNavigationAsync(friendshipEntity.Id, cancellationToken);
+        
+        if(loadedFriendship?.Friend is null)
             return Result<ReadFriendshipDto>.Failure("Failed to load created friendship");
         // Map manually - return the friend's information
         var dto = loadedFriendship.MapToDto(loadedFriendship.Friend);

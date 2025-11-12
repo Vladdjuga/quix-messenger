@@ -39,8 +39,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<MessengerDbContext>(options => 
             options.UseNpgsql(configuration.GetConnectionString("PostgresSQLConnection"),
-                    b => b.MigrationsAssembly("Infrastructure"))
-                .UseLazyLoadingProxies());
+                    b => b.MigrationsAssembly("Infrastructure")));
         
         services.Configure<JwtSettings>(opt =>
             configuration.GetSection(nameof(JwtSettings)).Bind(opt));
@@ -70,8 +69,6 @@ public static class DependencyInjection
         
         // Comment this if you want to use global exception middleware
         services.AddExceptionHandler<GlobalExceptionHandler>();
-        
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         
         services.AddScoped<IUserRepository,UserRepository>();
         services.AddScoped<IChatRepository,ChatRepository>();

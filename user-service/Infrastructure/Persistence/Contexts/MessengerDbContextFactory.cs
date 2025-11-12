@@ -10,7 +10,6 @@ public class MessengerDbContextFactory : IDesignTimeDbContextFactory<MessengerDb
         var connectionString = "Host=localhost;Port=5432;Database=UserDB;Username=postgres;Password=qwe;";
         var optionsBuilder = new DbContextOptionsBuilder<MessengerDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
-        optionsBuilder.UseLazyLoadingProxies();
 
         return new MessengerDbContext(optionsBuilder.Options);
     }
