@@ -27,7 +27,7 @@ public class MessageConfiguration : IEntityTypeConfiguration<MessageEntity>
             .HasConversion<int>();
 
         builder.HasOne(x => x.Chat)
-            .WithMany()
+            .WithMany(c => c.Messages)
             .HasForeignKey(x => x.ChatId)
             .OnDelete(DeleteBehavior.Cascade);
 
