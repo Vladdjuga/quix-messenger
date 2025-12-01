@@ -81,6 +81,12 @@ public class MessagesController : Controller
                 messageDto.Attachments = uploadResult.Value;
         }
         
+        // Publish complete message with attachments to Kafka
+        var publishCommand = new PublishMessageToKafkaCommand(messageDto.Id);
+        var publishResult = await _mediator.Send(publishCommand);
+        if (publishResult.IsFailure)
+            _logger.LogWarning("Failed to publish message {MessageId} to Kafka: {Error}", messageDto.Id, publishResult.Error);
+        
         _logger.LogInformation("User {UserId} sent message {MessageId} to chat {ChatId}", userId, messageDto.Id, chatId);
         
         return TypedResults.Ok(messageDto);

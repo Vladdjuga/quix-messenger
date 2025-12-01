@@ -1,6 +1,5 @@
 using Application.Common;
 using Application.DTOs.Message;
-using Application.Interfaces.Notification;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
@@ -14,13 +13,11 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
 {
     private readonly IMessageRepository _repository;
     private readonly IUserChatRepository _userChatRepository;
-    private readonly INotificationService _realtimeNotification;
 
-    public CreateMessageHandler(IMessageRepository repository, IUserChatRepository userChatRepository, INotificationService realtimeNotification)
+    public CreateMessageHandler(IMessageRepository repository, IUserChatRepository userChatRepository)
     {
         _repository = repository;
         _userChatRepository = userChatRepository;
-        _realtimeNotification = realtimeNotification;
     }
     public async Task<Result<ReadMessageDto>> Handle(CreateMessageCommand request, CancellationToken cancellationToken)
     {
@@ -54,8 +51,8 @@ public class CreateMessageHandler : IRequestHandler<CreateMessageCommand, Result
             Attachments = new List<MessageAttachmentDto>() // Will be populated after upload if needed
         };
 
-        // Send event to Kafka
-        await _realtimeNotification.BroadcastNewMessageAsync(dto, cancellationToken);
+        // Note: Kafka publishing is handled separately via PublishMessageToKafkaCommand
+        // to ensure attachments are included
         return Result<ReadMessageDto>.Success(dto);
     }
 }
