@@ -29,7 +29,10 @@ export default function RegisterForm() {
         }
     });
 
+    const [backendError, setBackendError] = React.useState<string | null>(null);
+
     const onSubmit = async (data: RegisterFormData) => {
+        setBackendError(null);
         try {
             const response = await api.auth.register({
                 username: data.username,
@@ -43,11 +46,16 @@ export default function RegisterForm() {
             if (response.status === 201 || response.status === 200) {
                 window.location.href = "/login"; // Redirect to login page on successful registration
             } else {
-                alert("Registration failed. Please try again.");
+                const errorMessage = response.data?.error || response.data?.message || "Registration failed. Please try again.";
+                setBackendError(errorMessage);
             }
         } catch (error) {
             console.error("Registration failed:", error);
-            alert("Registration failed. Please try again.");
+            const errorMessage = (error as { response?: { data?: { error?: string; message?: string } }; message?: string })?.response?.data?.error || 
+                                (error as { response?: { data?: { error?: string; message?: string } }; message?: string })?.response?.data?.message || 
+                                (error as Error)?.message || 
+                                "Registration failed. Please check your connection and try again.";
+            setBackendError(errorMessage);
         }
     };
 
@@ -57,6 +65,13 @@ export default function RegisterForm() {
                 <div className="w-1/3 bg-gray-900 p-[3%] rounded">
                     <h1 className="text-white text-2xl mb-2">Register</h1>
                     <hr className="my-4" />
+
+                    {/* Backend error message */}
+                    {backendError && (
+                        <div className="mb-4 p-3 bg-red-500/20 border border-red-500 rounded">
+                            <p className="text-red-400 text-sm">{backendError}</p>
+                        </div>
+                    )}
 
                     {[
                         { name: "username", label: "Username" },
