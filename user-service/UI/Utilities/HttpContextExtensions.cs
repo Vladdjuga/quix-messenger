@@ -5,19 +5,22 @@ namespace UI.Utilities;
 
 public static class HttpContextExtensions
 {
-    public static Guid GetUserGuid(this HttpContext httpContext)
+    extension(HttpContext httpContext)
     {
-        if (httpContext.Items.TryGetValue(GetUserGuidAttribute.UserGuidKey, out var value)
-            && value is Guid userGuid)
-            return userGuid;
-        throw new InvalidOperationException("User GUID not found in HttpContext.");
-    }
+        public Guid GetUserGuid()
+        {
+            if (httpContext.Items.TryGetValue(GetUserGuidAttribute.UserGuidKey, out var value)
+                && value is Guid userGuid)
+                return userGuid;
+            throw new InvalidOperationException("User GUID not found in HttpContext.");
+        }
 
-    public static Guid GetSessionGuid(this HttpContext httpContext)
-    {
-        if (httpContext.Items.TryGetValue(GetSessionGuidAttribute.SessionGuidKey, out var value) 
-            && value is Guid sessionGuid)
-            return sessionGuid;
-        throw new InvalidOperationException("Session GUID not found in HttpContext.");
+        public Guid GetSessionGuid()
+        {
+            if (httpContext.Items.TryGetValue(GetSessionGuidAttribute.SessionGuidKey, out var value) 
+                && value is Guid sessionGuid)
+                return sessionGuid;
+            throw new InvalidOperationException("Session GUID not found in HttpContext.");
+        }
     }
 }
