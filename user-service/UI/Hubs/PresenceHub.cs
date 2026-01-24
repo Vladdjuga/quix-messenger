@@ -34,7 +34,16 @@ public class PresenceHub : Hub<IPresenceClient>
             userId, connectionId);
 
         // Mark user as online
-        var userInfo = await _presenceService.UserConnectedAsync(userId, connectionId);
+        var result = await _presenceService.UserConnectedAsync(userId, connectionId);
+        
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Failed to connect user {UserId}: {Error}", userId, result.Error);
+            await base.OnConnectedAsync();
+            return;
+        }
+
+        var userInfo = result.Value;
 
         // Join personal group for this user (for targeted notifications)
         await Groups.AddToGroupAsync(connectionId, $"user_{userId}");
@@ -54,24 +63,34 @@ public class PresenceHub : Hub<IPresenceClient>
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var connectionId = Context.ConnectionId;
-        var userInfo = await _presenceService.GetUserByConnectionIdAsync(connectionId);
+        var userResult = await _presenceService.GetUserByConnectionIdAsync(connectionId);
 
-        if (userInfo != null)
+        if (!userResult.IsSuccess)
         {
-            _logger.LogInformation(
-                "User {UserId} disconnected from PresenceHub with connectionId {ConnectionId}",
-                userInfo.UserId, connectionId);
+            _logger.LogWarning("Failed to get user info on disconnect: {Error}", userResult.Error);
+            await base.OnDisconnectedAsync(exception);
+            return;
+        }
 
-            // Remove connection and check if user went fully offline
-            var wentOffline = await _presenceService.UserDisconnectedAsync(connectionId);
+        var userInfo = userResult.Value;
+        
+        _logger.LogInformation(
+            "User {UserId} disconnected from PresenceHub with connectionId {ConnectionId}",
+            userInfo.UserId, connectionId);
 
-            if (wentOffline)
-            {
-                _logger.LogInformation("User {UserId} went offline", userInfo.UserId);
-                
-                // Notify all clients that user is offline
-                await Clients.Others.UserOffline(userInfo.UserId);
-            }
+        // Remove connection and check if user went fully offline
+        var disconnectResult = await _presenceService.UserDisconnectedAsync(connectionId);
+
+        if (!disconnectResult.IsSuccess)
+        {
+            _logger.LogError("Failed to disconnect user {UserId}: {Error}", userInfo.UserId, disconnectResult.Error);
+        }
+        else if (disconnectResult.Value)
+        {
+            _logger.LogInformation("User {UserId} went offline", userInfo.UserId);
+            
+            // Notify all clients that user is offline
+            await Clients.Others.UserOffline(userInfo.UserId);
         }
 
         await base.OnDisconnectedAsync(exception);
@@ -82,8 +101,16 @@ public class PresenceHub : Hub<IPresenceClient>
     /// </summary>
     public async Task GetOnlineUsers()
     {
-        var onlineUsers = await _presenceService.GetOnlineUsersAsync();
-        var onlineDtos = onlineUsers.Select(u => new OnlineUserDto
+        var result = await _presenceService.GetOnlineUsersAsync();
+        
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Failed to get online users: {Error}", result.Error);
+            await Clients.Caller.OnlineUsers(new List<OnlineUserDto>());
+            return;
+        }
+
+        var onlineDtos = result.Value.Select(u => new OnlineUserDto
         {
             UserId = u.UserId,
             ConnectedAt = u.ConnectedAt
@@ -98,13 +125,21 @@ public class PresenceHub : Hub<IPresenceClient>
     /// </summary>
     public async Task<IDictionary<Guid,bool>> SubscribeToUsers(List<Guid> userIds)
     {
-        var tasks=userIds.Select(async userId=> await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}"));
+        var tasks = userIds.Select(async userId => await Groups.AddToGroupAsync(Context.ConnectionId, $"user_{userId}"));
         await Task.WhenAll(tasks);
 
         _logger.LogInformation(
             "User {UserId} subscribed to {Count} users' presence",
             Context.GetUserGuid(), userIds.Count);
 
-        return await _presenceService.AreUsersOnlineAsync(userIds);
+        var result = await _presenceService.AreUsersOnlineAsync(userIds);
+        
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Failed to get users online status: {Error}", result.Error);
+            return new Dictionary<Guid, bool>();
+        }
+
+        return result.Value;
     }
 }

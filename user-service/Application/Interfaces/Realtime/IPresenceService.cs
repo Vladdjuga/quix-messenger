@@ -1,3 +1,4 @@
+using Application.Common;
 using Application.DTOs.Presence;
 
 namespace Application.Interfaces.Realtime;
@@ -10,31 +11,36 @@ public interface IPresenceService
     /// <summary>
     /// Mark user as online and return their connection info
     /// </summary>
-    Task<UserPresenceInfo> UserConnectedAsync(Guid userId, string connectionId);
+    Task<Result<UserPresenceInfo>> UserConnectedAsync(Guid userId, string connectionId);
     
     /// <summary>
     /// Mark user as offline (if no more connections)
+    /// Returns true if user went fully offline, false if they still have other connections
     /// </summary>
-    Task<bool> UserDisconnectedAsync(string connectionId);
+    Task<Result<bool>> UserDisconnectedAsync(string connectionId);
     
     /// <summary>
     /// Get all currently online users
     /// </summary>
-    Task<List<UserPresenceInfo>> GetOnlineUsersAsync();
+    Task<Result<List<UserPresenceInfo>>> GetOnlineUsersAsync();
     
     /// <summary>
     /// Get online friends of a specific user
     /// </summary>
-    Task<List<UserPresenceInfo>> GetOnlineFriendsAsync(Guid userId);
+    Task<Result<List<UserPresenceInfo>>> GetOnlineFriendsAsync(Guid userId);
     
     /// <summary>
     /// Check if specific user is online
     /// </summary>
-    Task<bool> IsUserOnlineAsync(Guid userId);
-    Task<IDictionary<Guid,bool>> AreUsersOnlineAsync(IEnumerable<Guid> userIds);
+    Task<Result<bool>> IsUserOnlineAsync(Guid userId);
+    
+    /// <summary>
+    /// Check multiple users' online status at once
+    /// </summary>
+    Task<Result<IDictionary<Guid,bool>>> AreUsersOnlineAsync(IEnumerable<Guid> userIds);
 
     /// <summary>
     /// Get user info by connection ID
     /// </summary>
-    Task<UserPresenceInfo?> GetUserByConnectionIdAsync(string connectionId);
+    Task<Result<UserPresenceInfo>> GetUserByConnectionIdAsync(string connectionId);
 }
