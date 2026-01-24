@@ -1,6 +1,6 @@
 # Quix Messenger (Monorepo)
 
-A modern, full-stack real-time messaging application built with a microservices architecture. Features include user authentication, friend management, real-time messaging, user presence tracking, and file uploads.
+A modern, full-stack real-time messaging application built with .NET Core and Next.js. Features SignalR for WebSocket communication, MassTransit + RabbitMQ for event-driven architecture, and includes user authentication, friend management, real-time messaging, presence tracking, and file uploads.
 
 ## 🏗️ Architecture Overview
 
@@ -8,78 +8,76 @@ A modern, full-stack real-time messaging application built with a microservices 
 ```
 ┌─────────────────┐
 │     Frontend    │
-│   (Next.js)     │
+│   (Next.js 15)  │
 │   Port: 3000    │
 └────────┬────────┘
-         │ HTTP (BFF Pattern)
-         ├──────────────┐
-         │              │ WebSocket
-         ▼              ▼
-┌─────────────────┐    ┌─────────────────┐
-│  User Service   │    │  Realtime-TS    │
-│  (.NET Core)    │◄──►│   (Node.js)     │
-│   Port: 6001    │    │   Port: 8081    │
-└────────┬────────┘    └────────┬────────┘
-         │                      │
-         │ Kafka Publish        │ Kafka Consume
-         │                      │
-         ▼                      ▼
-    ┌─────────────────────────────────┐
-    │           Kafka                 │
-    │  (Event Streaming)              │
-    │  Port: 9092                     │
-    │  Topic: messenger.events.       │
-    │         newMessage              │
-    └─────────────────────────────────┘
-         │                      │
-         ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐
-│   PostgreSQL    │    │     Redis       │
-│  (Persistence)  │    │   (Presence)    │
-│   Port: 5432    │    │   Port: 6379    │
-└─────────────────┘    └─────────────────┘
+         │ HTTP REST API (BFF Pattern)
+         │ SignalR WebSocket (/chat, /presence)
+         │
+         ▼
+┌─────────────────────────────┐
+│      User Service           │
+│     (.NET Core 10)          │
+│      Port: 6001             │
+│                             │
+│  ┌──────────────────────┐   │
+│  │   SignalR Hubs       │   │
+│  │   • ChatHub          │   │
+│  │   • PresenceHub      │   │
+│  └──────────────────────┘   │
+│                             │
+│  ┌──────────────────────┐   │
+│  │   MassTransit +      │   │
+│  │   RabbitMQ Events    │   │
+│  └──────────────────────┘   │
+└──────────┬──────────────────┘
+           │
+           ├──────────────┬────────────┐
+           ▼              ▼            ▼
+    ┌─────────────┐ ┌──────────┐ ┌──────────┐
+    │ PostgreSQL  │ │ RabbitMQ │ │  Redis   │
+    │(Persistence)│ │ (Events) │ │(SignalR) │
+    │ Port: 5432  │ │Port: 5672│ │Port: 6379│
+    └─────────────┘ └──────────┘ └──────────┘
 ```
 
 ### 📦 Services (in this repo)
 - **`frontend`** — Next.js 15 app with BFF pattern (TypeScript, React 19, Tailwind CSS 4)
   - Client-side React application with Server Components
   - API routes acting as BFF proxy layer
-  - WebSocket client for real-time features
-- **`realtime-service-ts`** — WebSocket gateway and Kafka consumer (Express.js 4.18, Socket.io 4.8, KafkaJS 2.2)
-  - Real-time message delivery via Socket.IO rooms
-  - Kafka consumer for `messenger.events.newMessage` topic
-  - User presence tracking with Redis
-  - Typing indicators broadcast
-- **`user-service`** — ASP.NET Core service (PostgreSQL, EF Core 9, KafkaFlow)
-  - Authentication with JWT (access + refresh tokens)
-  - User profiles and friendship management
-  - Message persistence to PostgreSQL
-  - Kafka producer for new messages
+  - SignalR client (`@microsoft/signalr`) for real-time features
+  - Automatic reconnection with exponential backoff
+- **`user-service`** — ASP.NET Core 10 monolithic service
+  - **REST API**: Authentication, profiles, friendships, messages, chats
+  - **SignalR Hubs**: Real-time messaging (ChatHub) and presence tracking (PresenceHub)
+  - **Event-Driven**: MassTransit + RabbitMQ for internal event broadcasting
+  - **Persistence**: PostgreSQL with Entity Framework Core 10
+  - **Features**: JWT auth, message attachments, avatar uploads, friend requests
 
 ### 🗄️ Infrastructure
 - **PostgreSQL 16** — Primary database for users, friendships, messages, chats
-- **Redis 7** — Ephemeral data for online presence (Sets + Hashes), last seen timestamps
-- **Apache Kafka 3.8.1** — Event streaming for message broadcasting (3 partitions)
-- **Kafka UI** — Web interface for monitoring topics (Port: 8080)
+- **Redis 7** — SignalR backplane for scaling across multiple instances
+- **RabbitMQ 3.13** — Event bus for MassTransit (MessageCreated, MessageEdited, MessageDeleted)
 - **PgAdmin 4** — Database management UI (Port: 5050)
-- **File System** — Avatar storage with Docker volumes
+- **File System** — Avatar and message attachment storage with Docker volumes
 
 ## ⚙️ Tech Stack
 
 ### Backend Services
-- **ASP.NET Core 9** — User service with Entity Framework Core, Kafka producer
-- **Express.js 4.18** — TypeScript-based realtime service with Node.js 18
+- **ASP.NET Core 10** — User service with SignalR hubs and REST API
+- **Entity Framework Core 10** — ORM with PostgreSQL provider
+- **SignalR Core** — Real-time WebSocket communication (ChatHub, PresenceHub)
+- **MassTransit 8.3.4** — Event-driven architecture with RabbitMQ
 - **PostgreSQL 16** — Primary database for persistent data
-- **Redis 7** — In-memory store for ephemeral presence data
-- **Apache Kafka 3.8.1 (KRaft mode)** — Event streaming without Zookeeper
-- **KafkaJS 2.2.4** — Node.js Kafka client for consuming message events
+- **Redis 7** — SignalR backplane for distributed deployments
+- **RabbitMQ 3.13** — Message broker for event streaming
 
 ### Frontend
 - **Next.js 15** — React-based frontend with App Router
 - **React 19** — Latest React with modern hooks and features
 - **Tailwind CSS 4** — Utility-first CSS framework
 - **TypeScript 5** — Type-safe development
-- **Socket.io Client 4.8** — Real-time WebSocket communication
+- **@microsoft/signalr** — SignalR client for real-time WebSocket communication
 - **Zod 3.25** — Runtime type validation
 - **Axios 1.11** — HTTP client with interceptors
 
@@ -93,12 +91,13 @@ A modern, full-stack real-time messaging application built with a microservices 
 The frontend implements a Backend-For-Frontend (BFF) pattern using Next.js API routes:
 
 ### API Proxy Layer
-- **Route Structure**: API routes under `frontend/src/app/api/**` proxy to backend services
+- **Route Structure**: API routes under `frontend/src/app/api/**` proxy to user-service
 - **Unified Proxy**: Single helper `src/lib/proxy.ts` handles all backend communication
 - **Examples**: 
   - `/api/chats` → `USER_SERVICE_URL/Chat/getChats`
-  - `/api/online/[userId]` → `REALTIME_URL/online/:userId`
-  - `/api/realtime/user/[userId]/presence` → `REALTIME_URL/user/:userId/presence`
+  - `/api/messages` → `USER_SERVICE_URL/Message/send`
+  - `/api/auth/login` → `USER_SERVICE_URL/Auth/login`
+- **SignalR Direct**: Frontend connects directly to `USER_SERVICE_URL/chat` and `USER_SERVICE_URL/presence`
 
 ### Security & Validation
 - **Input Validation**: Each route validates query/body with Zod schemas
@@ -126,36 +125,42 @@ sequenceDiagram
 
 ### Real-time Communication & Event Streaming
 
-#### Message Flow (Kafka-based)
+#### Message Flow (SignalR + MassTransit)
 ```mermaid
 sequenceDiagram
     participant U1 as User 1 (Sender)
-    participant US as User Service
-    participant K as Kafka
-    participant RT as Realtime Service
+    participant Hub as SignalR ChatHub
+    participant MediatR as MediatR Handler
+    participant DB as PostgreSQL
+    participant MT as MassTransit
+    participant RMQ as RabbitMQ
     participant U2 as User 2 (Recipient)
     
-    U1->>US: POST /Message/send
-    US->>PostgreSQL: Save Message
-    US->>K: Publish to messenger.events.newMessage
-    K->>RT: Consumer receives event
-    RT->>U2: Emit via Socket.IO to room
+    U1->>Hub: Connected to /chat
+    U1->>MediatR: POST /Message/send
+    MediatR->>DB: Save Message
+    MediatR->>MT: Publish MessageCreatedEvent
+    MT->>RMQ: Send to exchange
+    RMQ->>MT: Consume event
+    MT->>Hub: Broadcast via IChatClient
+    Hub->>U2: NewMessage(payload)
     U2->>UI: Display new message
 ```
 
-#### Socket.IO Features
-- **Token-based Authentication**: Bearer JWT for WebSocket handshake
-- **Automatic Reconnection**: Built-in retry logic with exponential backoff
-- **Room-based Broadcasting**: Each chat has a dedicated Socket.IO room
-- **Typing Indicators**: Real-time `onTyping`/`onStopTyping` events
-- **Presence Tracking**: Online/offline status with 10-second polling + Redis Sets
+#### SignalR Features
+- **JWT Authentication**: Bearer token via `accessTokenFactory`
+- **Automatic Reconnection**: Exponential backoff (2s → 30s)
+- **Strongly-Typed Hubs**: `Hub<IChatClient>`, `Hub<IPresenceClient>`
+- **Group-based Broadcasting**: Each chat has a SignalR group
+- **Typing Indicators**: `UserTyping`/`UserStopTyping` methods
+- **Presence Tracking**: Real-time `UserOnline`/`UserOffline` events via PresenceHub
+- **Redis Backplane**: Scales across multiple instances with Redis pub/sub
 
-#### Kafka Integration
-- **Producer**: User service publishes messages to `messenger.events.newMessage`
-- **Consumer**: Realtime service consumes events and broadcasts via WebSocket
-- **Consumer Group**: `realtime-service-group` for horizontal scaling
-- **Partitions**: 3 partitions for parallel processing
-- **Benefits**: Decoupling, message durability, at-least-once delivery
+#### MassTransit + RabbitMQ Integration
+- **Event Publishing**: `IEventPublisher` abstraction for domain events
+- **Events**: `MessageCreatedEvent`, `MessageEditedEvent`, `MessageDeletedEvent`
+- **Future Consumers**: Can add consumers to trigger push notifications, analytics, etc.
+- **Benefits**: Decoupling, reliability, at-least-once delivery, dead-letter queues
 
 ### Key Frontend Paths
 ```
@@ -165,9 +170,15 @@ src/
 │   ├── (protected)/        # Authenticated pages
 │   └── globals.css         # Global styles
 ├── lib/
-│   ├── proxy.ts           # Unified proxy helper
+│   ├── signalr/           # SignalR connection management
+│   │   ├── chatConnection.ts
+│   │   ├── chatUseCases.ts
+│   │   ├── presenceConnection.ts
+│   │   └── presenceUseCases.ts
+│   ├── contexts/          # React contexts
+│   │   ├── SocketContext.tsx (ChatContext)
+│   │   └── PresenceContext.tsx
 │   ├── hooks/data/        # Data fetching hooks
-│   ├── realtime/          # Socket.io workflows
 │   ├── mappers/           # DTO → Domain type mapping
 │   ├── types/             # TypeScript definitions
 │   └── schemas/           # Zod validation schemas
@@ -181,19 +192,20 @@ src/
 - **Automatic Token Refresh** — Axios interceptors handle token expiry transparently
 - **User Profiles** — View, edit profile, avatar upload, password change
 - **Friendships** — Send/accept/reject friend requests, friend lists, sent requests
-- **Real-time Messaging** — Kafka event streaming + Socket.IO delivery
+- **Real-time Messaging** — SignalR WebSocket with MassTransit event publishing
 - **Group Chats** — Multi-user conversations with ChatType enum (Direct/Group)
-- **Typing Indicators** — Real-time typing status broadcast via Socket.IO
-- **User Presence** — Online/offline status via Redis Sets, "last seen" via Redis Hashes, 10-second polling
+- **Typing Indicators** — Real-time typing status via SignalR ChatHub
+- **User Presence** — Real-time online/offline tracking via SignalR PresenceHub with Redis backplane
 - **Message History** — Persistent PostgreSQL storage with cursor-based pagination
 - **User Search** — Search users by username/email with pagination
 - **Friend Search** — Search within friend list
 - **File Sharing** — Attachment uploads with preview, file type icons, size display
 - **Protected Resources** — Data URL caching (5-min TTL) for avatars in SPA context
-- **Containerization** — Full Docker Compose with all services (includes Kafka UI, PgAdmin)
+- **Containerization** — Full Docker Compose with PostgreSQL, RabbitMQ, Redis, PgAdmin
 - **Input Validation** — Zod schemas on frontend, FluentValidation on backend
-- **Error Handling** — Winston logging (realtime service), Serilog (user service)
-- **BFF Pattern** — Next.js API routes as proxy layer, eliminates CORS issues
+- **Error Handling** — Serilog structured logging, Result pattern for service responses
+- **BFF Pattern** — Next.js API routes as proxy layer for REST, direct SignalR connection for WebSocket
+- **Scalability** — Redis backplane for SignalR, RabbitMQ for event-driven architecture
 
 ### 🔄 In Progress
 - **Message Read Status** — Read receipts and delivery indicators (✓✓ checkmarks)
