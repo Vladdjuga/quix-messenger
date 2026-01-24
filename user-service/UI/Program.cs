@@ -1,5 +1,3 @@
-using System.Text;
-using UI.Swagger;
 // using Chat; // removed: gRPC no longer used
 using Infrastructure.DI;
 using Infrastructure.Persistence.Contexts;
@@ -17,6 +15,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Text;
+using UI.Hubs;
+using UI.Swagger;
 // using UI.gRPCClients; // removed: gRPC no longer used
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+builder.Services.AddSignalR(); // Add SignalR for real-time communication
 
 // builder.Services.AddGrpc(); // removed: gRPC no longer used
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -112,6 +114,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chat");
 // app.MapGrpcService<UI.gRPCClients.ChatService>(); // removed: gRPC no longer used
 
 app.Run();
