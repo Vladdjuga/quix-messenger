@@ -1,32 +1,34 @@
-import {useCallback, useEffect, useRef, useState} from "react";
-import {User} from "@/lib/types";
-import {onStopTyping, onTyping, sendStopTyping, sendTyping} from "@/lib/realtime/chatSocketUseCases";
-import {Socket} from "socket.io-client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { User } from "@/lib/types";
+import { onUserStopTyping, onUserTyping, sendStopTyping, sendTyping } from "@/lib/signalr/chatUseCases";
+import * as signalR from "@microsoft/signalr";
 
-export default function useTyping(chatId: string, socket: Socket | null, user: User | null) {
+export default function useTyping(chatId: string, connection: signalR.HubConnection | null, user: User | null) {
     const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map());
     const cooldownRef = useRef(false);
     const stopTypingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleInputChange = useCallback(() => {
-        if (!socket || !chatId) return;
+        if (!connection || !chatId || connection.state !== signalR.HubConnectionState.Connected) return;
 
         if (!cooldownRef.current) {
-            sendTyping(socket, chatId,user?.username).catch(() => {});
+            sendTyping(connection, chatId).catch(() => {});
             cooldownRef.current = true;
             setTimeout(() => { cooldownRef.current = false; }, 1000);
         }
 
         if (stopTypingTimeout.current) clearTimeout(stopTypingTimeout.current);
         stopTypingTimeout.current = setTimeout(() => {
-            if (socket && chatId) sendStopTyping(socket, chatId).catch(() => {});
+            if (connection && chatId && connection.state === signalR.HubConnectionState.Connected) {
+                sendStopTyping(connection, chatId).catch(() => {});
+            }
         }, 1500);
-    }, [socket, chatId, user?.username]);
+    }, [connection, chatId]);
 
     useEffect(() => {
-        if (!socket || !chatId || !user) return;
+        if (!connection || !chatId || !user || connection.state !== signalR.HubConnectionState.Connected) return;
 
-        const offTyping = onTyping(socket, ({username, chatId: cid, userId: uid }) => {
+        const offTyping = onUserTyping(connection, ({ username, chatId: cid, userId: uid }) => {
             if (cid !== chatId || uid === user.id) return;
 
             setTypingUsers(prev => {
@@ -43,7 +45,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
             }, 2000);
         });
 
-        const offStopTyping = onStopTyping(socket, ({ chatId: cid, userId: uid }) => {
+        const offStopTyping = onUserStopTyping(connection, ({ chatId: cid, userId: uid }) => {
             if (cid !== chatId || uid === user.id) return;
             setTypingUsers(prev => {
                 const next = new Map(prev);
@@ -57,7 +59,7 @@ export default function useTyping(chatId: string, socket: Socket | null, user: U
             offStopTyping?.();
             if (stopTypingTimeout.current) clearTimeout(stopTypingTimeout.current);
         };
-    }, [socket, chatId, user]);
+    }, [connection, chatId, user]);
 
     return { typingUsers, handleInputChange };
 }

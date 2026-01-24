@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChatType, ChatWithLastMessage } from "@/lib/types";
-import { useUserPresencePolling } from "@/lib/hooks/data/user/useUserPresencePolling";
+import { useUserPresence } from "@/lib/hooks/data/user/usePresence";
 import { formatLastSeen } from "@/lib/utils/formatLastSeen";
 import Image from "next/image";
 import { getProtectedChatAvatarUrl, getProtectedUserAvatarUrl } from "@/lib/utils/protectedAvatar";
@@ -22,7 +22,7 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
   }, [chat.chatType, chat.participants, currentUserId]);
 
   const otherUserId = otherUser?.id ?? null;
-  const { isOnline, lastSeenAt } = useUserPresencePolling(otherUserId, { intervalMs: 10000, enabled: !!otherUserId });
+  const { isOnline } = useUserPresence(otherUserId);
 
   const displayTitle = useMemo(() => {
     if (chat.chatType === ChatType.Direct && otherUser) {

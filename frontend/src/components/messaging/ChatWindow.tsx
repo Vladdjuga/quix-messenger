@@ -1,6 +1,6 @@
 "use client";
 import React, {useContext, useState, useEffect} from "react";
-import {SocketContext} from "@/lib/contexts/SocketContext";
+import {ChatContext} from "@/lib/contexts/SocketContext";
 import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
 import MessageInput from "@/components/messaging/MessageInput";
 import MessageList from "@/components/messaging/MessageList";
@@ -19,13 +19,13 @@ interface ChatWindowProps {
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ chatId, headerTitle }) => {
   const { user, loading: userLoading } = useCurrentUser();
-  const socket = useContext(SocketContext);
+  const connection = useContext(ChatContext);
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [chatInfo, setChatInfo] = useState<ChatWithLastMessage | null>(null);
   const [loadingChat, setLoadingChat] = useState(true);
 
-  const { typingUsers,handleInputChange } = useTyping(chatId,socket,user);
+  const { typingUsers,handleInputChange } = useTyping(chatId,connection,user);
   const { sendMessage,messages, loading, deleteMessage, editMessage, loadMore } = useMessages({chatId});
 
   // Load chat info to get chatType and chatRole

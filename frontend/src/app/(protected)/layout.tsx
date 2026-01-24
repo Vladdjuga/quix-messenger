@@ -2,14 +2,17 @@
 
 import React from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
-import {SocketProvider} from "@/lib/contexts/SocketContext";
+import {ChatProvider} from "@/lib/contexts/SocketContext";
+import {PresenceProvider} from "@/lib/contexts/PresenceContext";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <AuthGuard>
-            <SocketProvider>
-            {children}
-            </SocketProvider>
+            <ChatProvider>
+                <PresenceProvider>
+                    {children}
+                </PresenceProvider>
+            </ChatProvider>
         </AuthGuard>
     );
 }

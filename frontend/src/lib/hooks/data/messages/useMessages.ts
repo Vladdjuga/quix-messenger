@@ -1,7 +1,7 @@
-import {useCallback, useContext, useEffect, useState} from "react";
-import {Message, MessageStatus} from "@/lib/types";
-import {api} from "@/app/api";
-import {mapReadMessageDto, mapReadMessageDtos} from "@/lib/mappers/messageMapper";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Message, MessageStatus } from "@/lib/types";
+import { api } from "@/app/api";
+import { mapReadMessageDto, mapReadMessageDtos } from "@/lib/mappers/messageMapper";
 import {
     joinChat,
     leaveChat,
@@ -9,9 +9,10 @@ import {
     onMessageEdited,
     onNewMessage,
     sendStopTyping
-} from "@/lib/realtime/chatSocketUseCases";
-import {SocketContext} from "@/lib/contexts/SocketContext";
-import {useCurrentUser} from "@/lib/hooks/data/user/userHook";
+} from "@/lib/signalr/chatUseCases";
+import { ChatContext } from "@/lib/contexts/SocketContext";
+import { useCurrentUser } from "@/lib/hooks/data/user/userHook";
+import * as signalR from "@microsoft/signalr";
 
 const NEXT_PUBLIC_PAGE_SIZE = parseInt(process.env.NEXT_PUBLIC_PAGE_SIZE || '20', 10);
 
@@ -19,7 +20,7 @@ export function useMessages(props: { chatId: string }) {
     const { chatId } = props;
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState<Message[]>([]);
-    const socket = useContext(SocketContext);
+    const connection = useContext(ChatContext);
     const { user, loading: userLoading } = useCurrentUser();
 
     useEffect(() => {
@@ -79,7 +80,9 @@ export function useMessages(props: { chatId: string }) {
             });
 
             // stop typing after sending
-            if (socket) await sendStopTyping(socket, chatId);
+            if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                await sendStopTyping(connection, chatId);
+            }
         } catch (e) {
             console.error('Failed to send message:', e);
             // Remove optimistic message on error
@@ -144,28 +147,33 @@ export function useMessages(props: { chatId: string }) {
     }, [chatId, messages]);
 
     useEffect(() => {
-        if (!socket || !chatId || !user) return;
-        joinChat(socket, chatId);
-        const offNewMessage = onNewMessage(socket, async (msg) => {
+        if (!connection || !chatId || !user || connection.state !== signalR.HubConnectionState.Connected) return;
+        
+        joinChat(connection, chatId);
+        
+        const offNewMessage = onNewMessage(connection, async (msg) => {
             if (msg.chatId !== chatId) return;
-            // Add message from WebSocket (this is the real message from backend)
+            // Add message from SignalR (this is the real message from backend)
             addMessage(msg);
         });
-        const offEdited = onMessageEdited(socket, (msg) => {
+        
+        const offEdited = onMessageEdited(connection, (msg) => {
             if (msg.chatId !== chatId) return;
             setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, text: msg.text, status: (m.status | MessageStatus.Modified) } : m));
         });
-        const offDeleted = onMessageDeleted(socket, ({ messageId, chatId: cid }) => {
+        
+        const offDeleted = onMessageDeleted(connection, ({ messageId, chatId: cid }) => {
             if (cid !== chatId) return;
             setMessages(prev => prev.filter(m => m.id !== messageId));
         });
+        
         return () => {
-            leaveChat(socket, chatId);
+            leaveChat(connection, chatId);
             offNewMessage?.();
             offEdited?.();
             offDeleted?.();
         };
-    }, [socket, chatId, addMessage, user]);
+    }, [connection, chatId, addMessage, user]);
 
     return {
         loading: loading || userLoading,

@@ -2,12 +2,12 @@
 
 import React, { createContext, useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
-import { initChatConnection } from "@/lib/signalr/chatConnection";
+import { initPresenceConnection } from "@/lib/signalr/presenceConnection";
 
-export const ChatContext = createContext<signalR.HubConnection | null>(null);
+export const PresenceContext = createContext<signalR.HubConnection | null>(null);
 
-// Provider to initialize and manage ChatHub connection
-export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
+// Provider to initialize and manage PresenceHub connection
+export const PresenceProvider = ({ children }: { children: React.ReactNode }) => {
     const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
 
     useEffect(() => {
@@ -15,12 +15,12 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
         const setupConnection = async () => {
             try {
-                const conn = await initChatConnection();
+                const conn = await initPresenceConnection();
                 if (mounted) {
                     setConnection(conn);
                 }
             } catch (error) {
-                console.error('Failed to initialize ChatHub:', error);
+                console.error('Failed to initialize PresenceHub:', error);
             }
         };
 
@@ -31,5 +31,5 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }, []);
 
-    return <ChatContext.Provider value={connection}>{children}</ChatContext.Provider>;
+    return <PresenceContext.Provider value={connection}>{children}</PresenceContext.Provider>;
 };

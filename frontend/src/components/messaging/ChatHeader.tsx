@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChatType, ChatRole, Participant } from '@/lib/types';
-import { useUserPresencePolling } from '@/lib/hooks/data/user/useUserPresencePolling';
+import { useUserPresence } from '@/lib/hooks/data/user/usePresence';
 import { formatLastSeen } from '@/lib/utils/formatLastSeen';
 import Image from 'next/image';
 import { getProtectedUserAvatarUrl } from '@/lib/utils/protectedAvatar';
@@ -26,8 +26,8 @@ const ChatHeader : React.FC<Props> = (props:Props)=>{
 
     const otherUserId = otherUser?.id ?? null;
     
-    // Poll for online status (only for direct chats)
-    const { isOnline, lastSeenAt } = useUserPresencePolling(otherUserId, { intervalMs: 10000 });
+    // Track online status via SignalR (only for direct chats)
+    const { isOnline } = useUserPresence(otherUserId);
 
     // Avatar state for direct chats
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -49,9 +49,9 @@ const ChatHeader : React.FC<Props> = (props:Props)=>{
         ? `${otherUser.firstName} ${otherUser.lastName}`.trim() || otherUser.username 
         : props.title || 'Chat';
 
-    // For direct chats, show online status
+    // For direct chats, show online status (no lastSeenAt for now, can be added later)
     const statusText = otherUser 
-        ? (isOnline ? 'Active now' : (lastSeenAt ? formatLastSeen(lastSeenAt) : null))
+        ? (isOnline ? 'Active now' : null)
         : null;
     
     return (
