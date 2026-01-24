@@ -74,7 +74,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-builder.Services.AddSignalR(); // Add SignalR for real-time communication
+
+// Add SignalR with Redis backplane for scaling across multiple instances
+var redisConnection = config.GetConnectionString("RedisConnection");
+if (!string.IsNullOrEmpty(redisConnection))
+{
+    builder.Services.AddSignalR()
+        .AddStackExchangeRedis(redisConnection, options =>
+        {
+            options.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("quix-signalr");
+        });
+}
+else
+{
+    builder.Services.AddSignalR(); // Fallback to in-memory for development
+}
 
 // builder.Services.AddGrpc(); // removed: gRPC no longer used
 builder.Services.AddInfrastructure(builder.Configuration);

@@ -18,6 +18,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
+      - ConnectionStrings__RedisConnection=redis:6379
       - RabbitMQ__Host=rabbitmq
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=guest
@@ -29,6 +30,7 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+      - redis
     volumes:
       - ./user-service/UI/wwwroot:/app/wwwroot
       - avatar-storage:/var/lib/quix-messenger/avatars
