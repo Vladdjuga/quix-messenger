@@ -16,7 +16,7 @@ namespace UI.Hubs
     public class ChatHub(ILogger<ChatHub> logger) : Hub<IChatClient>
     {
 
-        public async Task OnJoinChat(Guid chatId)
+        public async Task JoinChat(Guid chatId)
         {
             if (chatId == Guid.Empty)
             {
@@ -29,7 +29,7 @@ namespace UI.Hubs
             await this.Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
         }
 
-        public async Task OnLeaveChat(Guid chatId)
+        public async Task LeaveChat(Guid chatId)
         {
             if (chatId == Guid.Empty)
             {
@@ -42,23 +42,24 @@ namespace UI.Hubs
             await this.Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId.ToString());
         }
 
-        public async Task OnTyping(Guid chatId, string username)
+        public async Task UserTyping(Guid chatId)
         {
-            if (chatId == Guid.Empty || string.IsNullOrWhiteSpace(username))
+            if (chatId == Guid.Empty)
             {
-                logger.LogWarning("ChatID or/and username are empty.\n Values :\n chatId={chatId};\n username={username};",
-                    chatId,username);
+                logger.LogWarning("ChatID is empty.");
                 return;
             }
             var userId = Context.GetUserGuid();
-            logger.LogInformation("Sending UserTyping event to {chatId} group with username{username}, and ID {userId}.",
-                chatId, username, chatId);
-            await this.Clients.OthersInGroup(chatId.ToString()).UserTyping(username,userId);
+            var username = Context.GetUsername();
+            logger.LogInformation("Sending UserTyping event to {chatId} group with username {username}, and ID {userId}.",
+                chatId, username, userId);
+            await this.Clients.OthersInGroup(chatId.ToString()).UserTyping(username, userId);
         }
 
-        public async Task OnStopTyping(Guid chatId)
+        public async Task UserStopTyping(Guid chatId)
         {
             var userId = Context.GetUserGuid();
+            var username = Context.GetUsername();
             await this.Clients.OthersInGroup(chatId.ToString()).UserStopTyping(userId);
         }
     }

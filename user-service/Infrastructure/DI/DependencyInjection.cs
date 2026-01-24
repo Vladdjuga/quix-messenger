@@ -20,6 +20,7 @@ using Domain.Repositories;
 using FluentValidation;
 using Infrastructure.Auth;
 using Infrastructure.Configuration;
+using Infrastructure.Consumers;
 using Infrastructure.ExceptionHandlers;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Contexts;
@@ -105,8 +106,11 @@ public static class DependencyInjection
         
         services.AddMassTransit(busConfig =>
         {
-            // Register consumers here when needed
-            // busConfig.AddConsumer<MessageCreatedConsumer>();
+            // Register RabbitMQ consumers
+            busConfig.AddConsumer<MessageCreatedConsumer>();
+            busConfig.AddConsumer<MessageEditedConsumer>();
+            busConfig.AddConsumer<MessageDeletedConsumer>();
+            
             busConfig.UsingRabbitMq((context, cfg) =>
             {
                 var rabbitMqOptions = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;

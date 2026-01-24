@@ -18,7 +18,7 @@ public class PresenceHub : Hub<IPresenceClient>
 
     public PresenceHub(
         IPresenceService presenceService,
-        ILogger<PresenceHub> logger)
+        ILogger<PresenceHub> logger)    
     {
         _presenceService = presenceService;
         _logger = logger;

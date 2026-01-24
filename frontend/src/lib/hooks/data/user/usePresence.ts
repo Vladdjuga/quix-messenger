@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { PresenceContext } from '@/lib/contexts/PresenceContext';
 import { onUserOffline, onUserOnline, subscribeToUsers } from '@/lib/signalr/presenceUseCases';
 import * as signalR from '@microsoft/signalr';
@@ -25,35 +25,48 @@ export function usePresence(options: UsePresenceOptions): UsePresenceReturn {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Memoize userIds to prevent unnecessary re-subscriptions
-    const userIdsKey = useMemo(() => JSON.stringify([...userIds].sort()), [userIds]);
+    const userIdsKey = useMemo(() => {
+        return [...userIds].sort().join(',');
+    }, [userIds]);
 
-    // Subscribe on mount or when userIds change
     useEffect(() => {
+        // Проверяем connection.state, чтобы не пытаться слать в разорванное соединение
         if (!connection || !enabled || userIds.length === 0 || connection.state !== signalR.HubConnectionState.Connected) {
-            setLoading(false);
+            // Если мы не можем подписаться, можно сбросить loading,
+            // но аккуратно, чтобы не мерцало.
+            if (userIds.length === 0) setLoading(false);
             return;
         }
 
+        let isMounted = true; // Флаг для предотвращения set state на размонтированном компоненте
         setLoading(true);
         setError(null);
 
         const subscribe = async () => {
             try {
-                // Subscribe to users and get initial online status
                 const initialStatus = await subscribeToUsers(connection, userIds);
-                setOnlineStatus(initialStatus);
+                if (isMounted) {
+                    setOnlineStatus(initialStatus);
+                }
             } catch (e) {
-                setError((e as Error).message ?? 'Failed to subscribe to presence');
+                if (isMounted) {
+                    setError((e as Error).message ?? 'Failed to subscribe');
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         subscribe();
+
+        return () => {
+            isMounted = false;
+        };
+        // В зависимостях используем КЛЮЧ, а не сам массив или его длину
     }, [connection, enabled, userIdsKey]);
 
-    // Listen for real-time presence updates
     useEffect(() => {
         if (!connection || !enabled || connection.state !== signalR.HubConnectionState.Connected) return;
 
@@ -86,8 +99,11 @@ export function useUserPresence(userId?: string | null): {
     loading: boolean;
     error: string | null;
 } {
+    // Memoize the array to prevent recreation on every render
+    const userIds = useMemo(() => userId ? [userId] : [], [userId]);
+    
     const { onlineStatus, loading, error } = usePresence({
-        userIds: userId ? [userId] : [],
+        userIds,
         enabled: !!userId
     });
 

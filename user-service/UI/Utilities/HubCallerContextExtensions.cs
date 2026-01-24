@@ -30,5 +30,14 @@ public static class HubCallerContextExtensions
             
             return sessionGuid.Value;
         }
+
+        public string GetUsername()
+        {
+            var username = context.User?.FindFirst(JwtRegisteredClaimNames.UniqueName)?.Value;
+            if (string.IsNullOrEmpty(username))
+                throw new InvalidOperationException("Username not found in claims.");
+            
+            return username;
+        }
     }
 }

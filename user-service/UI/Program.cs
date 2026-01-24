@@ -109,6 +109,9 @@ else
 // builder.Services.AddGrpc(); // removed: gRPC no longer used
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// Override INotificationService with SignalR implementation (Adapter pattern)
+builder.Services.AddScoped<Application.Interfaces.Notification.INotificationService, UI.Services.SignalRNotificationService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
