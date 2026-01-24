@@ -23,8 +23,6 @@ export const initPresenceConnection = async (): Promise<signalR.HubConnection> =
     presenceConnection = new signalR.HubConnectionBuilder()
         .withUrl(PRESENCE_HUB_URL, {
             accessTokenFactory: () => token || '',
-            skipNegotiation: true,
-            transport: signalR.HttpTransportType.WebSockets,
         })
         .withAutomaticReconnect({
             nextRetryDelayInMilliseconds: (retryContext) => {

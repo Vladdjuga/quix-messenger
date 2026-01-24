@@ -83,6 +83,9 @@ public static class DependencyInjection
         services.AddScoped<IMessageRepository,MessageRepository>();
         services.AddScoped<IMessageAttachmentRepository,MessageAttachmentRepository>();
         
+        // Unit of Work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        
         // Kafka Producer
         services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
         services.Configure<KafkaTopicsOptions>(

@@ -23,8 +23,6 @@ export const initChatConnection = async (): Promise<signalR.HubConnection> => {
     chatConnection = new signalR.HubConnectionBuilder()
         .withUrl(CHAT_HUB_URL, {
             accessTokenFactory: () => token || '',
-            skipNegotiation: true,
-            transport: signalR.HttpTransportType.WebSockets,
         })
         .withAutomaticReconnect({
             nextRetryDelayInMilliseconds: (retryContext) => {

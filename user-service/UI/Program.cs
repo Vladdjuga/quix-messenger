@@ -59,6 +59,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true // Standard JWT lifetime validation
         };
         options.MapInboundClaims = false;
+        
+        // Allow SignalR to read JWT from query string
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/chat") || path.StartsWithSegments("/presence")))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug() 

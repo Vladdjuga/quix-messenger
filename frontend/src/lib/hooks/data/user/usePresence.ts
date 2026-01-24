@@ -25,7 +25,11 @@ export function usePresence(options: UsePresenceOptions): UsePresenceReturn {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    const subscribe = useCallback(async () => {
+    // Memoize userIds to prevent unnecessary re-subscriptions
+    const userIdsKey = useMemo(() => JSON.stringify([...userIds].sort()), [userIds]);
+
+    // Subscribe on mount or when userIds change
+    useEffect(() => {
         if (!connection || !enabled || userIds.length === 0 || connection.state !== signalR.HubConnectionState.Connected) {
             setLoading(false);
             return;
@@ -34,21 +38,20 @@ export function usePresence(options: UsePresenceOptions): UsePresenceReturn {
         setLoading(true);
         setError(null);
 
-        try {
-            // Subscribe to users and get initial online status
-            const initialStatus = await subscribeToUsers(connection, userIds);
-            setOnlineStatus(initialStatus);
-        } catch (e) {
-            setError((e as Error).message ?? 'Failed to subscribe to presence');
-        } finally {
-            setLoading(false);
-        }
-    }, [connection, enabled, userIds]);
+        const subscribe = async () => {
+            try {
+                // Subscribe to users and get initial online status
+                const initialStatus = await subscribeToUsers(connection, userIds);
+                setOnlineStatus(initialStatus);
+            } catch (e) {
+                setError((e as Error).message ?? 'Failed to subscribe to presence');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    // Subscribe on mount or when userIds change
-    useEffect(() => {
         subscribe();
-    }, [subscribe]);
+    }, [connection, enabled, userIdsKey]);
 
     // Listen for real-time presence updates
     useEffect(() => {
