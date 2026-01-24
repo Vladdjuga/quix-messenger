@@ -3,7 +3,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ChatType, ChatWithLastMessage } from "@/lib/types";
 import { useUserPresence } from "@/lib/hooks/data/user/usePresence";
-import { formatLastSeen } from "@/lib/utils/formatLastSeen";
 import Image from "next/image";
 import { getProtectedChatAvatarUrl, getProtectedUserAvatarUrl } from "@/lib/utils/protectedAvatar";
 
@@ -114,8 +113,8 @@ export const ChatListItem: React.FC<Props> = ({ chat, active, currentUserId }) =
           <div className="text-xs text-muted truncate">
             {subtitle !== "No messages yet"
               ? subtitle
-              : (chat.chatType === ChatType.Direct && !isOnline && lastSeenAt
-                ? `Last seen ${formatLastSeen(lastSeenAt)}`
+              : (chat.chatType === ChatType.Direct && !isOnline
+                ? `Offline`
                 : subtitle)}
           </div>
         </div>

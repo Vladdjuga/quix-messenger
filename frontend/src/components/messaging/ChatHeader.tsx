@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChatType, ChatRole, Participant } from '@/lib/types';
 import { useUserPresence } from '@/lib/hooks/data/user/usePresence';
-import { formatLastSeen } from '@/lib/utils/formatLastSeen';
 import Image from 'next/image';
 import { getProtectedUserAvatarUrl } from '@/lib/utils/protectedAvatar';
 
