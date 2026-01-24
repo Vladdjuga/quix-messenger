@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.DTOs.Message;
-using Application.Interfaces.Notification;
+using Application.Events;
+using Application.Interfaces.Events;
 using Domain.Repositories;
 using MediatR;
 
@@ -12,13 +13,13 @@ public class DeleteMessageHandler : IRequestHandler<DeleteMessageCommand, Result
 {
     private readonly IMessageRepository _messageRepository;
     private readonly IUserChatRepository _userChatRepository;
-    private readonly INotificationService _notificationService;
+    private readonly IEventPublisher _eventPublisher;
 
-    public DeleteMessageHandler(IMessageRepository messageRepository, IUserChatRepository userChatRepository, INotificationService notificationService)
+    public DeleteMessageHandler(IMessageRepository messageRepository, IUserChatRepository userChatRepository, IEventPublisher eventPublisher)
     {
         _messageRepository = messageRepository;
         _userChatRepository = userChatRepository;
-        _notificationService = notificationService;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<Result<bool>> Handle(DeleteMessageCommand request, CancellationToken cancellationToken)
@@ -40,18 +41,14 @@ public class DeleteMessageHandler : IRequestHandler<DeleteMessageCommand, Result
 
         await _messageRepository.DeleteAsync(msg, cancellationToken);
         
-        var dto = new ReadMessageDto()
+        // Publish event to message broker
+        await _eventPublisher.PublishAsync(new MessageDeletedEvent
         {
-            Id = msg.Id,
+            MessageId = msg.Id,
             ChatId = msg.ChatId,
-            Text = msg.Text,
-            UserId = msg.UserId,
-            CreatedAt = msg.CreatedAt,
-            Status = msg.Status
-        };
+            UserId = msg.UserId
+        }, cancellationToken);
         
-        // Send event to Kafka
-        await _notificationService.BroadcastMessageDeletedAsync(dto, cancellationToken);
         return Result<bool>.Success(true);
     }
 }

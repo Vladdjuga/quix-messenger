@@ -5,7 +5,9 @@ using Application.Auth;
 using Application.Behaviors;
 using Application.DTOs.User;
 using Application.Interfaces;
+using Application.Interfaces.Events;
 using Application.Interfaces.Notification;
+using Application.Interfaces.Realtime;
 using Application.Interfaces.Security;
 using Application.Mappings;
 using Application.Services;
@@ -24,11 +26,13 @@ using Infrastructure.Persistence.Contexts;
 using Infrastructure.Persistence.Files;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Services;
+using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.DI;
@@ -56,7 +60,8 @@ public static class DependencyInjection
         services.AddSingleton<IMessageAttachmentStorageService>(sp =>
         {
             var fileStorageOptions = sp.GetRequiredService<IOptionsSnapshot<FileStorageOptions>>().Value;
-            return new MessageAttachmentStorageService(fileStorageOptions.AvatarStoragePath, "messages");
+            var logger = sp.GetRequiredService<ILogger<MessageAttachmentStorageService>>();
+            return new MessageAttachmentStorageService(fileStorageOptions.AvatarStoragePath, "messages", logger);
         });
         
         services.AddScoped<AvatarMigrationService>();
@@ -90,6 +95,34 @@ public static class DependencyInjection
             options.Options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             options.Options.Converters.Add(new JsonStringEnumConverter());
         });
+        
+        // MassTransit with RabbitMQ
+        services.Configure<RabbitMqOptions>(
+            configuration.GetSection(RabbitMqOptions.SectionName));
+        
+        services.AddMassTransit(busConfig =>
+        {
+            // Register consumers here when needed
+            // busConfig.AddConsumer<MessageCreatedConsumer>();
+            busConfig.UsingRabbitMq((context, cfg) =>
+            {
+                var rabbitMqOptions = context.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+                
+                cfg.Host(rabbitMqOptions.Host, rabbitMqOptions.Port, rabbitMqOptions.VirtualHost, h =>
+                {
+                    h.Username(rabbitMqOptions.Username);
+                    h.Password(rabbitMqOptions.Password);
+                });
+                
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+        
+        // Event Publisher (abstraction over MassTransit)
+        services.AddScoped<IEventPublisher, EventPublisher>();
+        
+        // Presence Service (in-memory for single instance, consider Redis for multi-instance)
+        services.AddSingleton<IPresenceService, PresenceService>();
         
         // Notification Service (uses Kafka)
         services.AddScoped<INotificationService, RealtimeNotificationService>();

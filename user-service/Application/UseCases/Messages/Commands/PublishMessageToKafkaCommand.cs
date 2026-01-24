@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.DTOs.Message;
-using Application.Interfaces.Notification;
+using Application.Events;
+using Application.Interfaces.Events;
 using Domain.Repositories;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Application.UseCases.Messages.Commands;
 
 /// <summary>
-/// Command to publish a complete message with attachments to Kafka.
+/// Command to publish a complete message with attachments to message broker.
 /// This should be called after message and attachments are persisted to DB.
 /// </summary>
 public record PublishMessageToKafkaCommand(Guid MessageId) : IRequest<Result<Unit>>;
@@ -17,18 +18,18 @@ public class PublishMessageToKafkaHandler : IRequestHandler<PublishMessageToKafk
 {
     private readonly IMessageRepository _messageRepository;
     private readonly IMessageAttachmentRepository _attachmentRepository;
-    private readonly INotificationService _notificationService;
+    private readonly IEventPublisher _eventPublisher;
     private readonly ILogger<PublishMessageToKafkaHandler> _logger;
 
     public PublishMessageToKafkaHandler(
         IMessageRepository messageRepository,
         IMessageAttachmentRepository attachmentRepository,
-        INotificationService notificationService,
+        IEventPublisher eventPublisher,
         ILogger<PublishMessageToKafkaHandler> logger)
     {
         _messageRepository = messageRepository;
         _attachmentRepository = attachmentRepository;
-        _notificationService = notificationService;
+        _eventPublisher = eventPublisher;
         _logger = logger;
     }
 
@@ -38,45 +39,43 @@ public class PublishMessageToKafkaHandler : IRequestHandler<PublishMessageToKafk
         var message = await _messageRepository.GetByIdAsync(request.MessageId, cancellationToken);
         if (message == null)
         {
-            _logger.LogWarning("Message {MessageId} not found for Kafka publishing", request.MessageId);
+            _logger.LogWarning("Message {MessageId} not found for publishing", request.MessageId);
             return Result<Unit>.Failure($"Message {request.MessageId} not found");
         }
 
         // Get all attachments for this message
         var attachments = await _attachmentRepository.GetByMessageIdAsync(request.MessageId, cancellationToken);
         
-        // Map to DTO
-        var messageDto = new ReadMessageDto
-        {
-            Id = message.Id,
-            ChatId = message.ChatId,
-            Text = message.Text,
-            UserId = message.UserId,
-            CreatedAt = message.CreatedAt,
-            Status = message.Status,
-            Attachments = attachments.Select(a => new MessageAttachmentDto
-            {
-                Id = a.Id,
-                Name = a.FileName,
-                ContentType = a.MimeType,
-                Size = a.FileSize,
-                Url = $"/api/Attachment/download/{a.Id}"
-            }).ToList()
-        };
-
-        // Publish to Kafka
+        // Publish event to message broker
         try
         {
-            await _notificationService.BroadcastNewMessageAsync(messageDto, cancellationToken);
+            await _eventPublisher.PublishAsync(new MessageCreatedEvent
+            {
+                MessageId = message.Id,
+                ChatId = message.ChatId,
+                Text = message.Text,
+                UserId = message.UserId,
+                CreatedAt = message.CreatedAt,
+                Status = (int)message.Status,
+                Attachments = attachments.Select(a => new MessageAttachmentEventDto
+                {
+                    Id = a.Id,
+                    Name = a.FileName,
+                    ContentType = a.MimeType,
+                    Size = a.FileSize,
+                    Url = $"/api/Attachment/download/{a.Id}"
+                }).ToList()
+            }, cancellationToken);
+            
             _logger.LogInformation(
-                "Successfully published message {MessageId} with {AttachmentCount} attachments to Kafka",
-                request.MessageId, messageDto.Attachments.Count());
+                "Successfully published message {MessageId} with {AttachmentCount} attachments",
+                request.MessageId, attachments.Count());
             return Result<Unit>.Success(Unit.Value);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to publish message {MessageId} to Kafka", request.MessageId);
-            return Result<Unit>.Failure($"Failed to publish message to Kafka: {ex.Message}");
+            _logger.LogError(ex, "Failed to publish message {MessageId}", request.MessageId);
+            return Result<Unit>.Failure($"Failed to publish message: {ex.Message}");
         }
     }
 }

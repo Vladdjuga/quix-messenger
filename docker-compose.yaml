@@ -12,22 +12,27 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app-network
+  
   user-service:
     image: user-service
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__PostgresSQLConnection=Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret
-      - Kafka__BootstrapServers=kafka:9092
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
     ports:
       - "6001:7001"
     networks:
       - app-network
     depends_on:
       - postgres
-      - kafka
+      - rabbitmq
     volumes:
       - ./user-service/UI/wwwroot:/app/wwwroot
       - avatar-storage:/var/lib/quix-messenger/avatars
+  
   redis:
     image: redis:7-alpine
     restart: always
@@ -42,48 +47,26 @@ services:
       retries: 5
     networks:
       - app-network
-  kafka:
-    image: apache/kafka:3.8.1
+  
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
     restart: always
     environment:
-      # KRaft mode configuration (no Zookeeper needed)
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_NUM_PARTITIONS: 3
-      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
-      - "9092:9092"
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
     volumes:
-      - kafka_data:/var/lib/kafka/data
+      - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
-      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
-      timeout: 10s
+      timeout: 5s
       retries: 5
     networks:
       - app-network
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    restart: always
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      DYNAMIC_CONFIG_ENABLED: 'true'
-    ports:
-      - "8080:8080"
-    depends_on:
-      - kafka
-    networks:
-      - app-network
+
   # realtime-service-ts:
   #   image: realtime-service-ts
   #   ports:
@@ -95,7 +78,7 @@ services:
   #   depends_on:
   #     - user-service
   #     - redis
-  #     - kafka
+
   frontend:
     image: frontend
     ports:
@@ -107,6 +90,7 @@ services:
     depends_on:
       - user-service
       #- realtime-service-ts
+  
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: always
@@ -122,6 +106,7 @@ services:
       - app-network
     depends_on:
       - postgres
+
 volumes:
   pgdata:
     driver: local
@@ -129,10 +114,11 @@ volumes:
     driver: local
   redisdata:
     driver: local
-  kafka_data:
+  rabbitmq_data:
     driver: local
   avatar-storage:
     driver: local
+
 networks:
   app-network:
     driver: bridge

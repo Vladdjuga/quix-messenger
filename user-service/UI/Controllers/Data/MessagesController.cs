@@ -43,53 +43,38 @@ public class MessagesController : Controller
         [FromForm] IFormFileCollection? attachments)
     {
         var userId = HttpContext.GetUserGuid();
-        var command = new CreateMessageCommand(text, userId, chatId);
-        _logger.LogInformation("User {UserId} sending message to chat {ChatId} with {AttachmentCount} attachments", 
-            userId, chatId, attachments?.Count ?? 0);
         
+        // Convert IFormFile to FileStreamDto
+        var fileDtos = attachments?
+            .Where(file => file.Length > 0)
+            .Select(file => new FileStreamDto
+            {
+                Name = file.FileName,
+                ContentType = file.ContentType,
+                Content = file.OpenReadStream()
+            }).ToList();
+
+        _logger.LogInformation(
+            "User {UserId} sending message to chat {ChatId} with {AttachmentCount} attachments",
+            userId, chatId, fileDtos?.Count ?? 0);
+
+        // Single command handles everything: save message, upload files, publish event
+        var command = new CreateMessageCommand(text, userId, chatId, fileDtos);
         var result = await _mediator.Send(command);
+        
         if (result.IsFailure)
         {
-            _logger.LogError("Failed to send message by user {UserId} to chat {ChatId}: {Error}", userId, chatId, result.Error);
+            _logger.LogError(
+                "Failed to send message by user {UserId} to chat {ChatId}: {Error}",
+                userId, chatId, result.Error);
             return ErrorResult.Create(result.Error);
         }
-        
-        var messageDto = result.Value;
-        
-        // Upload attachments if present
-        if (attachments is { Count: > 0 })
-        {
-        
-            var fileDtos = attachments.Where(file => file.Length > 0)
-                .Select(file => new FileStreamDto
-                {
-                    Name = file.FileName,
-                    ContentType = file.ContentType,
-                    Content = file.OpenReadStream()
-                }).ToList();
-            
-            var uploadCommand = new UploadAttachmentsCommand(
-                MessageId: messageDto.Id,
-                ChatId: chatId,
-                Files: fileDtos
-            );
-            
-            var uploadResult = await _mediator.Send(uploadCommand);
-            if (uploadResult.IsFailure)
-                _logger.LogError("Failed to upload attachments for message {MessageId}: {Error}", messageDto.Id, uploadResult.Error);
-            else
-                messageDto.Attachments = uploadResult.Value;
-        }
-        
-        // Publish complete message with attachments to Kafka
-        var publishCommand = new PublishMessageToKafkaCommand(messageDto.Id);
-        var publishResult = await _mediator.Send(publishCommand);
-        if (publishResult.IsFailure)
-            _logger.LogWarning("Failed to publish message {MessageId} to Kafka: {Error}", messageDto.Id, publishResult.Error);
-        
-        _logger.LogInformation("User {UserId} sent message {MessageId} to chat {ChatId}", userId, messageDto.Id, chatId);
-        
-        return TypedResults.Ok(messageDto);
+
+        _logger.LogInformation(
+            "User {UserId} sent message {MessageId} to chat {ChatId}",
+            userId, result.Value.Id, chatId);
+
+        return TypedResults.Ok(result.Value);
     }
 
     // GET api/messages?chatId=&userId=&count=

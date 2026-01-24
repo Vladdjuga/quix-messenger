@@ -115,6 +115,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/chat");
+app.MapHub<PresenceHub>("/presence");
 // app.MapGrpcService<UI.gRPCClients.ChatService>(); // removed: gRPC no longer used
 
 app.Run();

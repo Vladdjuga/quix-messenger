@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.DTOs.Message;
-using Application.Interfaces.Notification;
+using Application.Events;
+using Application.Interfaces.Events;
 using Domain.Enums;
 using Domain.Repositories;
 using MediatR;
@@ -13,13 +14,13 @@ public class EditMessageHandler : IRequestHandler<EditMessageCommand, Result<boo
 {
     private readonly IMessageRepository _messageRepository;
     private readonly IUserChatRepository _userChatRepository;
-    private readonly INotificationService _notificationService;
+    private readonly IEventPublisher _eventPublisher;
 
-    public EditMessageHandler(IMessageRepository messageRepository, IUserChatRepository userChatRepository, INotificationService notificationService)
+    public EditMessageHandler(IMessageRepository messageRepository, IUserChatRepository userChatRepository, IEventPublisher eventPublisher)
     {
         _messageRepository = messageRepository;
         _userChatRepository = userChatRepository;
-        _notificationService = notificationService;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<Result<bool>> Handle(EditMessageCommand request, CancellationToken cancellationToken)
@@ -45,18 +46,16 @@ public class EditMessageHandler : IRequestHandler<EditMessageCommand, Result<boo
         msg.Status |= MessageStatus.Modified;
         await _messageRepository.UpdateAsync(msg, cancellationToken);
 
-        var dto = new ReadMessageDto()
+        // Publish event to message broker
+        await _eventPublisher.PublishAsync(new MessageEditedEvent
         {
-            Id = msg.Id,
+            MessageId = msg.Id,
             ChatId = msg.ChatId,
             Text = msg.Text,
             UserId = msg.UserId,
-            CreatedAt = msg.CreatedAt,
-            Status = msg.Status
-        };
+            Status = (int)msg.Status
+        }, cancellationToken);
         
-        // Send event to Kafka
-        await _notificationService.BroadcastMessageEditedAsync(dto,cancellationToken);
         return Result<bool>.Success(true);
     }
 }
